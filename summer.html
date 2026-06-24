@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Good Moves Studio · Summer Deal · €99 unlimited until 15 September</title>
+<meta name="description" content="The Good Moves Summer Deal: €99 flat for unlimited low-impact pilates classes at our new Prenzlauer Berg studio, until 15 September. One price, no monthly commitment. 4.9/5 from ~4,000 reviews.">
+<script>document.documentElement.classList.add('js');</script>
+
+<!--
+  ===================================================================
+  GOOD MOVES STUDIO — SUMMER DEAL (TRANSACTIONAL OFFER PAGE)
+  ===================================================================
+  ONE JOB: explain the €99 flat summer deal, build quick trust, send to
+  the Mindbody checkout. Deliberately SIMPLE and transactional. No
+  questionnaire, no curated journey, no video. Separate from the main
+  "Find your routine" funnel.
+  OFFER: €99 flat, unlimited classes until 15 September (~10 weeks),
+  tied to the new studio opening (2 July). Price/date are drafts; the
+  checkout link is a placeholder until GMS sends the Mindbody SKU.
+  Exact same brand system as index.html (Bricolage / Figtree / Fredoka,
+  cream/coral/cobalt/ink palette). Bilingual: EN default in markup, DE in
+  data-de (hand-written, "Lehrer:innen", no dashes in visible copy).
+  Positive framing only (no app/AI/algorithm contrast).
+  ===================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#F7F0E9;
+    --cream-soft:#FBF7F1;
+    --peach:#F7E9DA;
+    --peach-deep:#F2DAC0;
+    --ink:#020F52;
+    --cobalt:#0426CE;
+    --cobalt-bright:#1347E7;
+    --coral:#BE3F21;
+    --coral-soft:#E2683F;
+    --slate:#505885;
+    --lavender:#DDCAE0;
+    --rust-dark:#591E0F;
+
+    --maxw:1180px;
+    --radius:28px;
+    --radius-sm:16px;
+    --shadow:0 18px 50px -22px rgba(2,15,82,.35);
+    --shadow-soft:0 10px 30px -18px rgba(2,15,82,.30);
+    --display:'Bricolage Grotesque',system-ui,sans-serif;
+    --body:'Figtree',system-ui,sans-serif;
+    --groovy:'Fredoka',system-ui,sans-serif;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--body);
+    background:var(--cream);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* ---------- Typography ---------- */
+  h1,h2,h3{font-family:var(--display);font-weight:800;text-transform:uppercase;line-height:.94;letter-spacing:-.02em}
+  h1{font-size:clamp(2.7rem,8.5vw,5.5rem)}
+  h2{font-size:clamp(2rem,5.5vw,3.4rem)}
+  h3{font-size:clamp(1.25rem,3vw,1.7rem)}
+  .eyebrow{
+    font-family:var(--body);font-weight:700;text-transform:uppercase;
+    letter-spacing:.18em;font-size:.78rem;color:var(--coral);
+  }
+  .lead{font-size:clamp(1.05rem,1.6vw,1.3rem);color:var(--slate);font-weight:500}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+    font-family:var(--body);font-weight:700;text-transform:uppercase;
+    letter-spacing:.04em;font-size:1rem;
+    background:var(--cobalt);color:#fff;
+    padding:18px 34px;border-radius:999px;border:0;cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+    box-shadow:0 12px 26px -10px rgba(4,38,206,.55);
+    white-space:nowrap;
+  }
+  .btn:hover{background:var(--cobalt-bright);transform:translateY(-2px);box-shadow:0 18px 34px -12px rgba(4,38,206,.6)}
+  .btn:active{transform:translateY(0)}
+  .btn--lg{padding:22px 44px;font-size:1.08rem}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(247,240,233,.82);backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(2,15,82,.07);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:74px}
+  .logo{font-family:var(--groovy);font-weight:700;color:var(--coral);
+    font-size:1.5rem;line-height:.82;letter-spacing:-.01em;text-transform:uppercase}
+  .logo span{display:block}
+  .nav-cta{display:flex;align-items:center;gap:14px}
+  .nav-note{font-size:.82rem;color:var(--slate);font-weight:600}
+  @media(max-width:620px){.nav-note{display:none}.nav .btn{display:none}.btn{padding:15px 24px;font-size:.92rem}}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:clamp(36px,6vw,76px) 0 clamp(40px,6vw,72px)}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,4vw,56px);align-items:center}
+  @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:30px}}
+
+  .hero h1{color:var(--ink);margin:14px 0 0}
+  .hero h1 em{font-style:normal;color:var(--coral)}
+  .hero .lead{margin:18px 0 8px;max-width:42ch}
+  .price-line{font-weight:700;color:var(--ink);font-size:1.05rem;margin:14px 0 24px}
+  .price-line b{color:var(--coral)}
+  .hero-cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+  .risk-list{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:22px}
+  .risk-list li{list-style:none;font-size:.93rem;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .check{width:20px;height:20px;border-radius:50%;background:var(--cobalt);color:#fff;
+    display:inline-grid;place-items:center;font-size:.7rem;flex-shrink:0}
+  .open-badge{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--cream);
+    font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;padding:8px 15px;border-radius:999px}
+
+  /* hero deal graphic = the price does the work */
+  .deal-visual{position:relative;border-radius:var(--radius);overflow:hidden;
+    aspect-ratio:4/4.4;box-shadow:var(--shadow);
+    background:
+      radial-gradient(120% 90% at 80% 10%, var(--peach) 0%, transparent 55%),
+      linear-gradient(150deg, var(--coral) 0%, var(--coral-soft) 48%, #e9a06f 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;color:#fff}
+  .deal-visual .dv-kicker{font-family:var(--body);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:.8rem;opacity:.92}
+  .deal-visual .dv-price{font-family:var(--display);font-weight:800;text-transform:uppercase;
+    font-size:clamp(4.5rem,15vw,8.5rem);line-height:.82;color:var(--ink);margin:6px 0 4px}
+  .deal-visual .dv-sub{font-family:var(--display);font-weight:800;text-transform:uppercase;
+    font-size:clamp(1.05rem,2.8vw,1.6rem);letter-spacing:.01em;line-height:1}
+  .deal-visual .dv-until{margin-top:14px;font-weight:700;font-size:.92rem;background:rgba(2,15,82,.16);
+    padding:7px 16px;border-radius:999px}
+  .deal-visual .float-chip{position:absolute;top:6%;right:6%;background:var(--cream);color:var(--ink);
+    font-weight:700;font-size:.78rem;padding:9px 15px;border-radius:999px;box-shadow:var(--shadow-soft);transform:rotate(5deg)}
+
+  /* ---------- Proof bar ---------- */
+  .proof{background:var(--ink);color:var(--cream);padding:34px 0}
+  .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center}
+  .proof .big{font-family:var(--display);font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1;color:#fff}
+  .proof .big.coral{color:var(--coral-soft)}
+  .proof small{display:block;margin-top:8px;color:rgba(247,240,233,.72);font-weight:600;
+    font-size:.82rem;text-transform:uppercase;letter-spacing:.06em}
+  @media(max-width:680px){.proof-grid{grid-template-columns:repeat(2,1fr);gap:26px 14px}}
+
+  /* ---------- Section scaffolding ---------- */
+  section.block{padding:clamp(56px,8vw,104px) 0}
+  .sec-head{max-width:46ch;margin-bottom:clamp(30px,4vw,52px)}
+  .sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+  .sec-head h2{margin-top:10px}
+  .sec-head p{margin-top:16px}
+
+  /* ---------- Deal / value cards ---------- */
+  .val-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:820px){.val-grid{grid-template-columns:1fr}}
+  .val{background:var(--peach);border-radius:var(--radius);padding:30px 28px 32px;position:relative}
+  .val:nth-child(2){background:var(--lavender)}
+  .val:nth-child(3){background:#dfe7e0}
+  .val .vnum{font-family:var(--display);font-weight:800;font-size:2.2rem;line-height:1;color:var(--coral);margin-bottom:14px}
+  .val h3{margin-bottom:10px}
+  .val p{color:var(--rust-dark);font-weight:500;opacity:.86}
+
+  .tag-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .tag{background:#fff;border:1px solid rgba(2,15,82,.1);border-radius:999px;padding:8px 16px;
+    font-weight:600;font-size:.85rem;color:var(--ink)}
+
+  /* ---------- FAQ ---------- */
+  .faq{max-width:760px;margin:0 auto}
+  details{background:var(--cream-soft);border:1px solid rgba(2,15,82,.08);border-radius:var(--radius-sm);
+    padding:4px 22px;margin-bottom:12px}
+  details summary{cursor:pointer;list-style:none;padding:18px 0;font-family:var(--display);
+    text-transform:uppercase;font-weight:700;font-size:1.02rem;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+";font-size:1.5rem;color:var(--coral);transition:transform .2s}
+  details[open] summary::after{transform:rotate(45deg)}
+  details p{padding:0 0 20px;color:var(--slate);font-weight:500}
+
+  /* ---------- Final CTA ---------- */
+  .final{background:
+      radial-gradient(110% 130% at 0% 0%, var(--peach) 0%, transparent 50%),
+      radial-gradient(120% 130% at 100% 100%, var(--lavender) 0%, transparent 55%),
+      var(--cream-soft);
+    border-radius:var(--radius);padding:clamp(40px,6vw,80px) clamp(24px,4vw,40px);text-align:center}
+  .final h2{font-size:clamp(2.2rem,6vw,4rem)}
+  .final .big-price{font-family:var(--display);font-weight:800;color:var(--coral);font-size:clamp(2.6rem,7vw,4rem);line-height:1;margin:14px 0 4px}
+  .final .lead{margin:14px auto 28px;max-width:46ch}
+  .final .risk-list{justify-content:center}
+
+  /* ---------- Footer ---------- */
+  footer{padding:54px 0 130px;color:var(--slate)}
+  .foot-grid{display:flex;flex-wrap:wrap;justify-content:space-between;gap:24px;align-items:flex-start}
+  .foot-grid .logo{font-size:1.7rem}
+  .foot-col b{display:block;color:var(--ink);text-transform:uppercase;font-size:.78rem;letter-spacing:.1em;margin-bottom:8px}
+  .foot-col p{font-size:.92rem;font-weight:500}
+  .foot-bottom{margin-top:36px;padding-top:20px;border-top:1px solid rgba(2,15,82,.1);font-size:.82rem;font-weight:500}
+
+  /* ---------- Sticky mobile CTA ---------- */
+  .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:rgba(247,240,233,.92);backdrop-filter:blur(12px);
+    border-top:1px solid rgba(2,15,82,.1);padding:12px 16px;
+    display:none;align-items:center;justify-content:space-between;gap:12px}
+  .sticky-cta .s-price{font-weight:700;font-size:.86rem}
+  .sticky-cta .s-price b{font-family:var(--display);display:block;font-size:1rem;text-transform:uppercase}
+  .sticky-cta .btn{padding:14px 22px;font-size:.9rem}
+  @media(max-width:880px){.sticky-cta{display:flex}}
+
+  /* reveal on scroll, gated by .js so content is ALWAYS visible if JS is off */
+  .js .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease}
+  .js .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.js .reveal{opacity:1;transform:none}html{scroll-behavior:auto}}
+
+  /* ---------- Language switch ---------- */
+  .lang{display:inline-flex;align-items:center;border:1.5px solid rgba(2,15,82,.16);border-radius:999px;
+    padding:3px;gap:2px;background:rgba(255,255,255,.45)}
+  .lang button{font-family:var(--body);font-weight:700;font-size:.76rem;letter-spacing:.05em;border:0;
+    background:transparent;color:var(--slate);padding:6px 11px;border-radius:999px;cursor:pointer;line-height:1;
+    transition:background .15s,color .15s}
+  .lang button[aria-pressed="true"]{background:var(--ink);color:var(--cream)}
+  .lang button:hover{color:var(--ink)}
+  .lang button[aria-pressed="true"]:hover{color:var(--cream)}
+  @media(max-width:430px){.nav-cta{gap:8px}.lang button{padding:6px 9px;font-size:.72rem}}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. HEADER (logo + lang + one cta) ============ -->
+<header>
+  <div class="wrap nav">
+    <div class="logo"><span>Good</span><span>Moves</span></div>
+    <div class="nav-cta">
+      <span class="nav-note" data-de="Sommer-Deal · 99 € pauschal">Summer Deal · €99 flat</span>
+      <div class="lang" role="group" aria-label="Language / Sprache">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="de" aria-pressed="false">DE</button>
+      </div>
+      <a href="#buy" class="btn" data-de="Sommer-Deal sichern">Get the Summer Deal</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 2. HERO — the offer, the price, one action ============ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="open-badge" data-de="Neues Studio · ab 2. Juli">New studio · open 2 July</span>
+      <p class="eyebrow" style="margin-top:16px" data-de="Sommer-Deal · Prenzlauer Berg, Berlin">Summer Deal · Prenzlauer Berg, Berlin</p>
+      <h1 data-de="Dein Sommer<br>in <em>Bewegung.</em>">Your summer<br>of <em>movement.</em></h1>
+      <p style="font-weight:700;color:var(--ink);font-size:1.12rem;margin:16px 0 0" data-de="Ein Preis, keine monatliche Bindung.">One price, no monthly commitment.</p>
+      <p class="lead" data-de="Unbegrenzt Kurse in unserem neuen Studio in Prenzlauer Berg, den ganzen Sommer. Einmal zahlen, so viel bewegen, wie du möchtest.">Unlimited classes at our new Prenzlauer Berg studio, all summer long. Pay once, move as much as you like.</p>
+      <p class="price-line" data-de="<b>99 €</b> pauschal. Unbegrenzt bis 15. September, rund 10 Wochen."><b>€99</b> flat. Unlimited until 15 September, around 10 weeks.</p>
+
+      <div class="hero-cta-row">
+        <a href="#buy" class="btn btn--lg" data-de="Sommer-Deal sichern · 99 €">Get the Summer Deal · €99</a>
+      </div>
+
+      <ul class="risk-list">
+        <li><span class="check">✓</span> <span data-de="Einmal zahlen, keine Monatsgebühr">Pay once, no monthly fee</span></li>
+        <li><span class="check">✓</span> <span data-de="Unbegrenzt bis 15. September">Unlimited until 15 September</span></li>
+        <li><span class="check">✓</span> <span data-de="Nichts zu kündigen">Nothing to cancel</span></li>
+      </ul>
+    </div>
+
+    <!-- Deal graphic: the price carries the page -->
+    <div class="deal-visual" aria-hidden="true">
+      <span class="float-chip" data-de="Neues Studio · 2. Juli">New studio · 2 July</span>
+      <span class="dv-kicker" data-de="Sommer-Deal · pauschal">Summer Deal · flat</span>
+      <span class="dv-price" data-de="99 €">€99</span>
+      <span class="dv-sub" data-de="Unbegrenzt,<br>den ganzen Sommer">Unlimited,<br>all summer</span>
+      <span class="dv-until" data-de="bis 15. September">until 15 September</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. PROOF BAR ============ -->
+<section class="proof">
+  <div class="wrap proof-grid">
+    <div><div class="big coral" data-de="4,9★">4.9★</div><small data-de="Durchschnitt">Average rating</small></div>
+    <div><div class="big" data-de="~4.000">~4,000</div><small data-de="Bewertungen">Member reviews</small></div>
+    <div><div class="big">22</div><small data-de="Plätze pro Kurs">People max / class</small></div>
+    <div><div class="big">17</div><small data-de="Lehrer:innen · EN &amp; DE">Teachers · EN &amp; DE</small></div>
+  </div>
+</section>
+
+<!-- ============ 4. THE DEAL, EXPLAINED ============ -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="So einfach ist es">It is genuinely this simple</p>
+      <h2 data-de="Ein Preis. Der ganze<br>Sommer. Punkt.">One price. The whole<br>summer. That's it.</h2>
+    </div>
+    <div class="val-grid">
+      <div class="val reveal">
+        <div class="vnum" data-de="99 €">€99</div>
+        <h3 data-de="Einmal zahlen">Pay once</h3>
+        <p data-de="Keine Monatsgebühr, nichts, was du später kündigen musst. Du zahlst einmal und bist dabei.">No monthly fee, nothing to cancel later. You pay once and you're in.</p>
+      </div>
+      <div class="val reveal">
+        <div class="vnum" data-de="∞">∞</div>
+        <h3 data-de="Unbegrenzt bewegen">Move unlimited</h3>
+        <p data-de="So viele Kurse, wie du möchtest, den ganzen Sommer. Komm zweimal die Woche oder fünfmal, das entscheidest du.">As many classes as you like, all summer. Come twice a week or five times, it's up to you.</p>
+      </div>
+      <div class="val reveal">
+        <div class="vnum" data-de="15.9.">15 Sep</div>
+        <h3 data-de="Läuft bis 15. September">Runs until 15 September</h3>
+        <p data-de="Rund 10 Wochen, etwa 2,5 Monate unbegrenzte Bewegung zu einem Pauschalpreis.">Around 10 weeks, about 2.5 months of unlimited movement for one flat price.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. WHY NOW — summer logic ============ -->
+<section class="block" style="background:var(--cream-soft)">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-de="Warum jetzt">Why now</p>
+      <h2 data-de="Alle anderen pausieren.<br>Du bleibst in Bewegung.">Everyone else pauses.<br>You keep moving.</h2>
+      <p class="lead" data-de="Die meisten pausieren ihre Mitgliedschaft im Sommer. Reisen, Seen, lange Abende. Das hier ist das Gegenteil. Ein Pauschalpreis hält dich in Bewegung, mit voller Freiheit, ohne monatliche Bindung, ohne nachzudenken. Komm, wenn du kannst, pausier, wenn du verreist, und steig danach einfach wieder ein. Und das genau dann, wenn unser neues Studio öffnet, ein frischer, warmer Raum wartet auf dich.">Most people pause their membership in summer. Trips, lakes, long evenings. This is the opposite. One flat price keeps you moving with full freedom, no monthly commitment, no thinking about it. Come when you can, skip when you travel, pick right back up. And it lands just as our new studio opens, so there's a fresh, warm room waiting for you.</p>
+    </div>
+    <div class="tag-row">
+      <span class="tag" data-de="Gelenkschonend">Low-impact</span><span class="tag" data-de="Voller Bewegungsumfang">Full range of motion</span>
+      <span class="tag" data-de="Auf der Matte">On the mat</span><span class="tag" data-de="Kleine Gruppen">Small groups</span>
+      <span class="tag" data-de="Echte Lehrer:innen">Real teachers</span><span class="tag" data-de="EN &amp; DE">EN &amp; DE</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. TRUST / CREDENTIALS ============ -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="Warum Good Moves">Why Good Moves</p>
+      <h2 data-de="Ein Studio, in das man<br>gern reinkommt">A studio worth<br>walking into</h2>
+    </div>
+    <div class="val-grid">
+      <div class="val reveal">
+        <h3 data-de="Echte ausgebildete Lehrer:innen">Real certified teachers</h3>
+        <p data-de="Menschen, die aus der Mitte des Raums unterrichten und deinen Namen kennen.">Actual people who teach from the middle of the room and know your name.</p>
+      </div>
+      <div class="val reveal">
+        <h3 data-de="4,9 / 5 aus rund 4.000 Bewertungen">4.9 / 5 from ~4,000 reviews</h3>
+        <p data-de="Ein warmes, buntes Studio in Prenzlauer Berg, für die Nachbarschaft gemacht.">A warm, colourful studio in Prenzlauer Berg, made for the neighbourhood.</p>
+      </div>
+      <div class="val reveal">
+        <h3 data-de="Gelenkschonend, voller Bewegungsumfang">Low-impact, full range of motion</h3>
+        <p data-de="Auf der Matte, gelenkfreundlich, und mehr Workout, als du denkst.">Mat-based and joint-friendly, and more of a workout than you'd expect.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. FAQ ============ -->
+<section class="block" style="background:var(--cream-soft)">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="Kurz geklärt">Quickly answered</p>
+      <h2 data-de="Bevor du zugreifst">Before you grab it</h2>
+    </div>
+    <div class="faq">
+      <details><summary data-de="Was ist enthalten?">What's included?</summary><p data-de="Jeder reguläre Kurs im Plan, so oft du möchtest, bis 15. September. Derselbe warme Raum, dieselben Lehrer:innen, keine Zusatzpakete, über die du nachdenken musst.">Every regular class on the schedule, as often as you like, until 15 September. Same warm room, same teachers, no add-ons to figure out.</p></details>
+      <details><summary data-de="Wie lange läuft das Angebot?">How long does it run?</summary><p data-de="Ab jetzt bis 15. September. Das sind rund 10 Wochen, etwa 2,5 Monate unbegrenzte Bewegung zu einem Pauschalpreis.">From now until 15 September. That's roughly 10 weeks, about 2.5 months of unlimited movement for one flat price.</p></details>
+      <details><summary data-de="Ist es wirklich unbegrenzt?">Is it really unlimited?</summary><p data-de="Ja. Buch so viele Kurse, wie du möchtest, den ganzen Sommer. Komm zweimal die Woche, komm fünfmal, das entscheidest du. Wir empfehlen einen Rhythmus, wir schreiben dir nie einen vor.">Yes. Book as many classes as you like across the summer. Come twice a week, come five times, it's up to you. We recommend a rhythm, we never lock you to one.</p></details>
+      <details><summary data-de="Wann kann ich starten?">When can I start?</summary><p data-de="Unser neues Studio öffnet am 2. Juli, und dein Sommer-Deal gilt ab dem Tag, an dem du ihn kaufst. Sicher ihn dir jetzt, starte, sobald die Türen offen sind.">Our new studio opens on 2 July, and your Summer Deal is good from the day you buy it. Grab it now, start as soon as the doors open.</p></details>
+      <details><summary data-de="Wo seid ihr?">Where are you?</summary><p data-de="Mitten in Prenzlauer Berg, Berlin. Genaue Adresse und Anfahrt kommen mit deiner Bestätigung.">In the heart of Prenzlauer Berg, Berlin. Exact address and directions land in your confirmation.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. FINAL CTA ============ -->
+<section class="block" id="buy">
+  <div class="wrap">
+    <div class="final reveal">
+      <p class="eyebrow" data-de="Dein Sommer wartet">Your summer is waiting</p>
+      <h2 data-de="Sichere dir den<br>Sommer-Deal">Grab the<br>Summer Deal</h2>
+      <div class="big-price" data-de="99 € pauschal">€99 flat</div>
+      <p class="lead" data-de="Unbegrenzt bis 15. September. Ein Preis, keine monatliche Bindung. Das Einzige, was du riskierst: einen richtig guten Sommer.">Unlimited until 15 September. One price, no monthly commitment. The only thing you risk is a really good summer.</p>
+      <a href="#buy" class="btn btn--lg" data-de="Sommer-Deal sichern · 99 €">Get the Summer Deal · €99</a>
+      <ul class="risk-list">
+        <li><span class="check">✓</span> <span data-de="Einmal zahlen, keine Monatsgebühr">Pay once, no monthly fee</span></li>
+        <li><span class="check">✓</span> <span data-de="Unbegrenzt bis 15. September">Unlimited until 15 September</span></li>
+        <li><span class="check">✓</span> <span data-de="Direkt zur Buchung">Straight to checkout</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="logo">Good Moves</div>
+      <div class="foot-col"><b data-de="Studio">Studio</b><p data-de="Prenzlauer Berg<br>Berlin">Prenzlauer Berg<br>Berlin</p></div>
+      <div class="foot-col"><b data-de="Öffnungszeiten">Hours</b><p data-de="Mo bis Fr · 7:00 bis 21:00<br>Sa und So · 9:00 bis 15:00">Mon to Fri · 7:00 to 21:00<br>Sat and Sun · 9:00 to 15:00</p></div>
+      <div class="foot-col"><b data-de="Bewertung">Rated</b><p data-de="★ 4,9 / 5<br>~4.000 Bewertungen">★ 4.9 / 5<br>~4,000 reviews</p></div>
+    </div>
+    <div class="foot-bottom" data-de="© Good Moves Studio · Sommer-Deal · <em>Konzeptentwurf, nicht zur Veröffentlichung.</em>">© Good Moves Studio · Summer Deal · <em>Concept draft, not for publication.</em></div>
+  </div>
+</footer>
+
+<!-- ============ 10. STICKY MOBILE CTA ============ -->
+<div class="sticky-cta">
+  <div class="s-price" data-de="bis 15. Sept.<br><b>99 € pauschal</b>">until 15 Sept<br><b>€99 flat</b></div>
+  <a href="#buy" class="btn" data-de="Sommer-Deal sichern">Get the Summer Deal</a>
+</div>
+
+<script>
+  // ---- Language switch: EN default, auto-detect DE from the browser, remember the choice ----
+  (function(){
+    const i18n = document.querySelectorAll('[data-de]');
+    i18n.forEach(n => n.dataset.en = n.innerHTML);            // snapshot the English original
+    const btns = document.querySelectorAll('.lang button');
+    function apply(lang){
+      document.documentElement.lang = lang;
+      i18n.forEach(n => { n.innerHTML = (lang === 'de' ? n.dataset.de : n.dataset.en); });
+      btns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+      try { localStorage.setItem('gms_lang', lang); } catch(e){}
+    }
+    let lang; try { lang = localStorage.getItem('gms_lang'); } catch(e){}
+    if(lang !== 'de' && lang !== 'en'){                        // no saved choice, detect system language
+      const sys = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+      lang = /^de/i.test(sys) ? 'de' : 'en';
+    }
+    apply(lang);
+    btns.forEach(b => b.addEventListener('click', () => apply(b.dataset.lang)));
+  })();
+
+  // Reveal-on-scroll (progressive enhancement). If unsupported, reveal everything.
+  const reveals = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }});
+    },{threshold:.12, rootMargin:'0px 0px -8% 0px'});
+    reveals.forEach(el=>io.observe(el));
+  } else {
+    reveals.forEach(el=>el.classList.add('in'));
+  }
+
+  // Mock checkout: every CTA goes straight to checkout (real flow connects to Mindbody).
+  // When GMS sends the real Mindbody SKU/link, point these hrefs at it (target=_blank) instead.
+  document.querySelectorAll('a[href="#buy"]').forEach(a=>{
+    a.addEventListener('click',(e)=>{
+      e.preventDefault();
+      const de = document.documentElement.lang === 'de';
+      alert(de ? 'Checkout kommt hierhin (Mindbody). Das ist ein visuelles Konzept.'
+              : 'Checkout goes here (Mindbody). This is a visual concept.');
+    });
+  });
+</script>
+</body>
+</html>

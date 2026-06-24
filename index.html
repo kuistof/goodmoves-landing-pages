@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Good Moves Studio · A movement studio in Prenzlauer Berg, Berlin</title>
+<meta name="description" content="Good Moves is a low-impact movement studio in Prenzlauer Berg, Berlin. Tell us your goal and real certified teachers map a curated six-week pilates plan made for your body. Small classes, full range of motion, 4.9/5 from ~4,000 reviews.">
+<!-- Mark JS as available BEFORE paint, so reveal animations only hide content when JS can bring it back -->
+<script>document.documentElement.classList.add('js');</script>
+
+<!--
+  ===================================================================
+  GOOD MOVES STUDIO — LANDING PAGE (CONCEPT / VISUALISATION DRAFT v2)
+  ===================================================================
+  PIVOT (client feedback round): the page is now GENERIC, not bundle-
+  specific. It introduces Good Moves as a low-impact movement studio,
+  then the single action is a short QUESTIONNAIRE ("find your routine").
+  Based on the answers, a REAL-TEACHER-curated 6-week plan is recommended
+  (one clear purchase action). We sell a guided, human journey toward a
+  personal outcome, NOT a stack of class packs.
+  Language rules: low-impact MOVEMENT language, no gym talk. The word
+  "strength" never appears as a front-end headline ("stronger" is ok);
+  no "transformation". Lead with certified teachers + real experience,
+  framed POSITIVELY (no app/AI/algorithm contrast anywhere in the front end).
+  Bilingual: English is the in-markup default; German lives in data-de
+  attributes (hand-written, idiomatic, no dashes in visible copy).
+  Free-class entry + commitment-fee live on a SEPARATE track / at
+  checkout (flagged draft). Summer Deal + postnatal pages are separate.
+  ===================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#F7F0E9;
+    --cream-soft:#FBF7F1;
+    --peach:#F7E9DA;
+    --peach-deep:#F2DAC0;
+    --ink:#020F52;
+    --cobalt:#0426CE;
+    --cobalt-bright:#1347E7;
+    --coral:#BE3F21;
+    --coral-soft:#E2683F;
+    --slate:#505885;
+    --lavender:#DDCAE0;
+    --rust-dark:#591E0F;
+
+    --maxw:1180px;
+    --radius:28px;
+    --radius-sm:16px;
+    --shadow:0 18px 50px -22px rgba(2,15,82,.35);
+    --shadow-soft:0 10px 30px -18px rgba(2,15,82,.30);
+    --display:'Bricolage Grotesque',system-ui,sans-serif;
+    --body:'Figtree',system-ui,sans-serif;
+    --groovy:'Fredoka',system-ui,sans-serif;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--body);
+    background:var(--cream);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* ---------- Typography ---------- */
+  h1,h2,h3{font-family:var(--display);font-weight:800;text-transform:uppercase;line-height:.94;letter-spacing:-.02em}
+  h1{font-size:clamp(2.7rem,8.5vw,5.5rem)}
+  h2{font-size:clamp(2rem,5.5vw,3.4rem)}
+  h3{font-size:clamp(1.25rem,3vw,1.7rem)}
+  .eyebrow{
+    font-family:var(--body);font-weight:700;text-transform:uppercase;
+    letter-spacing:.18em;font-size:.78rem;color:var(--coral);
+  }
+  .lead{font-size:clamp(1.05rem,1.6vw,1.3rem);color:var(--slate);font-weight:500}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+    font-family:var(--body);font-weight:700;text-transform:uppercase;
+    letter-spacing:.04em;font-size:1rem;
+    background:var(--cobalt);color:#fff;
+    padding:18px 34px;border-radius:999px;border:0;cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+    box-shadow:0 12px 26px -10px rgba(4,38,206,.55);
+    white-space:nowrap;
+  }
+  .btn:hover{background:var(--cobalt-bright);transform:translateY(-2px);box-shadow:0 18px 34px -12px rgba(4,38,206,.6)}
+  .btn:active{transform:translateY(0)}
+  .btn--ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px rgba(2,15,82,.18)}
+  .btn--ghost:hover{background:rgba(2,15,82,.05);box-shadow:inset 0 0 0 2px rgba(2,15,82,.3)}
+  .btn--lg{padding:22px 44px;font-size:1.08rem}
+  .btn--coral{background:var(--coral);box-shadow:0 12px 26px -10px rgba(190,63,33,.5)}
+  .btn--coral:hover{background:var(--coral-soft)}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(247,240,233,.82);backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(2,15,82,.07);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:74px}
+  .logo{font-family:var(--groovy);font-weight:700;color:var(--coral);
+    font-size:1.5rem;line-height:.82;letter-spacing:-.01em;text-transform:uppercase}
+  .logo span{display:block}
+  .nav-cta{display:flex;align-items:center;gap:14px}
+  .nav-note{font-size:.82rem;color:var(--slate);font-weight:600}
+  @media(max-width:620px){.nav-note{display:none}.nav .btn{display:none}.btn{padding:15px 24px;font-size:.92rem}}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:clamp(36px,6vw,76px) 0 clamp(40px,6vw,72px)}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,4vw,56px);align-items:center}
+  @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:30px}}
+
+  .hero h1{color:var(--ink);margin:14px 0 0}
+  .hero h1 em{font-style:normal;color:var(--coral)}
+  .hero .lead{margin:22px 0 28px;max-width:46ch}
+  .hero-cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+  .risk-list{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:22px}
+  .risk-list li{list-style:none;font-size:.93rem;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .check{width:20px;height:20px;border-radius:50%;background:var(--cobalt);color:#fff;
+    display:inline-grid;place-items:center;font-size:.7rem;flex-shrink:0}
+
+  /* star badge above the fold */
+  .hero-badge{display:inline-flex;align-items:center;gap:12px;
+    background:#fff;border-radius:999px;padding:9px 18px 9px 12px;margin-bottom:6px;
+    box-shadow:var(--shadow-soft)}
+  .hero-badge .stars{color:var(--coral);font-size:1rem;letter-spacing:1px}
+  .hero-badge b{font-size:.92rem}
+  .hero-badge small{color:var(--slate);font-weight:600;font-size:.82rem}
+
+  /* hero visual = brand placeholder for real GMS photo */
+  .hero-visual{position:relative;border-radius:var(--radius);overflow:hidden;
+    aspect-ratio:4/4.4;box-shadow:var(--shadow);
+    background:
+      radial-gradient(120% 90% at 80% 10%, var(--peach) 0%, transparent 55%),
+      linear-gradient(150deg, var(--coral) 0%, var(--coral-soft) 48%, #e9a06f 100%);}
+  .hero-visual .ph-label{position:absolute;top:16px;left:18px;color:rgba(255,255,255,.85);
+    font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+  .hero-visual .groovy-mark{position:absolute;left:50%;bottom:9%;transform:translateX(-50%) rotate(-6deg);
+    font-family:var(--groovy);font-weight:700;color:var(--ink);opacity:.92;
+    font-size:clamp(2.6rem,7vw,4rem);line-height:.8;text-align:center;text-transform:uppercase}
+  .hero-visual .float-chip{position:absolute;top:7%;right:6%;background:var(--cream);color:var(--ink);
+    font-weight:700;font-size:.82rem;padding:10px 16px;border-radius:999px;box-shadow:var(--shadow-soft);
+    transform:rotate(5deg)}
+
+  /* ---------- Proof bar ---------- */
+  .proof{background:var(--ink);color:var(--cream);padding:34px 0}
+  .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center}
+  .proof .big{font-family:var(--display);font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1;color:#fff}
+  .proof .big.coral{color:var(--coral-soft)}
+  .proof small{display:block;margin-top:8px;color:rgba(247,240,233,.72);font-weight:600;
+    font-size:.82rem;text-transform:uppercase;letter-spacing:.06em}
+  @media(max-width:680px){.proof-grid{grid-template-columns:repeat(2,1fr);gap:26px 14px}}
+
+  /* ---------- Section scaffolding ---------- */
+  section.block{padding:clamp(56px,8vw,104px) 0}
+  .sec-head{max-width:46ch;margin-bottom:clamp(30px,4vw,52px)}
+  .sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+  .sec-head h2{margin-top:10px}
+  .sec-head p{margin-top:16px}
+
+  /* ---------- Questionnaire ("find your routine") ---------- */
+  .quiz-section{background:
+      radial-gradient(120% 120% at 100% 0%, var(--peach) 0%, transparent 52%),
+      radial-gradient(120% 120% at 0% 100%, var(--lavender) 0%, transparent 50%),
+      var(--cream-soft);}
+  .quiz-card{max-width:760px;margin:0 auto;background:#fff;border-radius:var(--radius);
+    box-shadow:var(--shadow);border:1px solid rgba(2,15,82,.06);
+    padding:clamp(26px,4vw,46px);min-height:380px;display:flex;flex-direction:column}
+  .quiz-progress{display:flex;gap:8px;margin-bottom:26px}
+  .quiz-progress span{height:6px;flex:1;border-radius:999px;background:rgba(2,15,82,.10)}
+  .quiz-progress span.on{background:var(--cobalt)}
+  .quiz-progress span.done{background:var(--coral)}
+  .q-kicker{font-family:var(--body);font-weight:700;text-transform:uppercase;letter-spacing:.14em;
+    font-size:.72rem;color:var(--coral);margin-bottom:10px}
+  .q-title{font-family:var(--display);text-transform:uppercase;font-weight:800;line-height:.98;
+    letter-spacing:-.02em;font-size:clamp(1.5rem,3.4vw,2.1rem);color:var(--ink)}
+  .q-sub{color:var(--slate);font-weight:500;margin:10px 0 4px}
+  .q-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+  @media(max-width:560px){.q-options{grid-template-columns:1fr}}
+  .opt{display:flex;align-items:center;gap:14px;text-align:left;width:100%;
+    background:var(--cream-soft);border:1.5px solid rgba(2,15,82,.10);border-radius:var(--radius-sm);
+    padding:18px 18px;cursor:pointer;font-family:var(--body);font-weight:600;font-size:1rem;color:var(--ink);
+    transition:border-color .15s, background .15s, transform .12s, box-shadow .15s}
+  .opt:hover{border-color:var(--cobalt);background:#fff;transform:translateY(-2px);box-shadow:var(--shadow-soft)}
+  .opt .o-ic{width:42px;height:42px;border-radius:12px;background:var(--peach-deep);color:var(--ink);
+    display:grid;place-items:center;font-size:1.3rem;flex-shrink:0}
+  .opt.sel{border-color:var(--cobalt);background:#fff;box-shadow:0 0 0 3px rgba(4,38,206,.12)}
+  .q-back{margin-top:24px;background:none;border:0;color:var(--slate);font-family:var(--body);
+    font-weight:600;font-size:.9rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;align-self:flex-start}
+  .q-back:hover{color:var(--ink)}
+
+  /* building micro-moment */
+  .q-building{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:18px;padding:40px 0}
+  .q-spin{width:44px;height:44px;border-radius:50%;border:4px solid rgba(2,15,82,.12);border-top-color:var(--cobalt);
+    animation:qspin .8s linear infinite}
+  @keyframes qspin{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){.q-spin{animation:none}}
+  .q-building p{font-weight:600;color:var(--ink)}
+
+  /* result */
+  .res-tag{display:inline-flex;align-items:center;gap:8px;background:var(--peach);color:var(--rust-dark);
+    font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;padding:7px 14px;border-radius:999px;align-self:flex-start}
+  .res-title{font-family:var(--display);text-transform:uppercase;font-weight:800;letter-spacing:-.02em;line-height:.98;
+    font-size:clamp(1.8rem,4.4vw,2.7rem);color:var(--ink);margin:14px 0 4px}
+  .res-title:focus{outline:none}  /* focused only for screen-reader announcement, not a visible box */
+  .res-sub{color:var(--coral);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.82rem}
+  .res-intro{color:var(--slate);font-weight:500;margin:16px 0 0;max-width:52ch}
+  .plan-weeks{list-style:none;margin:24px 0 4px;border-top:1px solid rgba(2,15,82,.1)}
+  .plan-weeks li{display:flex;gap:16px;align-items:baseline;padding:13px 0;border-bottom:1px solid rgba(2,15,82,.08)}
+  .plan-weeks .wk{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:.82rem;color:var(--coral);
+    flex-shrink:0;width:96px;letter-spacing:.02em;white-space:nowrap}
+  .plan-weeks .wd{font-weight:600;color:var(--ink)}
+  .plan-open{background:var(--cream-soft);border:1px dashed rgba(2,15,82,.2);border-radius:var(--radius-sm);
+    padding:14px 18px;margin-top:20px;font-size:.92rem;font-weight:500;color:var(--ink)}
+  .plan-open b{color:var(--coral)}
+  .plan-inc{list-style:none;margin:22px 0 0;display:grid;gap:10px}
+  .plan-inc li{display:flex;gap:11px;align-items:flex-start;font-weight:500;color:var(--ink);font-size:.97rem}
+  .res-buy{margin-top:26px;padding-top:24px;border-top:1px solid rgba(2,15,82,.12);
+    display:flex;flex-wrap:wrap;align-items:center;gap:18px 24px;justify-content:space-between}
+  .res-price{display:flex;align-items:baseline;gap:10px}
+  .res-price .amt{font-family:var(--display);font-weight:800;font-size:2.7rem;line-height:1;color:var(--ink)}
+  .res-price .meta{font-size:.86rem;color:var(--slate);font-weight:600;max-width:18ch}
+  .res-buy .btn{flex:1;min-width:200px}
+  .res-fine{font-size:.82rem;color:var(--slate);font-weight:500;margin-top:14px;line-height:1.5}
+  .res-fine b{color:var(--ink)}
+  .res-retake{margin-top:16px;background:none;border:0;color:var(--slate);font-family:var(--body);
+    font-weight:600;font-size:.88rem;cursor:pointer;text-decoration:underline;align-self:flex-start}
+  .res-retake:hover{color:var(--ink)}
+  .draft-pill{background:rgba(2,15,82,.07);color:var(--slate);font-weight:700;text-transform:uppercase;
+    letter-spacing:.06em;font-size:.62rem;padding:3px 8px;border-radius:999px;vertical-align:middle;margin-left:6px}
+
+  /* ---------- Differentiator (certified teachers, real experience) ---------- */
+  .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:820px){.why-grid{grid-template-columns:1fr}}
+  .why{background:var(--cream-soft);border:1px solid rgba(2,15,82,.08);border-radius:var(--radius);padding:30px 28px 32px}
+  .why .ic{width:54px;height:54px;border-radius:16px;background:var(--ink);color:var(--cream);
+    display:grid;place-items:center;font-size:1.5rem;margin-bottom:18px}
+  .why h3{margin-bottom:10px}
+  .why p{color:var(--slate);font-weight:500}
+
+  /* ---------- Outcome cards ---------- */
+  .val-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:820px){.val-grid{grid-template-columns:1fr}}
+  .val{background:var(--peach);border-radius:var(--radius);padding:30px 28px 32px;position:relative}
+  .val:nth-child(2){background:var(--lavender)}
+  .val:nth-child(3){background:#dfe7e0}
+  .val .ic{width:54px;height:54px;border-radius:16px;background:var(--ink);color:var(--cream);
+    display:grid;place-items:center;font-size:1.5rem;margin-bottom:18px}
+  .val h3{margin-bottom:10px}
+  .val p{color:var(--rust-dark);font-weight:500;opacity:.86}
+
+  /* ---------- Objections (flip the 4 hesitations) ---------- */
+  .obj-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  @media(max-width:760px){.obj-grid{grid-template-columns:1fr}}
+  .obj{background:var(--cream-soft);border:1px solid rgba(2,15,82,.08);border-radius:var(--radius-sm);
+    padding:26px 26px 24px;position:relative;overflow:hidden}
+  .obj .quote{font-family:var(--display);text-transform:uppercase;font-weight:700;font-size:1.05rem;
+    color:var(--slate);margin-bottom:12px;display:flex;gap:10px;align-items:flex-start}
+  .obj .quote::before{content:"\201C";font-size:2.2rem;line-height:.5;color:var(--lavender);font-family:Georgia,serif}
+  .obj .flip{font-weight:600;color:var(--ink)}
+  .obj .flip b{color:var(--coral)}
+
+  /* ---------- How it works ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;counter-reset:step}
+  @media(max-width:820px){.steps{grid-template-columns:1fr}}
+  .step{position:relative;padding-top:14px}
+  .step .num{font-family:var(--display);font-weight:800;font-size:3rem;color:var(--coral);line-height:1;opacity:.9}
+  .step h3{margin:8px 0 8px}
+  .step p{color:var(--slate);font-weight:500}
+  .step.last .num{color:var(--cobalt)}
+
+  /* ---------- Wall of love ---------- */
+  .love{column-count:3;column-gap:18px}
+  @media(max-width:880px){.love{column-count:2}}
+  @media(max-width:560px){.love{column-count:1}}
+  .card{break-inside:avoid;background:#fff;border-radius:var(--radius-sm);padding:22px 22px 20px;margin-bottom:18px;
+    box-shadow:var(--shadow-soft);border:1px solid rgba(2,15,82,.05)}
+  .card .stars{color:var(--coral);font-size:.9rem;letter-spacing:1px;margin-bottom:10px}
+  .card p{font-weight:500;color:var(--ink)}
+  .card .who{margin-top:14px;display:flex;align-items:center;gap:10px}
+  .card .av{width:36px;height:36px;border-radius:50%;background:var(--lavender);color:var(--ink);
+    display:grid;place-items:center;font-weight:700;font-size:.85rem}
+  .card .who b{font-size:.9rem}
+  .card .who small{display:block;color:var(--slate);font-size:.76rem;font-weight:600}
+
+  /* ---------- FAQ ---------- */
+  .faq{max-width:760px;margin:0 auto}
+  details{background:var(--cream-soft);border:1px solid rgba(2,15,82,.08);border-radius:var(--radius-sm);
+    padding:4px 22px;margin-bottom:12px}
+  details summary{cursor:pointer;list-style:none;padding:18px 0;font-family:var(--display);
+    text-transform:uppercase;font-weight:700;font-size:1.02rem;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+";font-size:1.5rem;color:var(--coral);transition:transform .2s}
+  details[open] summary::after{transform:rotate(45deg)}
+  details p{padding:0 0 20px;color:var(--slate);font-weight:500}
+
+  /* ---------- Final CTA ---------- */
+  .final{background:
+      radial-gradient(110% 130% at 0% 0%, var(--peach) 0%, transparent 50%),
+      radial-gradient(120% 130% at 100% 100%, var(--lavender) 0%, transparent 55%),
+      var(--cream-soft);
+    border-radius:var(--radius);padding:clamp(40px,6vw,80px) clamp(24px,4vw,40px);text-align:center}
+  .final h2{font-size:clamp(2.2rem,6vw,4rem)}
+  .final .lead{margin:18px auto 30px;max-width:48ch}
+  .final .risk-list{justify-content:center}
+
+  /* ---------- Footer ---------- */
+  footer{padding:54px 0 130px;color:var(--slate)}
+  .foot-grid{display:flex;flex-wrap:wrap;justify-content:space-between;gap:24px;align-items:flex-start}
+  .foot-grid .logo{font-size:1.7rem}
+  .foot-col b{display:block;color:var(--ink);text-transform:uppercase;font-size:.78rem;letter-spacing:.1em;margin-bottom:8px}
+  .foot-col p{font-size:.92rem;font-weight:500}
+  .foot-bottom{margin-top:36px;padding-top:20px;border-top:1px solid rgba(2,15,82,.1);font-size:.82rem;font-weight:500}
+
+  /* ---------- Sticky mobile CTA ---------- */
+  .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:rgba(247,240,233,.92);backdrop-filter:blur(12px);
+    border-top:1px solid rgba(2,15,82,.1);padding:12px 16px;
+    display:none;align-items:center;justify-content:space-between;gap:12px}
+  .sticky-cta .s-price{font-weight:700;font-size:.86rem}
+  .sticky-cta .s-price b{font-family:var(--display);display:block;font-size:1rem;text-transform:uppercase}
+  .sticky-cta .btn{padding:14px 22px;font-size:.9rem}
+  @media(max-width:880px){.sticky-cta{display:flex}}
+
+  /* reveal on scroll — gated by .js so content is ALWAYS visible if JS is off/fails */
+  .js .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease}
+  .js .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.js .reveal{opacity:1;transform:none}html{scroll-behavior:auto}}
+
+  .tag-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .tag{background:#fff;border:1px solid rgba(2,15,82,.1);border-radius:999px;padding:8px 16px;
+    font-weight:600;font-size:.85rem;color:var(--ink)}
+
+  /* ---------- Language switch ---------- */
+  .lang{display:inline-flex;align-items:center;border:1.5px solid rgba(2,15,82,.16);border-radius:999px;
+    padding:3px;gap:2px;background:rgba(255,255,255,.45)}
+  .lang button{font-family:var(--body);font-weight:700;font-size:.76rem;letter-spacing:.05em;border:0;
+    background:transparent;color:var(--slate);padding:6px 11px;border-radius:999px;cursor:pointer;line-height:1;
+    transition:background .15s,color .15s}
+  .lang button[aria-pressed="true"]{background:var(--ink);color:var(--cream)}
+  .lang button:hover{color:var(--ink)}
+  .lang button[aria-pressed="true"]:hover{color:var(--cream)}
+  @media(max-width:430px){.nav-cta{gap:8px}.lang button{padding:6px 9px;font-size:.72rem}}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. HEADER (logo + lang + ONE cta → questionnaire) ============ -->
+<header>
+  <div class="wrap nav">
+    <div class="logo"><span>Good</span><span>Moves</span></div>
+    <div class="nav-cta">
+      <span class="nav-note" data-de="★ 4,9/5 · ~4.000 Bewertungen">★ 4.9/5 · ~4,000 reviews</span>
+      <div class="lang" role="group" aria-label="Language / Sprache">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="de" aria-pressed="false">DE</button>
+      </div>
+      <a href="#quiz" class="btn" data-de="Routine finden">Find your routine</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 2. HERO — generic studio intro + the one action ============ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="hero-badge">
+        <span class="stars">★★★★★</span>
+        <span><b data-de="4,9 / 5">4.9 / 5</b> <small data-de="· aus ~4.000 Bewertungen">· from ~4,000 reviews</small></span>
+      </div>
+      <p class="eyebrow" data-de="Movement Studio · Prenzlauer Berg, Berlin">Movement studio · Prenzlauer Berg, Berlin</p>
+      <h1 data-de="Echtes Pilates<br>braucht nur <em>dich.</em>">All you need for<br>pilates is <em>you.</em></h1>
+      <p style="font-weight:700;color:var(--ink);font-size:1.12rem;margin:16px 0 0" data-de="Lass uns deine Routine finden, die zu dir und deinem Körper passt.">Let's find the routine that fits you and your body.</p>
+      <p class="lead" data-de="Pilates passt zu jedem Körper und jeder Situation, ob dich der Alltag stresst, du dich steif fühlst oder ein, zwei Stellen zwicken. Es ist gelenkschonend, lässt sich leicht in deine Woche einbauen und passt sich dir an wie kaum etwas sonst. Wenn du dich also fragst, wo du anfangen sollst, bist du hier genau richtig: Sag uns ein bisschen über dich, und wir bauen einen individuellen Plan um deinen Körper und deine Möglichkeiten, hier bei deinem Movement Studio in Prenzlauer Berg.">Pilates fits every body and every situation, whether you're stressed, stiff, or working around an ache or two. It's low-impact, easy to fold into your week, and it adapts to you like few things do. So if you're wondering where to start, you're in exactly the right place: tell us a little about you, and we'll build an individual plan around your body and what's possible for you, here at our movement studio in Prenzlauer Berg.</p>
+
+      <div class="hero-cta-row">
+        <a href="#quiz" class="btn btn--lg" data-de="Finde deine perfekte Routine">Find your perfect routine</a>
+      </div>
+
+      <ul class="risk-list">
+        <li><span class="check">✓</span> <span data-de="Echte, ausgebildete Lehrer:innen">Real, certified teachers</span></li>
+        <li><span class="check">✓</span> <span data-de="Auf dein Ziel gebaut">Built around your goal</span></li>
+        <li><span class="check">✓</span> <span data-de="Gelenkschonend, voller Bewegungsumfang">Low-impact, full range of motion</span></li>
+      </ul>
+    </div>
+
+    <!-- Hero visual = placeholder for real GMS photo -->
+    <div class="hero-visual" aria-hidden="true">
+      <span class="ph-label">▢ Real GMS photo here</span>
+      <span class="float-chip" data-de="Klein, warm, ausgebucht mit Liebe">Small, warm, fully booked</span>
+      <span class="groovy-mark">Good<br>Moves</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. PROOF BAR ============ -->
+<section class="proof">
+  <div class="wrap proof-grid">
+    <div><div class="big coral" data-de="4,9★">4.9★</div><small data-de="Durchschnitt">Average rating</small></div>
+    <div><div class="big" data-de="~4.000">~4,000</div><small data-de="Bewertungen">Member reviews</small></div>
+    <div><div class="big">22</div><small data-de="Plätze pro Kurs">People max / class</small></div>
+    <div><div class="big">17</div><small data-de="Lehrer:innen · EN &amp; DE">Teachers · EN &amp; DE</small></div>
+  </div>
+</section>
+
+<!-- ============ 4. QUESTIONNAIRE — the single action ============ -->
+<section class="block quiz-section" id="quiz">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="30 Sekunden · ohne Anmeldung">30 seconds · no signup</p>
+      <h2 data-de="Finde deine Routine">Find your routine</h2>
+      <p class="lead" data-de="Beantworte drei kurze Fragen, und ausgebildete Lehrer:innen bauen einen kuratierten 6-Wochen-Plan um dein Ziel und deinen Ausgangspunkt. Pilates, gemacht für dein Leben.">Answer three quick questions, and certified teachers shape a curated six-week plan around your goal and where you're starting from. Pilates, made to fit your life.</p>
+    </div>
+    <div class="quiz-card">
+      <div id="quizBox">
+        <!-- JS renders the steps / result here. Fallback for no-JS below. -->
+        <noscript>
+          <p style="font-weight:600;color:var(--ink)">This quick questionnaire needs JavaScript. You can also just come in for a first class and we'll map your plan in person, in Prenzlauer Berg, Berlin.</p>
+          <p style="font-weight:600;color:var(--slate);margin-top:10px">Dieser kurze Fragebogen braucht JavaScript. Du kannst auch einfach zu einer ersten Stunde vorbeikommen, dann stellen wir deinen Plan vor Ort in Prenzlauer Berg, Berlin zusammen.</p>
+        </noscript>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. DIFFERENTIATOR — real teachers, not an app ============ -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="Warum das hier anders ist">Why this is different</p>
+      <h2 data-de="Ausgebildete Lehrer:innen,<br>echte Erfahrung">Certified teachers,<br>real experience</h2>
+      <p class="lead" data-de="Hinter jeder Empfehlung stehen ausgebildete Lehrer:innen, echte Kurse und das Feedback, das nur ein Mensch geben kann.">Behind every recommendation are certified teachers, real classes, and the kind of feedback only a person can give.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why reveal">
+        <h3 data-de="Ausgebildet und erfahren">Certified, experienced teachers</h3>
+        <p data-de="Deine Empfehlung kommt von Menschen, die seit Jahren unterrichten, und sie passen deinen Plan an, sobald sich dein Körper meldet.">Your recommendation comes from people who have taught for years, and they adjust your plan the moment your body asks for it.</p>
+      </div>
+      <div class="why reveal">
+        <h3 data-de="Auf dein Ziel gebaut">Built around your goal</h3>
+        <p data-de="Sag uns, woran du arbeiten willst, und wir zeigen dir genau, was du dafür brauchst.">Tell us what you want to work on, and we map exactly what you need to get there.</p>
+      </div>
+      <div class="why reveal">
+        <h3 data-de="Im Studio auf dich angepasst">Adapted to you in person</h3>
+        <p data-de="Im Studio passen Lehrer:innen deinen Plan im persönlichen Gespräch auf dich an. Kleine Gruppen, in denen du wirklich gesehen wirst, und ein Willkommensgeschenk beim ersten Mal.">When you come in, a teacher fine-tunes your plan with you, face to face. Small groups where you're actually seen, and a welcome gift on your first visit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. OUTCOME CARDS — what you'll actually feel ============ -->
+<section class="block" style="background:var(--cream-soft)">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-de="Worauf es hinausläuft">What it actually leads to</p>
+      <h2 data-de="Du gehst mit<br>etwas Konkretem raus">You leave with<br>something real</h2>
+      <p class="lead" data-de="Weniger darum, wie du aussiehst, mehr darum, wie du dich bewegst und fühlst. Das nehmen die meisten nach ein paar Wochen mit.">Less about how you look, more about how you move and feel. Here's what most members carry out the door after a few weeks.</p>
+    </div>
+    <div class="val-grid">
+      <div class="val reveal">
+        <h3 data-de="Aufrechter stehen">Stand taller</h3>
+        <p data-de="Vieles trainiert deine natürliche, neutrale Wirbelsäulenposition. Mach rückgängig, was das viele Sitzen mit deinem Rücken macht, und steh über die Wochen spürbar aufrechter.">A lot of the work trains your natural, neutral spine position. Undo what all that sitting does to your back, and notice yourself standing taller over the weeks.</p>
+      </div>
+      <div class="val reveal">
+        <h3 data-de="Freier bewegen">Move more freely</h3>
+        <p data-de="Mehr Beweglichkeit über den vollen Bewegungsumfang. Gelenkschonend für Knie, Hüften und Rücken, gemacht für Körper, die den ganzen Tag sitzen, und Comebacks aller Art.">More mobility through a full range of motion. Low-impact on knees, hips and back, built for bodies that sit all day, and comebacks of every kind.</p>
+      </div>
+      <div class="val reveal">
+        <h3 data-de="Dich zu Hause fühlen">Feel at home in your body</h3>
+        <p data-de="Kontrolliertes Ganzkörpertraining mit deinem Körpergewicht und ein paar Props. Du gehst stärker, wacher und ein Stück mehr bei dir raus, als du reingekommen bist.">Controlled, full-body work with your bodyweight and a few props. You leave stronger, more switched-on and a little more yourself than when you came in.</p>
+      </div>
+    </div>
+    <div class="tag-row">
+      <span class="tag" data-de="Gelenkschonend">Low-impact</span><span class="tag" data-de="Voller Bewegungsumfang">Full range of motion</span>
+      <span class="tag" data-de="Auf der Matte">On the mat</span><span class="tag" data-de="Körpergewicht">Bodyweight</span>
+      <span class="tag" data-de="Props &amp; Bänder">Props &amp; bands</span><span class="tag" data-de="Echte Lehrer:innen">Real teachers</span>
+      <span class="tag" data-de="Kein Reformer nötig">No reformer needed</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. OBJECTIONS — flip the 4 entry hesitations ============ -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="Lies das, falls du's aufschiebst">Read this if you've been putting it off</p>
+      <h2 data-de="Die Gründe, warum<br>du noch nicht hier warst">The reasons you<br>haven't come yet</h2>
+      <p class="lead" data-de="Jede dieser Sorgen kommt jede Woche zu uns rein und geht grinsend wieder raus.">Every one of these walks through our door every week, and leaves grinning.</p>
+    </div>
+    <div class="obj-grid">
+      <div class="obj reveal">
+        <div class="quote" data-de="„Ich bin nicht beweglich genug.“">"I'm not flexible enough."</div>
+        <p class="flip" data-de="Ist niemand am ersten Tag. <b>Beweglichkeit ist das Ergebnis, nicht die Eintrittskarte.</b> Du startest genau da, wo dein Körper heute steht.">Nobody is on day one. <b>Flexibility is the result, not the ticket.</b> You start exactly where your body is today.</p>
+      </div>
+      <div class="obj reveal">
+        <div class="quote" data-de="„Pilates ist zu leicht für mich.“">"Pilates is too easy for me."</div>
+        <p class="flip" data-de="Ein Mythos. <b>Richtig ausgeführt reicht schon dein eigenes Körpergewicht, um dich an deine Grenzen zu bringen.</b> Die Anleitung sorgt dafür, dass du es genau richtig machst.">A myth. <b>Done properly, your own bodyweight alone is enough to humble you.</b> The teaching is there to make sure you do it right.</p>
+      </div>
+      <div class="obj reveal">
+        <div class="quote" data-de="„Ich hab nicht den Körpertyp dafür.“">"I don't have the body type for it."</div>
+        <p class="flip" data-de="Den gibt es nicht. <b>Jede Form, jede Größe, jedes Alter bewegt sich hier</b>, und die Übungen passen sich deinem Körper an, nicht umgekehrt.">There's no such thing. <b>Every shape, size and age moves here</b>, and the work meets your body, not the other way around.</p>
+      </div>
+      <div class="obj reveal">
+        <div class="quote" data-de="„Ist das nicht nur was für Frauen?“">"Isn't this just for women?"</div>
+        <p class="flip" data-de="Nein. Unsere am schnellsten wachsende Gruppe sind Männer, die kamen, um stärker zu werden, und blieben, weil Bewegung sich einfach gut anfühlt. <b>Komm wie du bist.</b>">No. Our fastest-growing crowd is men who came to get stronger and stayed for how good it feels to move. <b>Come as you are.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. HOW IT WORKS — three steps ============ -->
+<section class="block" style="background:var(--cream-soft)">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="Es ist wirklich so einfach">It's genuinely this simple</p>
+      <h2 data-de="In drei Schritten<br>zu deinem Plan">Three steps<br>to your plan</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="num">1</div>
+        <h3 data-de="Sag uns dein Ziel">Tell us your goal</h3>
+        <p data-de="Beantworte drei kurze Fragen. Dreißig Sekunden, keine Anmeldung, keine Karte.">Answer three quick questions. Thirty seconds, no signup, no card.</p>
+      </div>
+      <div class="step reveal">
+        <div class="num">2</div>
+        <h3 data-de="Bekomm deinen kuratierten Plan">Get your curated plan</h3>
+        <p data-de="Echte Lehrer:innen empfehlen dir einen 6-Wochen-Weg, gebaut um dein Ziel. Alle Kurse bleiben dir offen, der Plan ist die Empfehlung.">A real teacher recommends a six-week path built around your goal. Every class stays open to you, the plan is the recommendation.</p>
+      </div>
+      <div class="step last reveal">
+        <div class="num">3</div>
+        <h3 data-de="Beweg dich, mit jemandem an deiner Seite">Move, with someone in your corner</h3>
+        <p data-de="Deine Lehrer:innen begleiten dich, passen unterwegs an und beantworten deine Fragen. Beim ersten Besuch wartet ein kleines Willkommensgeschenk.">Your teacher walks with you, adapts along the way and answers your questions. A small welcome gift is waiting on your first visit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. WALL OF LOVE — stacked proof ============ -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="4,9/5 aus ~4.000 Bewertungen">4.9/5 from ~4,000 reviews</p>
+      <h2 data-de="Die Nachbarschaft kommt,<br>gern und regelmäßig">The neighbourhood comes back,<br>gladly and often</h2>
+    </div>
+    <div class="love">
+      <!-- Placeholder copy modelled on real GMS value drivers — swap for live USC/Google reviews -->
+      <div class="card"><div class="stars">★★★★★</div><p data-de="„Ich dachte, Pilates sei Dehnen. Ich ging klatschnass raus, mit Muskelkater an Stellen, von denen ich nichts wusste. Das ist ein echtes Workout.“">"I came thinking Pilates was stretching. I left soaked and sore in muscles I forgot I had. This is a real workout."</p><div class="who"><span class="av">JM</span><div><b>Jonas M.</b><small data-de="Kam, um stärker zu werden">Came to get stronger</small></div></div></div>
+      <div class="card"><div class="stars">★★★★★</div><p data-de="„Nach der Schwangerschaft war ich bei allem nervös. Die Lehrer:innen haben mich genau da abgeholt, wo ich stand. Acht Monate später bin ich stärker als vorher.“">"After my pregnancy I was nervous about everything. The teachers met me exactly where I was. Eight months in and I'm stronger than before."</p><div class="who"><span class="av">LK</span><div><b>Lena K.</b><small data-de="Nach der Schwangerschaft">Post-pregnancy</small></div></div></div>
+      <div class="card"><div class="stars">★★★★★</div><p data-de="„Kleine Gruppen, echte, persönliche Aufmerksamkeit, und sie kennen wirklich meinen Namen. Jeden Cent wert, verglichen mit den großen Ketten.“">"Small groups, real personal attention, and they actually know my name. Worth every cent versus the big chains."</p><div class="who"><span class="av">SR</span><div><b>Sophie R.</b><small data-de="Früher im Fitnessstudio">Ex-gym member</small></div></div></div>
+      <div class="card"><div class="stars">★★★★★</div><p data-de="„Den ganzen Tag am Schreibtisch? Das hat meinen Rücken gerettet. Gelenkschonend, und trotzdem spüre ich am nächsten Tag jeden Muskel. Süchtig.“">"Sit at a desk all day? This undid my back. Low-impact, and I still feel every muscle the next day. Obsessed."</p><div class="who"><span class="av">DT</span><div><b>David T.</b><small data-de="Tech, Bürojob">Tech, desk worker</small></div></div></div>
+      <div class="card"><div class="stars">★★★★★</div><p data-de="„Die Atmosphäre ist wie in keinem anderen Studio in Berlin: warm, bunt, überhaupt nicht einschüchternd. Ich buche meine Kurse immer rund um meine Lieblings-Lehrerin.“">"The atmosphere is unlike any studio in Berlin: warm, colourful, not intimidating at all. I book around my favourite teacher."</p><div class="who"><span class="av">AM</span><div><b>Amélie M.</b><small data-de="3× die Woche">3× a week</small></div></div></div>
+      <div class="card"><div class="stars">★★★★★</div><p data-de="„Sie haben mir genau gesagt, woran ich arbeiten soll, statt mich raten zu lassen. Meine Lehrer:innen kennen meinen Namen und meine Ziele. Das hält mich dabei.“">"They told me exactly what to work on instead of leaving me to guess. My teacher knows my name and my goals. That's what keeps me coming."</p><div class="who"><span class="av">FB</span><div><b>Felix B.</b><small data-de="Folgt seinem Plan">Following his plan</small></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10. FAQ — remaining objections ============ -->
+<section class="block" style="background:var(--cream-soft)">
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="Gute Fragen">Good questions</p>
+      <h2 data-de="Bevor du startest">Before you start</h2>
+    </div>
+    <div class="faq">
+      <details><summary data-de="Wie persönlich ist mein Plan wirklich?">How personal is my plan, really?</summary><p data-de="Sehr. Der Fragebogen ist nur der schnelle Einstieg. Ausgebildete Lehrer:innen stellen deinen Plan aus echten Kursen zusammen, und im Studio passen wir ihn im persönlichen Gespräch genau auf dich an, gebaut um deinen Körper und dein Ziel.">Very. The questionnaire is just the quick way in. Certified teachers shape your plan from real classes, and when you come in we fine-tune it with you in person, built around your body and your goal.</p></details>
+      <details><summary data-de="Muss ich mich genau an den Plan halten?">Do I have to follow the exact plan?</summary><p data-de="Nein. Jeder Kurs bleibt dir offen, der Plan ist eine Empfehlung, kein Käfig. Du kannst jede Stunde tauschen, und deine Lehrer:innen helfen dir, ihn an deine Woche anzupassen.">No. Every class stays open to you, the plan is a recommendation, not a cage. You can swap any session, and your teacher helps you fit it to your week.</p></details>
+      <details><summary data-de="Ich hab noch nie Pilates gemacht. Komm ich mit?">I've never done Pilates. Will I keep up?</summary><p data-de="Auf jeden Fall. Alle Levels sind willkommen, von komplett neu bis fortgeschritten, und jede Übung lässt sich leichter oder schwerer machen. Die Lehrer:innen unterrichten aus der Mitte des Raums, du kannst also immer mitschauen. Einsteiger sind hier die Regel, nicht die Ausnahme.">Completely. All levels are welcome, from total beginner to advanced, and every move can be made easier or harder. The teacher teaches from the middle of the room, so you can always follow along. First-timers are the rule here, not the exception.</p></details>
+      <details><summary data-de="Ist das wirklich ein Workout, oder zu leicht?">Is this a real workout, or too easy?</summary><p data-de="Es ist gelenkschonend und trotzdem fordernd. Vor allem dein eigenes Körpergewicht und ein paar Props bringen dich an deine Grenzen, und die meisten gehen schon nach der ersten Stunde wacher und stärker raus.">It's low-impact and still demanding. Mostly your own bodyweight and a few props will challenge you, and most members leave the very first class feeling more switched-on and stronger.</p></details>
+      <details><summary data-de="Was steckt im 6-Wochen-Plan drin?">What's in the six-week plan?</summary><p data-de="Ein kuratierter Kursweg um dein Ziel herum, etwa zweimal pro Woche, Lehrer:innen, die du erreichen kannst, dazu eine Matte und ein Willkommensgeschenk beim ersten Besuch. Mehr als eine Klassenkarte, ein begleiteter Weg.">A curated sequence of classes built around your goal, about twice a week, a teacher you can reach, plus a mat and a welcome gift on your first visit. More than a class pass, a guided path.</p></details>
+      <details><summary data-de="Sind die Kurse auf Englisch oder Deutsch?">Are classes in English or German?</summary><p data-de="Beides. 17 Lehrer:innen auf Deutsch und Englisch, nimm, womit du dich wohler fühlst.">Both. 17 teachers across German and English, take whichever feels more comfortable.</p></details>
+      <details><summary data-de="Wo seid ihr?">Where are you?</summary><p data-de="Mitten in Prenzlauer Berg, Berlin. Genaue Adresse und Anfahrt kommen mit deiner Bestätigung.">In the heart of Prenzlauer Berg, Berlin. Exact address and directions land in your confirmation.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 11. FINAL CTA — repeat the one action ============ -->
+<section class="block">
+  <div class="wrap">
+    <div class="final reveal">
+      <p class="eyebrow" data-de="Dein erster Move">Your first move</p>
+      <h2 data-de="Lass uns deinen<br>Weg finden">Let's find<br>your way</h2>
+      <p class="lead" data-de="Drei Fragen, dreißig Sekunden, und echte Lehrer:innen zeigen dir genau, womit du anfängst. Das Einzige, was du riskierst: dass du dranbleiben willst.">Three questions, thirty seconds, and a real teacher shows you exactly where to start. The only thing you risk is wanting to keep going.</p>
+      <a href="#quiz" class="btn btn--lg" data-de="Finde deine Routine">Find your routine</a>
+      <ul class="risk-list">
+        <li><span class="check">✓</span> <span data-de="Echte, ausgebildete Lehrer:innen">Real, certified teachers</span></li>
+        <li><span class="check">✓</span> <span data-de="Auf dein Ziel gebaut">Built around your goal</span></li>
+        <li><span class="check">✓</span> <span data-de="Dauert 30 Sekunden">Takes 30 seconds</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 12. FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="logo">Good Moves</div>
+      <div class="foot-col"><b data-de="Studio">Studio</b><p data-de="Prenzlauer Berg<br>Berlin">Prenzlauer Berg<br>Berlin</p></div>
+      <div class="foot-col"><b data-de="Öffnungszeiten">Hours</b><p data-de="Mo bis Fr · 7:00 bis 21:00<br>Sa und So · 9:00 bis 15:00">Mon to Fri · 7:00 to 21:00<br>Sat and Sun · 9:00 to 15:00</p></div>
+      <div class="foot-col"><b data-de="Bewertung">Rated</b><p data-de="★ 4,9 / 5<br>~4.000 Bewertungen">★ 4.9 / 5<br>~4,000 reviews</p></div>
+    </div>
+    <div class="foot-bottom" data-de="© Good Moves Studio · Komm zurück in deinen Körper. · <em>Konzeptentwurf, nicht zur Veröffentlichung.</em>">© Good Moves Studio · Come back to your body. · <em>Concept draft, not for publication.</em></div>
+  </div>
+</footer>
+
+<!-- ============ 13. STICKY MOBILE CTA ============ -->
+<div class="sticky-cta">
+  <div class="s-price" data-de="Deine Routine<br><b>in 30 Sek.</b>">Your routine<br><b>in 30 sec</b></div>
+  <a href="#quiz" class="btn" data-de="Routine finden">Find your routine</a>
+</div>
+
+<script>
+  // ===================================================================
+  //  i18n + questionnaire. currentLang is shared so the quiz (rendered
+  //  dynamically, NOT via data-de) re-renders on language switch.
+  // ===================================================================
+  let currentLang = 'en';
+
+  // ---- Static i18n: EN default, German from data-de, remembered ----
+  const i18n = document.querySelectorAll('[data-de]');
+  i18n.forEach(n => n.dataset.en = n.innerHTML);   // snapshot the English original
+  const langBtns = document.querySelectorAll('.lang button');
+
+  function applyLang(lang){
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    i18n.forEach(n => { n.innerHTML = (lang === 'de' ? n.dataset.de : n.dataset.en); });
+    langBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+    try { localStorage.setItem('gms_lang', lang); } catch(e){}
+    renderQuiz();   // keep the dynamic quiz in sync with the language
+  }
+
+  // ---- Questionnaire content (EN + DE, hand-written) ----
+  const STEPS = [
+    {
+      key:'goal',
+      kicker:{en:'Question 1 of 3', de:'Frage 1 von 3'},
+      q:{en:'What do you most want from your Pilates?', de:'Was wünschst du dir am meisten von deinem Pilates?'},
+      sub:{en:'Pick the one that fits best right now.', de:'Wähl, was gerade am besten passt.'},
+      options:[
+        {v:'posture',  ic:'🧍', en:'Better posture',                  de:'Bessere Haltung'},
+        {v:'mobility', ic:'🤸', en:'More mobility and flexibility',   de:'Mehr Beweglichkeit'},
+        {v:'stronger', ic:'💪', en:'A stronger, more toned body',     de:'Stärker und definierter werden'},
+        {v:'reset',    ic:'🌿', en:'Feel at home in my body again',   de:'Mich wieder wohl in meinem Körper fühlen'}
+      ]
+    },
+    {
+      key:'level',
+      kicker:{en:'Question 2 of 3', de:'Frage 2 von 3'},
+      q:{en:'Where are you starting from?', de:'Wo stehst du gerade?'},
+      sub:{en:'Be honest, there is no wrong answer.', de:'Ganz ehrlich, es gibt keine falsche Antwort.'},
+      options:[
+        {v:'new',    ic:'🌱', en:'Totally new to this',            de:'Komplett neu dabei'},
+        {v:'back',   ic:'🔁', en:'Coming back after a break',      de:'Zurück nach einer Pause'},
+        {v:'active', ic:'⚡', en:'I move already, I want structure', de:'Ich bewege mich schon, will Struktur'},
+        {v:'gentle', ic:'🧩', en:'Easing back in gently',          de:'Sanft wieder einsteigen'}
+      ]
+    },
+    {
+      key:'rhythm',
+      kicker:{en:'Question 3 of 3', de:'Frage 3 von 3'},
+      q:{en:'How often can you move?', de:'Wie oft kannst du dich bewegen?'},
+      sub:{en:'We build the plan around your real week.', de:'Wir bauen den Plan um deine echte Woche.'},
+      options:[
+        {v:'2',    en:'Once or twice a week', de:'Ein- oder zweimal pro Woche'},
+        {v:'3',    ic:'🔥', en:'Three times or more',  de:'Dreimal oder mehr'},
+        {v:'flex', ic:'🌊', en:'It changes week to week', de:'Mal so, mal so'}
+      ]
+    }
+  ];
+
+  // Goal-based plan templates (few, overlapping — feels bespoke up front).
+  const PLANS = {
+    posture: {
+      title:{en:'Your Posture Reset', de:'Dein Haltungs-Reset'},
+      lead:{en:'We point everything at how you stand and carry yourself', de:'Wir richten alles darauf aus, wie du stehst und dich hältst'},
+      weeks:[
+        {wk:{en:'Weeks 1 &amp; 2',de:'Woche 1 &amp; 2'}, d:{en:'Foundations, alignment and breath', de:'Grundlagen, Ausrichtung und Atmung'}},
+        {wk:{en:'Weeks 3 &amp; 4',de:'Woche 3 &amp; 4'}, d:{en:'Deep core and back, standing tall', de:'Tiefe Körpermitte und Rücken, aufrecht stehen'}},
+        {wk:{en:'Weeks 5 &amp; 6',de:'Woche 5 &amp; 6'}, d:{en:'Posture under load, pilates with light weights', de:'Haltung unter Last, Pilates mit leichten Gewichten'}}
+      ]
+    },
+    mobility: {
+      title:{en:'Your Mobility Path', de:'Dein Beweglichkeits-Weg'},
+      lead:{en:'We open up how freely you move, the full range', de:'Wir arbeiten daran, wie frei du dich bewegst, der volle Umfang'},
+      weeks:[
+        {wk:{en:'Weeks 1 &amp; 2',de:'Woche 1 &amp; 2'}, d:{en:'Open up, find your full range of motion', de:'Aufmachen, deinen vollen Bewegungsumfang finden'}},
+        {wk:{en:'Weeks 3 &amp; 4',de:'Woche 3 &amp; 4'}, d:{en:'Mobility flow and control', de:'Mobility-Flow und Kontrolle'}},
+        {wk:{en:'Weeks 5 &amp; 6',de:'Woche 5 &amp; 6'}, d:{en:'Strong through the full range, light weights', de:'Stark über den vollen Umfang, leichte Gewichte'}}
+      ]
+    },
+    stronger: {
+      title:{en:'Your Stronger-Body Plan', de:'Dein Plan: stärker werden'},
+      lead:{en:'We build a stronger, more switched-on body, low-impact all the way', de:'Wir bauen einen stärkeren, wacheren Körper auf, durchgehend gelenkschonend'},
+      weeks:[
+        {wk:{en:'Weeks 1 &amp; 2',de:'Woche 1 &amp; 2'}, d:{en:'Build a base, bodyweight control', de:'Basis aufbauen, Kontrolle übers Körpergewicht'}},
+        {wk:{en:'Weeks 3 &amp; 4',de:'Woche 3 &amp; 4'}, d:{en:'Power pilates, more challenge', de:'Power-Pilates, mehr Herausforderung'}},
+        {wk:{en:'Weeks 5 &amp; 6',de:'Woche 5 &amp; 6'}, d:{en:'Pilates with weights, fully switched on', de:'Pilates mit Gewichten, voll da'}}
+      ]
+    },
+    reset: {
+      title:{en:'Your Come-Back Plan', de:'Dein Weg zurück'},
+      lead:{en:'We help you feel at home in your body again, gently and steadily', de:'Wir helfen dir, dich in deinem Körper wieder wohlzufühlen, sanft und stetig'},
+      weeks:[
+        {wk:{en:'Weeks 1 &amp; 2',de:'Woche 1 &amp; 2'}, d:{en:'Gentle reset, move and breathe', de:'Sanfter Reset, bewegen und atmen'}},
+        {wk:{en:'Weeks 3 &amp; 4',de:'Woche 3 &amp; 4'}, d:{en:'Find your rhythm, build confidence', de:'Deinen Rhythmus finden, Sicherheit aufbauen'}},
+        {wk:{en:'Weeks 5 &amp; 6',de:'Woche 5 &amp; 6'}, d:{en:'Feel strong and at home in your body', de:'Dich stark und zu Hause in deinem Körper fühlen'}}
+      ]
+    }
+  };
+
+  const LEVEL_FRAG = {
+    new:    {en:'since you are new to this, week one starts from the ground up', de:'weil du neu dabei bist, fängt Woche eins ganz von vorne an'},
+    back:   {en:'coming back after a break, we ease you in and build steadily',  de:'nach deiner Pause steigen wir sanft ein und bauen stetig auf'},
+    active: {en:'you already move, so we give it structure and progression',     de:'du bewegst dich schon, also geben wir dem Ganzen Struktur und Aufbau'},
+    gentle: {en:'we keep it gentle and low-impact the whole way',               de:'wir halten es durchgehend sanft und gelenkschonend'}
+  };
+  const RHYTHM_FRAG = {
+    '2':   {en:'at around once or twice a week',   de:'bei etwa ein bis zweimal pro Woche'},
+    '3':   {en:'across three sessions a week',     de:'über drei Einheiten pro Woche'},
+    'flex':{en:'at whatever pace your week allows', de:'in dem Tempo, das deine Woche zulässt'}
+  };
+
+  // Shared "what's included" + open-access + price strings.
+  const INCLUDED = [
+    {en:'A six-week sequence mapped to your goal', de:'Eine 6-Wochen-Abfolge, gebaut um dein Ziel'},
+    {en:'About twice a week, and every class stays open to you', de:'Etwa zweimal pro Woche, und jeder Kurs bleibt dir offen'},
+    {en:'A teacher you can email through the whole journey', de:'Lehrer:innen, denen du den ganzen Weg über schreiben kannst'},
+    {en:'A welcome goodie bag and a mat to keep on day one', de:'Ein Willkommenspaket und eine Matte zum Behalten am ersten Tag'},
+    {en:'4.9/5 from ~4,000 reviews behind every class', de:'4,9/5 aus ~4.000 Bewertungen hinter jeder Stunde'}
+  ];
+  const OPEN_LINE = {
+    en:'This is your <b>recommended</b> path, not a locked program. Swap any class, your teacher helps you adapt.',
+    de:'Das ist dein <b>empfohlener</b> Weg, kein festes Programm. Tausch jede Stunde, deine Lehrer:innen helfen dir beim Anpassen.'
+  };
+  const PRICE_META = {en:'six-week plan, all in', de:'6-Wochen-Plan, alles dabei'};
+  const FIRST_FREE = {
+    en:'<b>Your first class is free.</b> If it feels right, the six-week plan above is everything that comes next. No card needed to start, no auto-renewal.',
+    de:'<b>Deine erste Stunde ist gratis.</b> Wenn es sich gut anfühlt, ist der 6-Wochen-Plan oben alles, was danach kommt. Zum Starten keine Karte nötig, keine automatische Verlängerung.'
+  };
+
+  const tr = (o) => (o && (o[currentLang] || o.en)) || '';
+
+  // ---- Quiz state machine ----
+  const qstate = { view:'quiz', step:0, answers:{} };
+
+  function progressHTML(active){
+    let s = '<div class="quiz-progress">';
+    for(let i=0;i<STEPS.length;i++){
+      const cls = i < active ? 'done' : (i === active ? 'on' : '');
+      s += '<span class="'+cls+'"></span>';
+    }
+    return s + '</div>';
+  }
+
+  function stepHTML(i){
+    const st = STEPS[i];
+    let html = progressHTML(i);
+    html += '<div class="q-kicker">'+tr(st.kicker)+'</div>';
+    html += '<div class="q-title">'+tr(st.q)+'</div>';
+    html += '<p class="q-sub">'+tr(st.sub)+'</p>';
+    html += '<div class="q-options">';
+    st.options.forEach(o=>{
+      const sel = qstate.answers[st.key] === o.v ? ' sel' : '';
+      html += '<button type="button" class="opt'+sel+'" data-val="'+o.v+'">'
+            +   '<span>'+tr(o)+'</span>'
+            + '</button>';
+    });
+    html += '</div>';
+    if(i > 0){
+      const back = currentLang === 'de' ? 'Zurück' : 'Back';
+      html += '<button type="button" class="q-back" data-back="1">‹ '+back+'</button>';
+    }
+    return html;
+  }
+
+  function buildingHTML(){
+    const msg = currentLang === 'de' ? 'Deine Lehrer:innen stellen deinen Plan zusammen…' : 'Your teacher is putting your plan together…';
+    return '<div class="q-building" role="status" aria-live="polite">'+progressHTML(STEPS.length)+'<div class="q-spin"></div><p>'+msg+'</p></div>';
+  }
+
+  function resultHTML(){
+    const a = qstate.answers;
+    const plan = PLANS[a.goal] || PLANS.reset;
+    const lvl = tr(LEVEL_FRAG[a.level] || LEVEL_FRAG.new);
+    const lvlCap = lvl.charAt(0).toUpperCase() + lvl.slice(1);   // start the 2nd sentence with a capital
+    const intro = tr(plan.lead) + '. ' + lvlCap
+                + ', ' + tr(RHYTHM_FRAG[a.rhythm] || RHYTHM_FRAG['2']) + '.';
+    const tag = currentLang === 'de' ? 'Basierend auf deinen Angaben' : 'Based on what you told us';
+    const sub = currentLang === 'de' ? 'Dein kuratierter 6-Wochen-Plan' : 'Your curated six-week plan';
+    const start = currentLang === 'de' ? 'Mit meinem Plan starten' : 'Start my plan';
+    const retake = currentLang === 'de' ? 'Passt nicht ganz? Nochmal starten' : 'Not quite right? Retake the quiz';
+    const draft = currentLang === 'de' ? 'Entwurf' : 'Draft';
+
+    let weeks = '<ul class="plan-weeks">';
+    plan.weeks.forEach(w=>{
+      weeks += '<li><span class="wk">'+tr(w.wk)+'</span><span class="wd">'+tr(w.d)+'</span></li>';
+    });
+    weeks += '</ul>';
+
+    let inc = '<ul class="plan-inc">';
+    INCLUDED.forEach(x=>{
+      inc += '<li><span class="check">✓</span><span>'+tr(x)+'</span></li>';
+    });
+    inc += '</ul>';
+
+    return ''
+      + '<span class="res-tag">'+tag+'</span>'
+      + '<div class="res-title">'+tr(plan.title)+'</div>'
+      + '<div class="res-sub">'+sub+'</div>'
+      + '<p class="res-intro">'+intro+'</p>'
+      + weeks
+      + '<div class="plan-open">'+tr(OPEN_LINE)+'</div>'
+      + inc
+      + '<div class="res-buy">'
+      +   '<div class="res-price"><span class="amt">'+(currentLang==='de'?'229 €':'€229')+'<span class="draft-pill">'+draft+'</span></span><span class="meta">'+tr(PRICE_META)+'</span></div>'
+      +   '<button type="button" class="btn btn--coral" data-buy="1">'+start+'</button>'
+      + '</div>'
+      + '<p class="res-fine">'+tr(FIRST_FREE)+'</p>'
+      + '<button type="button" class="res-retake" data-retake="1">'+retake+'</button>';
+  }
+
+  function renderQuiz(){
+    const box = document.getElementById('quizBox');
+    if(!box) return;
+    if(qstate.view === 'building') box.innerHTML = buildingHTML();
+    else if(qstate.view === 'result') box.innerHTML = resultHTML();
+    else box.innerHTML = stepHTML(qstate.step);
+  }
+
+  // ---- Quiz interactions (event delegation) ----
+  (function(){
+    const box = document.getElementById('quizBox');
+    if(!box) return;
+    box.addEventListener('click', (e)=>{
+      const opt = e.target.closest('[data-val]');
+      if(opt){
+        const key = STEPS[qstate.step].key;
+        qstate.answers[key] = opt.dataset.val;
+        if(qstate.step < STEPS.length - 1){
+          qstate.step++;
+          renderQuiz();
+        } else {
+          qstate.view = 'building';
+          renderQuiz();
+          const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          setTimeout(()=>{
+            qstate.view = 'result'; renderQuiz();
+            const rt = document.querySelector('.res-title');
+            if(rt){ rt.setAttribute('tabindex','-1'); rt.focus({preventScroll:true}); }
+          }, reduce ? 200 : 1100);
+        }
+        return;
+      }
+      if(e.target.closest('[data-back]')){
+        if(qstate.step > 0){ qstate.step--; renderQuiz(); }
+        return;
+      }
+      if(e.target.closest('[data-retake]')){
+        qstate.view = 'quiz'; qstate.step = 0; qstate.answers = {};
+        renderQuiz();
+        document.getElementById('quiz').scrollIntoView({behavior:'smooth', block:'start'});
+        return;
+      }
+      if(e.target.closest('[data-buy]')){
+        const m = currentLang === 'de'
+          ? 'Checkout kommt hierhin (Mindbody). Das ist ein visuelles Konzept.'
+          : 'Checkout goes here (Mindbody). This is a visual concept.';
+        alert(m);
+        return;
+      }
+    });
+  })();
+
+  // ---- Boot: language first (also renders the quiz), then reveals ----
+  (function(){
+    let lang; try { lang = localStorage.getItem('gms_lang'); } catch(e){}
+    if(lang !== 'de' && lang !== 'en'){
+      const sys = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+      lang = /^de/i.test(sys) ? 'de' : 'en';
+    }
+    applyLang(lang);
+    langBtns.forEach(b => b.addEventListener('click', () => applyLang(b.dataset.lang)));
+  })();
+
+  // Reveal-on-scroll (progressive enhancement). If unsupported, reveal everything.
+  const reveals = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }});
+    },{threshold:.12, rootMargin:'0px 0px -8% 0px'});
+    reveals.forEach(el=>io.observe(el));
+  } else {
+    reveals.forEach(el=>el.classList.add('in'));
+  }
+</script>
+</body>
+</html>
