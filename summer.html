@@ -1,61 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Good Moves Studio · Summer Deal · €99 unlimited until 15 September</title>
-<meta name="description" content="The Good Moves Summer Deal: €99 flat for unlimited low-impact pilates classes at our new Prenzlauer Berg studio, until 15 September. One price, no monthly commitment. 4.9/5 from ~4,000 reviews.">
+<title>Good Moves Pilates Studio, Berlin Prenzlauer Berg · Summer Deal · €99 unlimited until 15 September</title>
+<meta name="description" content="The Good Moves Summer Deal: €99 flat for unlimited low-impact pilates classes at our Prenzlauer Berg studio, until 15 September. One price, no monthly commitment. 4.9/5 from ~4,000 reviews.">
 <script>document.documentElement.classList.add('js');</script>
 
 <!--
   ===================================================================
-  GOOD MOVES STUDIO — SUMMER DEAL (TRANSACTIONAL OFFER PAGE)
+  GOOD MOVES PILATES STUDIO — SUMMER DEAL (ON-BRAND BUILD)
   ===================================================================
+  On-brand rebuild of the goodmoves-summer landing page, using the
+  OFFICIAL Good Moves brand system (Human Deluxe, Jan 2026):
+    palette  terracotta #B0482D · beige #EEDBC3 · cream #FBF6F1
+             deep blue #001DA2 · ink #000044  (bold, flat, no gradients)
+    type     Nersans Three display (Nunito fallback) + system body
+    signature  organic blob shapes, the real circle logo lockup
   ONE JOB: explain the €99 flat summer deal, build quick trust, send to
-  the Mindbody checkout. Deliberately SIMPLE and transactional. No
-  questionnaire, no curated journey, no video. Separate from the main
-  "Find your routine" funnel.
+  the Mindbody checkout. Deliberately simple and transactional.
   OFFER: €99 flat, unlimited classes until 15 September (~10 weeks),
-  tied to the new studio opening (2 July). Price/date are drafts; the
-  checkout link is a placeholder until GMS sends the Mindbody SKU.
-  Exact same brand system as index.html (Bricolage / Figtree / Fredoka,
-  cream/coral/cobalt/ink palette). Bilingual: EN default in markup, DE in
-  data-de (hand-written, "Lehrer:innen", no dashes in visible copy).
-  Positive framing only (no app/AI/algorithm contrast).
+  unlimited classes until 15 September (~10 weeks). Price/date are
+  drafts; the checkout creates a Mindbody account behind the scenes.
+  Bilingual: EN default in markup, DE in data-de ("Lehrer:innen", no
+  dashes in visible copy). Positive framing only, no comparisons.
   ===================================================================
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600..900&display=swap" rel="stylesheet">
 
 <style>
+  /* Good Moves brand display face. Falls back to Nunito (the rounded
+     Google font the GMS guidelines sanction as the Nersans stand-in). */
+  @font-face{
+    font-family:'Nersans Three';
+    src:url('fonts/nersans-three.otf') format('opentype');
+    font-weight:400 900;
+    font-display:swap;
+  }
+
   :root{
-    --cream:#F7F0E9;
-    --cream-soft:#FBF7F1;
-    --peach:#F7E9DA;
-    --peach-deep:#F2DAC0;
-    --ink:#020F52;
-    --cobalt:#0426CE;
-    --cobalt-bright:#1347E7;
-    --coral:#BE3F21;
-    --coral-soft:#E2683F;
-    --slate:#505885;
-    --lavender:#DDCAE0;
-    --rust-dark:#591E0F;
+    /* ---- official GMS palette ---- */
+    --terracotta:#B0482D;
+    --terracotta-deep:#8E3A23;
+    --beige:#EEDBC3;
+    --beige-deep:#E4CBA8;
+    --cream:#FBF6F1;
+    --cream-warm:#FFFFFF;
+    --blue:#001DA2;
+    --blue-bright:#0A2EC9;
+    --ink:#000044;
+    --muted:#54547E;
 
     --maxw:1180px;
-    --radius:28px;
-    --radius-sm:16px;
-    --shadow:0 18px 50px -22px rgba(2,15,82,.35);
-    --shadow-soft:0 10px 30px -18px rgba(2,15,82,.30);
-    --display:'Bricolage Grotesque',system-ui,sans-serif;
-    --body:'Figtree',system-ui,sans-serif;
-    --groovy:'Fredoka',system-ui,sans-serif;
+    --radius:32px;
+    --radius-sm:18px;
+    --shadow:0 22px 60px -26px rgba(0,0,68,.40);
+    --shadow-soft:0 12px 34px -20px rgba(0,0,68,.32);
+    --display:'Nersans Three','Nunito',system-ui,sans-serif;
+    --body:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   }
 
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   body{
     font-family:var(--body);
     background:var(--cream);
@@ -66,169 +74,325 @@
   }
   img{max-width:100%;display:block}
   a{color:inherit;text-decoration:none}
+  ::selection{background:var(--terracotta);color:var(--cream)}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:8px}
 
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;position:relative;z-index:1}
+
+  /* ---------- Blobs (GMS signature element) ---------- */
+  .blob{position:absolute;pointer-events:none;z-index:0;display:block}
 
   /* ---------- Typography ---------- */
-  h1,h2,h3{font-family:var(--display);font-weight:800;text-transform:uppercase;line-height:.94;letter-spacing:-.02em}
-  h1{font-size:clamp(2.7rem,8.5vw,5.5rem)}
-  h2{font-size:clamp(2rem,5.5vw,3.4rem)}
-  h3{font-size:clamp(1.25rem,3vw,1.7rem)}
+  h1,h2,h3{font-family:var(--display);font-weight:800;text-transform:uppercase;line-height:.95;letter-spacing:-.01em}
+  h1{font-size:clamp(2.8rem,8.8vw,5.6rem)}
+  h2{font-size:clamp(2rem,5.6vw,3.5rem)}
+  h3{font-size:clamp(1.3rem,3vw,1.75rem);letter-spacing:0}
   .eyebrow{
-    font-family:var(--body);font-weight:700;text-transform:uppercase;
-    letter-spacing:.18em;font-size:.78rem;color:var(--coral);
+    font-family:var(--body);font-weight:800;text-transform:uppercase;
+    letter-spacing:.16em;font-size:.78rem;color:var(--terracotta);
   }
-  .lead{font-size:clamp(1.05rem,1.6vw,1.3rem);color:var(--slate);font-weight:500}
+  .lead{font-size:clamp(1.05rem,1.6vw,1.3rem);color:var(--muted);font-weight:500}
 
   /* ---------- Buttons ---------- */
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:.5em;
-    font-family:var(--body);font-weight:700;text-transform:uppercase;
+    font-family:var(--body);font-weight:800;text-transform:uppercase;
     letter-spacing:.04em;font-size:1rem;
-    background:var(--cobalt);color:#fff;
+    background:var(--terracotta);color:var(--cream);
     padding:18px 34px;border-radius:999px;border:0;cursor:pointer;
     transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
-    box-shadow:0 12px 26px -10px rgba(4,38,206,.55);
+    box-shadow:0 14px 28px -12px rgba(176,72,45,.6);
     white-space:nowrap;
   }
-  .btn:hover{background:var(--cobalt-bright);transform:translateY(-2px);box-shadow:0 18px 34px -12px rgba(4,38,206,.6)}
+  .btn:hover{background:var(--terracotta-deep);transform:translateY(-2px);box-shadow:0 20px 38px -14px rgba(176,72,45,.65)}
   .btn:active{transform:translateY(0)}
   .btn--lg{padding:22px 44px;font-size:1.08rem}
+  .btn--blue{background:var(--blue);box-shadow:0 14px 28px -12px rgba(0,29,162,.55)}
+  .btn--blue:hover{background:var(--blue-bright)}
 
   /* ---------- Header ---------- */
   header{
     position:sticky;top:0;z-index:50;
-    background:rgba(247,240,233,.82);backdrop-filter:blur(12px);
-    border-bottom:1px solid rgba(2,15,82,.07);
+    background:rgba(251,246,241,.82);backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(0,0,68,.07);
   }
-  .nav{display:flex;align-items:center;justify-content:space-between;height:74px}
-  .logo{font-family:var(--groovy);font-weight:700;color:var(--coral);
-    font-size:1.5rem;line-height:.82;letter-spacing:-.01em;text-transform:uppercase}
-  .logo span{display:block}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:76px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .mark{width:46px;height:46px;flex-shrink:0}
+  .brand .wordmark{font-family:var(--display);font-weight:800;color:var(--terracotta);
+    font-size:1.4rem;line-height:.85;letter-spacing:-.01em;text-transform:uppercase}
+  .brand .wordmark span{display:block}
   .nav-cta{display:flex;align-items:center;gap:14px}
-  .nav-note{font-size:.82rem;color:var(--slate);font-weight:600}
-  @media(max-width:620px){.nav-note{display:none}.nav .btn{display:none}.btn{padding:15px 24px;font-size:.92rem}}
+  .nav-note{font-size:.82rem;color:var(--muted);font-weight:700;white-space:nowrap}
+  @media(max-width:760px){.nav-note{display:none}}
+  @media(max-width:620px){.nav-note{display:none}.nav .btn{display:none}.btn{padding:15px 24px;font-size:.92rem}.brand .wordmark{display:none}}
 
   /* ---------- Hero ---------- */
-  .hero{padding:clamp(36px,6vw,76px) 0 clamp(40px,6vw,72px)}
+  .hero{padding:clamp(40px,6vw,82px) 0 clamp(44px,6vw,76px);position:relative;overflow:hidden}
+  .hero .blob-a{color:var(--beige);width:min(680px,70vw);top:-14%;right:-12%;opacity:.9}
+  .hero .blob-b{color:var(--terracotta);width:min(240px,34vw);bottom:-12%;left:-9%;opacity:.16}
   .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,4vw,56px);align-items:center}
-  @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:30px}}
+  @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:34px}}
 
   .hero h1{color:var(--ink);margin:14px 0 0}
-  .hero h1 em{font-style:normal;color:var(--coral)}
+  .hero h1 em{font-style:normal;color:var(--terracotta)}
   .hero .lead{margin:18px 0 8px;max-width:42ch}
   .price-line{font-weight:700;color:var(--ink);font-size:1.05rem;margin:14px 0 24px}
-  .price-line b{color:var(--coral)}
+  .price-line b{color:var(--terracotta)}
   .hero-cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
-  .risk-list{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:22px}
-  .risk-list li{list-style:none;font-size:.93rem;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px}
-  .check{width:20px;height:20px;border-radius:50%;background:var(--cobalt);color:#fff;
+  .risk-list{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:22px;list-style:none}
+  .risk-list li{font-size:.93rem;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .check{width:21px;height:21px;border-radius:50%;background:var(--blue);color:#fff;
     display:inline-grid;place-items:center;font-size:.7rem;flex-shrink:0}
   .open-badge{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--cream);
-    font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;padding:8px 15px;border-radius:999px}
+    font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;padding:9px 16px;border-radius:999px}
 
-  /* hero deal graphic = the price does the work */
+  /* hero deal panel = deep-blue feature callout, the price does the work */
   .deal-visual{position:relative;border-radius:var(--radius);overflow:hidden;
-    aspect-ratio:4/4.4;box-shadow:var(--shadow);
-    background:
-      radial-gradient(120% 90% at 80% 10%, var(--peach) 0%, transparent 55%),
-      linear-gradient(150deg, var(--coral) 0%, var(--coral-soft) 48%, #e9a06f 100%);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;color:#fff}
-  .deal-visual .dv-kicker{font-family:var(--body);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:.8rem;opacity:.92}
+    aspect-ratio:4/4.35;box-shadow:var(--shadow);background:var(--blue);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:34px;color:var(--beige)}
+  .deal-visual .blob-c{color:var(--terracotta);width:90%;bottom:-30%;left:-26%;opacity:.95}
+  .deal-visual .blob-d{color:var(--beige);width:54%;top:-16%;right:-14%;opacity:.14}
+  .deal-visual>*:not(.blob){position:relative;z-index:1}
+  .deal-visual .dv-kicker{font-family:var(--body);font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:.8rem;opacity:.95}
   .deal-visual .dv-price{font-family:var(--display);font-weight:800;text-transform:uppercase;
-    font-size:clamp(4.5rem,15vw,8.5rem);line-height:.82;color:var(--ink);margin:6px 0 4px}
+    font-size:clamp(4.6rem,15vw,8.6rem);line-height:.82;color:var(--cream);margin:6px 0 4px}
   .deal-visual .dv-sub{font-family:var(--display);font-weight:800;text-transform:uppercase;
-    font-size:clamp(1.05rem,2.8vw,1.6rem);letter-spacing:.01em;line-height:1}
-  .deal-visual .dv-until{margin-top:14px;font-weight:700;font-size:.92rem;background:rgba(2,15,82,.16);
-    padding:7px 16px;border-radius:999px}
+    font-size:clamp(1.1rem,2.8vw,1.65rem);letter-spacing:.01em;line-height:1;color:var(--beige)}
+  .deal-visual .dv-until{margin-top:16px;font-weight:800;font-size:.9rem;background:var(--cream);color:var(--terracotta-deep);
+    padding:8px 18px;border-radius:999px;letter-spacing:.02em}
   .deal-visual .float-chip{position:absolute;top:6%;right:6%;background:var(--cream);color:var(--ink);
-    font-weight:700;font-size:.78rem;padding:9px 15px;border-radius:999px;box-shadow:var(--shadow-soft);transform:rotate(5deg)}
+    font-weight:800;font-size:.76rem;padding:9px 15px;border-radius:999px;box-shadow:var(--shadow-soft);transform:rotate(4deg);z-index:2}
 
   /* ---------- Proof bar ---------- */
-  .proof{background:var(--ink);color:var(--cream);padding:34px 0}
+  .proof{background:var(--terracotta);color:var(--cream);padding:38px 0;position:relative;overflow:hidden}
+  .proof .blob-e{color:var(--cream);width:360px;top:-60%;right:4%;opacity:.08}
   .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center}
-  .proof .big{font-family:var(--display);font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1;color:#fff}
-  .proof .big.coral{color:var(--coral-soft)}
-  .proof small{display:block;margin-top:8px;color:rgba(247,240,233,.72);font-weight:600;
-    font-size:.82rem;text-transform:uppercase;letter-spacing:.06em}
-  @media(max-width:680px){.proof-grid{grid-template-columns:repeat(2,1fr);gap:26px 14px}}
+  .proof .big{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,4vw,2.7rem);line-height:1;color:var(--cream)}
+  .proof .big.beige{color:var(--beige)}
+  .proof small{display:block;margin-top:8px;color:rgba(251,246,241,.82);font-weight:700;
+    font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+  @media(max-width:680px){.proof-grid{grid-template-columns:repeat(2,1fr);gap:28px 14px}}
 
   /* ---------- Section scaffolding ---------- */
-  section.block{padding:clamp(56px,8vw,104px) 0}
+  section.block{padding:clamp(58px,8vw,108px) 0;position:relative;overflow:hidden}
   .sec-head{max-width:46ch;margin-bottom:clamp(30px,4vw,52px)}
   .sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
   .sec-head h2{margin-top:10px}
   .sec-head p{margin-top:16px}
 
-  /* ---------- Deal / value cards ---------- */
+  /* ---------- Value cards (bold, colourful) ---------- */
   .val-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   @media(max-width:820px){.val-grid{grid-template-columns:1fr}}
-  .val{background:var(--peach);border-radius:var(--radius);padding:30px 28px 32px;position:relative}
-  .val:nth-child(2){background:var(--lavender)}
-  .val:nth-child(3){background:#dfe7e0}
-  .val .vnum{font-family:var(--display);font-weight:800;font-size:2.2rem;line-height:1;color:var(--coral);margin-bottom:14px}
+
+  /* photo row: interim stills, swapped for 3 July shoot material */
+  .photo-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+  .photo-slot{margin:0;background:var(--beige);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-soft);aspect-ratio:4/5}
+  .photo-slot img{width:100%;height:100%;object-fit:cover;display:block}
+  @media(max-width:620px){.photo-row{grid-template-columns:1fr}.photo-slot{aspect-ratio:4/3}}
+  .val{border-radius:var(--radius);padding:34px 30px 36px;position:relative;overflow:hidden}
+  .val .vnum{font-family:var(--display);font-weight:800;font-size:2.4rem;line-height:1;margin-bottom:14px}
   .val h3{margin-bottom:10px}
-  .val p{color:var(--rust-dark);font-weight:500;opacity:.86}
+  .val p{font-weight:500}
+  /* card 1 — beige */
+  .val--beige{background:var(--beige);color:var(--ink)}
+  .val--beige .vnum{color:var(--terracotta)}
+  .val--beige p{color:var(--terracotta-deep);opacity:.92}
+  /* card 2 — deep blue */
+  .val--blue{background:var(--blue);color:var(--cream)}
+  .val--blue .vnum{color:var(--beige)}
+  .val--blue h3{color:#fff}
+  .val--blue p{color:rgba(251,246,241,.86)}
+  /* card 3 — terracotta */
+  .val--terra{background:var(--terracotta);color:var(--cream)}
+  .val--terra .vnum{color:var(--beige)}
+  .val--terra h3{color:#fff}
+  .val--terra p{color:rgba(251,246,241,.88)}
+
+  /* trust cards (calm beige) */
+  .val--soft{background:var(--beige);color:var(--ink)}
+  .val--soft h3{color:var(--terracotta)}
+  .val--soft p{color:var(--terracotta-deep);opacity:.9}
 
   .tag-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
-  .tag{background:#fff;border:1px solid rgba(2,15,82,.1);border-radius:999px;padding:8px 16px;
-    font-weight:600;font-size:.85rem;color:var(--ink)}
+  .tag{background:var(--cream);border:1.5px solid var(--beige-deep);border-radius:999px;padding:9px 17px;
+    font-weight:700;font-size:.85rem;color:var(--ink)}
+
+  /* ---------- Reviews (wall of love) ---------- */
+  .love{column-count:3;column-gap:18px}
+  @media(max-width:880px){.love{column-count:2}}
+  @media(max-width:560px){.love{column-count:1}}
+  .rev{break-inside:avoid;background:var(--cream-warm);border:1.5px solid var(--beige-deep);
+    border-radius:var(--radius-sm);padding:24px 24px 22px;margin-bottom:18px}
+  .rev .stars{color:var(--terracotta);font-size:.95rem;letter-spacing:2px;margin-bottom:12px}
+  .rev p{font-weight:500;color:var(--ink);text-wrap:pretty}
+  .rev .who{margin-top:16px;display:flex;align-items:center;gap:12px}
+  .rev .av{width:40px;height:40px;border-radius:50%;background:var(--beige);color:var(--ink);
+    display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:.9rem;flex-shrink:0}
+  .rev .av.b{background:var(--blue);color:var(--cream)}
+  .rev .av.t{background:var(--terracotta);color:var(--cream)}
+  .rev .who b{font-size:.92rem;color:var(--ink)}
+  .rev .who small{display:block;color:var(--muted);font-size:.76rem;font-weight:700}
 
   /* ---------- FAQ ---------- */
   .faq{max-width:760px;margin:0 auto}
-  details{background:var(--cream-soft);border:1px solid rgba(2,15,82,.08);border-radius:var(--radius-sm);
-    padding:4px 22px;margin-bottom:12px}
-  details summary{cursor:pointer;list-style:none;padding:18px 0;font-family:var(--display);
-    text-transform:uppercase;font-weight:700;font-size:1.02rem;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  details{background:var(--cream);border:1.5px solid var(--beige-deep);border-radius:var(--radius-sm);
+    padding:4px 24px;margin-bottom:12px}
+  details summary{cursor:pointer;list-style:none;padding:19px 0;font-family:var(--display);
+    text-transform:uppercase;font-weight:800;font-size:1.06rem;display:flex;justify-content:space-between;align-items:center;gap:16px}
   details summary::-webkit-details-marker{display:none}
-  details summary::after{content:"+";font-size:1.5rem;color:var(--coral);transition:transform .2s}
+  details summary::after{content:"+";font-family:var(--body);font-size:1.5rem;color:var(--terracotta);transition:transform .2s;line-height:1}
   details[open] summary::after{transform:rotate(45deg)}
-  details p{padding:0 0 20px;color:var(--slate);font-weight:500}
+  details .faq-answer{padding:0 0 20px;color:var(--muted);font-weight:500}
+  details[open] .faq-answer{animation:faq-open .42s cubic-bezier(.22,1,.36,1) both}
+  @keyframes faq-open{from{opacity:0;transform:translateY(-.4rem)}to{opacity:1;transform:none}}
 
-  /* ---------- Final CTA ---------- */
-  .final{background:
-      radial-gradient(110% 130% at 0% 0%, var(--peach) 0%, transparent 50%),
-      radial-gradient(120% 130% at 100% 100%, var(--lavender) 0%, transparent 55%),
-      var(--cream-soft);
-    border-radius:var(--radius);padding:clamp(40px,6vw,80px) clamp(24px,4vw,40px);text-align:center}
-  .final h2{font-size:clamp(2.2rem,6vw,4rem)}
-  .final .big-price{font-family:var(--display);font-weight:800;color:var(--coral);font-size:clamp(2.6rem,7vw,4rem);line-height:1;margin:14px 0 4px}
-  .final .lead{margin:14px auto 28px;max-width:46ch}
+  /* ---------- Final CTA (terracotta hero panel) ---------- */
+  .final{position:relative;overflow:hidden;background:var(--terracotta);color:var(--cream);
+    border-radius:var(--radius);padding:clamp(44px,6vw,84px) clamp(24px,4vw,40px);text-align:center}
+  .final .blob-f{color:var(--beige);width:min(440px,52vw);top:-30%;left:-12%;opacity:.16}
+  .final .blob-g{color:var(--ink);width:min(360px,44vw);bottom:-34%;right:-10%;opacity:.14}
+  .final>*:not(.blob){position:relative;z-index:1}
+  .final .eyebrow{color:var(--beige)}
+  .final h2{font-size:clamp(2.2rem,6vw,4rem);color:#fff}
+  .final .big-price{font-family:var(--display);font-weight:800;color:var(--beige);font-size:clamp(2.8rem,7vw,4.2rem);line-height:1;margin:14px 0 4px}
+  .final .lead{margin:14px auto 28px;max-width:46ch;color:rgba(251,246,241,.9)}
+  .final .btn{background:var(--cream);color:var(--terracotta);box-shadow:0 16px 32px -14px rgba(0,0,68,.5)}
+  .final .btn:hover{background:#fff;color:var(--terracotta-deep)}
   .final .risk-list{justify-content:center}
+  .final .risk-list li{color:var(--cream)}
+  .final .check{background:var(--cream);color:var(--terracotta)}
 
   /* ---------- Footer ---------- */
-  footer{padding:54px 0 130px;color:var(--slate)}
+  footer{padding:56px 0 130px;color:var(--muted)}
   .foot-grid{display:flex;flex-wrap:wrap;justify-content:space-between;gap:24px;align-items:flex-start}
-  .foot-grid .logo{font-size:1.7rem}
-  .foot-col b{display:block;color:var(--ink);text-transform:uppercase;font-size:.78rem;letter-spacing:.1em;margin-bottom:8px}
+  .foot-brand{display:flex;align-items:center;gap:12px}
+  .foot-brand .mark{width:52px;height:52px}
+  .foot-brand .wordmark{font-family:var(--display);font-weight:800;color:var(--terracotta);font-size:1.6rem;line-height:.85;text-transform:uppercase}
+  .foot-brand .wordmark span{display:block}
+  .foot-col b{display:block;color:var(--ink);text-transform:uppercase;font-size:.78rem;letter-spacing:.1em;margin-bottom:8px;font-weight:800}
   .foot-col p{font-size:.92rem;font-weight:500}
-  .foot-bottom{margin-top:36px;padding-top:20px;border-top:1px solid rgba(2,15,82,.1);font-size:.82rem;font-weight:500}
+  .foot-bottom{margin-top:38px;padding-top:20px;border-top:1.5px solid var(--beige-deep);font-size:.82rem;font-weight:500}
 
   /* ---------- Sticky mobile CTA ---------- */
   .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:60;
-    background:rgba(247,240,233,.92);backdrop-filter:blur(12px);
-    border-top:1px solid rgba(2,15,82,.1);padding:12px 16px;
+    background:rgba(251,246,241,.94);backdrop-filter:blur(12px);
+    border-top:1.5px solid var(--beige-deep);padding:12px 16px;
     display:none;align-items:center;justify-content:space-between;gap:12px}
-  .sticky-cta .s-price{font-weight:700;font-size:.86rem}
-  .sticky-cta .s-price b{font-family:var(--display);display:block;font-size:1rem;text-transform:uppercase}
+  .sticky-cta .s-price{font-weight:700;font-size:.86rem;color:var(--ink)}
+  .sticky-cta .s-price b{font-family:var(--display);display:block;font-size:1.04rem;text-transform:uppercase;color:var(--terracotta)}
   .sticky-cta .btn{padding:14px 22px;font-size:.9rem}
   @media(max-width:880px){.sticky-cta{display:flex}}
 
   /* reveal on scroll, gated by .js so content is ALWAYS visible if JS is off */
   .js .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease}
   .js .reveal.in{opacity:1;transform:none}
-  @media(prefers-reduced-motion:reduce){.js .reveal{opacity:1;transform:none}html{scroll-behavior:auto}}
 
   /* ---------- Language switch ---------- */
-  .lang{display:inline-flex;align-items:center;border:1.5px solid rgba(2,15,82,.16);border-radius:999px;
-    padding:3px;gap:2px;background:rgba(255,255,255,.45)}
-  .lang button{font-family:var(--body);font-weight:700;font-size:.76rem;letter-spacing:.05em;border:0;
-    background:transparent;color:var(--slate);padding:6px 11px;border-radius:999px;cursor:pointer;line-height:1;
+  .lang{display:inline-flex;align-items:center;border:1.5px solid var(--beige-deep);border-radius:999px;
+    padding:3px;gap:2px;background:rgba(255,255,255,.5)}
+  .lang button{font-family:var(--body);font-weight:800;font-size:.76rem;letter-spacing:.05em;border:0;
+    background:transparent;color:var(--muted);padding:6px 11px;border-radius:999px;cursor:pointer;line-height:1;
     transition:background .15s,color .15s}
   .lang button[aria-pressed="true"]{background:var(--ink);color:var(--cream)}
   .lang button:hover{color:var(--ink)}
   .lang button[aria-pressed="true"]:hover{color:var(--cream)}
   @media(max-width:430px){.nav-cta{gap:8px}.lang button{padding:6px 9px;font-size:.72rem}}
+
+  /* ---------- Checkout modal (branded) ---------- */
+  .modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,68,.55);
+    display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+  .modal-overlay.open{display:flex;animation:overlay-fade .3s ease both}
+  @keyframes overlay-fade{from{opacity:0}to{opacity:1}}
+  .modal{background:var(--cream);border-radius:var(--radius);width:min(560px,100%);margin:auto;
+    box-shadow:var(--shadow);overflow:hidden;max-height:94vh;display:flex;flex-direction:column;position:relative}
+  .modal-overlay.open .modal{animation:modal-pop .42s cubic-bezier(.22,1,.36,1) both}
+  @keyframes modal-pop{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}
+
+  .modal-head{position:relative;overflow:hidden;background:var(--terracotta);color:var(--cream);
+    padding:24px 26px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-shrink:0}
+  .modal-head .mh-blob{position:absolute;color:var(--terracotta-deep);width:300px;top:-58%;right:-12%;opacity:.55;pointer-events:none}
+  .modal-head .mh-text{position:relative;z-index:1;flex:1;min-width:0}
+  .modal-head .mh-eyebrow{display:block;font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:.68rem;color:var(--beige);margin-bottom:7px}
+  .modal-head .mh-title{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:1.3rem;line-height:1.05}
+  .modal-head .mh-sub{margin-top:8px;font-weight:700;font-size:.86rem;color:rgba(251,246,241,.92)}
+  .modal-close{position:relative;z-index:1;background:rgba(255,255,255,.18);border:0;color:var(--cream);
+    width:40px;height:40px;border-radius:50%;font-size:1.4rem;line-height:1;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:background .15s}
+  .modal-close:hover{background:rgba(255,255,255,.3)}
+
+  .modal-body{padding:22px 26px 26px;overflow-y:auto;min-height:0}
+
+  .os-panel{position:relative;overflow:hidden;background:var(--blue);color:var(--cream);
+    border-radius:var(--radius-sm);padding:20px 22px;margin-bottom:24px}
+  .os-panel .os-blob{position:absolute;color:var(--terracotta);width:210px;bottom:-58%;right:-14%;opacity:.92;pointer-events:none}
+  .os-panel>*:not(.os-blob){position:relative;z-index:1}
+  .os-kicker{display:block;font-weight:800;text-transform:uppercase;letter-spacing:.12em;font-size:.7rem;color:var(--beige)}
+  .os-price{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:3rem;line-height:.9;color:var(--cream);margin:5px 0 2px}
+  .os-meta{display:block;font-weight:700;font-size:.9rem;color:rgba(251,246,241,.92)}
+  .os-inc{list-style:none;margin:16px 0 0;display:grid;gap:9px}
+  .os-inc li{display:flex;gap:10px;align-items:center;font-weight:700;font-size:.86rem;color:var(--cream)}
+  .os-inc .check{width:20px;height:20px;border-radius:50%;background:var(--beige);color:var(--blue);display:inline-grid;place-items:center;font-size:.66rem;flex-shrink:0}
+
+  .form-sec-head{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.01em;
+    font-size:1.05rem;color:var(--ink);margin:6px 0 14px}
+  .field{margin-bottom:14px}
+  .field-row{display:flex;gap:12px}
+  .field-row .field{flex:1;margin-bottom:14px}
+  .field label{display:block;font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin-bottom:6px}
+  .field input{width:100%;min-height:50px;padding:13px 15px;border:1.5px solid var(--beige-deep);border-radius:12px;
+    font:inherit;background:var(--cream-warm);color:var(--ink);transition:border-color .15s,box-shadow .15s}
+  .field input::placeholder{color:#9a9ab0}
+  .field input:focus{outline:none;border-color:var(--terracotta);box-shadow:0 0 0 3px rgba(176,72,45,.18)}
+
+  .daypick-sub{font-size:.84rem;font-weight:500;color:var(--muted);margin:-6px 0 12px}
+  .day-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .day-chip{border:1.5px solid var(--beige-deep);background:var(--cream-warm);border-radius:12px;
+    min-height:62px;padding:9px 4px;text-align:center;cursor:pointer;font:inherit;transition:border-color .15s,background .15s,transform .12s}
+  .day-chip:hover{border-color:var(--terracotta);transform:translateY(-1px)}
+  .day-chip .dc-dow{display:block;font-weight:800;font-size:.7rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+  .day-chip .dc-day{display:block;font-family:var(--display);font-weight:800;font-size:1.45rem;line-height:1;color:var(--ink);margin-top:3px}
+  .day-chip .dc-mon{display:block;font-size:.64rem;font-weight:800;text-transform:uppercase;color:var(--muted);margin-top:3px}
+  .day-chip[aria-pressed="true"]{background:var(--terracotta);border-color:var(--terracotta)}
+  .day-chip[aria-pressed="true"] .dc-dow,.day-chip[aria-pressed="true"] .dc-mon{color:rgba(251,246,241,.85)}
+  .day-chip[aria-pressed="true"] .dc-day{color:var(--cream)}
+
+  .modal .btn.full{width:100%;margin-top:24px;min-height:56px}
+  .fineprint{font-size:.78rem;font-weight:500;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5}
+
+  .modal-success{display:none;position:relative;overflow:hidden;padding:46px 30px 48px;text-align:center}
+  .modal-overlay.done .modal-body{display:none}
+  .modal-overlay.done .modal-success{display:block}
+  .modal-success .succ-blob{position:absolute;color:var(--beige);width:280px;top:-26%;left:-16%;opacity:.5;pointer-events:none}
+  .modal-success>*:not(.succ-blob){position:relative;z-index:1}
+  .succ-check{width:76px;height:76px;border-radius:50%;background:var(--blue);color:#fff;
+    display:grid;place-items:center;font-size:2.1rem;margin:0 auto 20px}
+  .modal-success h3{font-family:var(--display);text-transform:uppercase;font-size:1.9rem;color:var(--ink);margin-bottom:12px}
+  .modal-success p{font-weight:500;color:var(--muted);max-width:40ch;margin:0 auto}
+  .modal-success .btn{margin-top:26px}
+
+  /* ---- mobile: full-width bottom sheet, tap-friendly ---- */
+  @media(max-width:560px){
+    .modal-overlay{padding:0;align-items:flex-end}
+    .modal{width:100%;max-height:92vh;border-radius:24px 24px 0 0;margin:0}
+    .modal-overlay.open .modal{animation:sheet-up .42s cubic-bezier(.22,1,.36,1) both}
+    @keyframes sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .modal-head{padding:20px}
+    .modal-head .mh-title{font-size:1.4rem}
+    .modal-body{padding:20px 18px 24px}
+    .field-row{flex-direction:column;gap:0}
+    .os-price{font-size:2.6rem}
+  }
+  @media(max-width:380px){
+    .day-chip{min-height:58px}
+    .day-chip .dc-day{font-size:1.25rem}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .js .reveal{opacity:1;transform:none}
+    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  }
 </style>
 </head>
 <body>
@@ -236,7 +400,15 @@
 <!-- ============ 1. HEADER (logo + lang + one cta) ============ -->
 <header>
   <div class="wrap nav">
-    <div class="logo"><span>Good</span><span>Moves</span></div>
+    <a href="#top" class="brand" aria-label="Good Moves Studio">
+      <!-- Real GMS circle lockup, terracotta variant -->
+      <svg class="mark" viewBox="0 0 830 830" role="img" aria-label="Good Moves Studio">
+        <circle cx="415" cy="415" r="415" fill="#B0482D"></circle>
+        <path fill="#FBF6F1" d="M318.861 440.153C348.208 428.125 381.872 440.952 397.006 476.874C410.64 509.249 398.216 545.129 368.869 557.158C339.522 569.186 306.27 555.324 290.724 520.438C276.413 488.336 289.514 452.181 318.861 440.153ZM618.59 434.767C631.841 423.966 653.819 420.851 672.98 422.563C676.746 422.808 679.828 424.242 681.051 428.237C682.372 432.537 683.594 436.878 685.31 441.052C687.539 445.197 684.144 449.705 679.66 447.072C670.701 442.429 661.889 437.579 651.304 437.62C644.375 437.607 635.595 437.221 631.511 443.546C625.519 452.872 634.976 461.085 643.442 463.714C657.406 468.304 671.786 472.107 685.159 478.225C704.17 486.658 712.652 508.082 702.976 526.558H702.947C685.599 561.693 644.983 552.073 620.294 540.143C614.947 536.96 612.941 533.834 613.173 530.304C613.491 525.221 613.956 518.854 614.204 515.027C614.384 512.215 618.26 510.589 620.636 512.822C624.72 516.678 627.443 519.184 631.8 522.743C642.907 532.37 658.963 538.048 670.906 535.375C681.45 533.544 687.344 517.367 674.052 506.125C670.755 503.342 666.866 501.315 662.794 499.787C647.179 493.367 629.049 491.395 616.157 479.864C604.035 468.524 600.46 447.981 618.59 434.767ZM165.361 404.538C166.363 402.883 170.598 402.511 172.51 402.744C175.49 403.103 189.677 405.667 191.805 406.176C194.568 406.853 197.784 407.623 200.907 408.434C207.379 410.117 208.933 412.734 209.524 419.129C210.131 425.728 211.562 455.151 211.627 456.025C213.637 452.939 217.223 447.412 219.135 444.437C221.071 441.433 222.995 438.429 224.935 435.425C227.299 431.749 229.664 428.068 232.028 424.404C235.382 419.211 238.748 417.862 244.895 419.251C247.23 419.773 249.578 420.381 251.861 420.959L254.225 421.567C261.692 423.442 263.918 426.001 264.562 433.468C265.088 439.452 265.569 445.444 266.062 451.436C266.404 455.777 266.763 460.105 267.134 464.442L267.973 474.351C269.359 490.785 270.79 507.762 272.29 524.461C272.576 527.645 273.183 531.089 274.075 534.712C274.858 537.879 277.482 540.276 280.657 541.132L280.674 541.103C285.732 542.468 287.987 542.978 288.496 544.963C289.047 547.083 287.999 548.212 287.163 549.096C285.484 550.845 281.567 550.515 278.225 550.543C270.86 550.596 260.963 551.081 252.301 549.125C246.558 547.8 243.835 544.478 242.926 539.273C241.895 533.363 241.39 527.355 241.019 522.256C239.767 505.06 238.557 487.578 237.375 470.67C236.894 463.811 235.847 457.016 234.983 449.867C233.527 452.084 219.547 473.952 215.283 480.661C214.941 481.227 214.749 481.858 214.778 482.148C215.764 493.585 215.711 503.437 216.865 515.16C217.032 516.843 217.443 518.523 218.022 520.548C219.024 524.103 221.059 525.562 223.875 527.135C225.428 528.003 227.05 530.18 226.981 532.206C226.887 534.794 224.658 536.543 221.458 536.559C213.991 536.6 206.858 537.769 198.172 535.8C192.303 534.463 188.507 530.441 187.492 524.445C186.706 519.888 187.326 515.49 187.008 511.014C185.761 493.349 184.521 475.671 183.286 457.994L180.853 436.611C180.054 437.936 171.369 452.939 167.492 459.4C163.107 466.704 157.179 476.279 155.834 482.935C153.482 494.535 154.144 503.658 157.926 512.833C158.13 513.342 158.309 513.851 158.489 514.361C159.642 517.735 158.802 519.818 157.881 520.959C156.976 522.076 155.174 523.357 151.698 523.083C146.309 522.643 138.98 522.944 131.864 521.828C131.407 521.758 130.955 521.677 130.527 521.567C127.641 520.866 125.428 519.403 124.042 517.295C122.404 514.801 122.061 511.617 123.064 508.063C126.626 495.456 131.355 484.517 137.554 474.653C148.963 456.482 160.702 438.099 172.041 420.311C172.055 420.289 172.605 419.387 172.811 419.101C175.904 414.801 169.098 412.392 165.678 408.792C164.932 408.01 164.452 406.037 165.361 404.538ZM519.724 418.591C524.672 418.249 544.135 420.535 549.181 421.155C561.205 422.643 575.284 424.791 587.312 426.238C588.836 426.417 590.61 426.694 592.301 427.326C596.728 428.993 598.884 432.604 598.721 438.086C598.611 441.889 598.403 445.749 598.211 449.466L598.084 451.729C597.921 454.896 596.532 456.934 593.964 457.79C590.638 458.89 588.56 456.62 587.557 455.532L587.447 455.405C580.754 448.105 571.432 442.59 563.133 440.511C559.228 439.533 555.05 438.995 551.019 438.473C549.633 438.294 548.243 438.115 546.869 437.923C545.427 449.275 545.357 450.775 543.817 462.115C543.405 465.147 545.305 470.605 554.24 471.844C564.466 473.263 577.456 475.647 586.513 476.984C588.037 477.216 589.607 477.517 591.131 477.986C594.926 479.172 597.359 481.899 597.824 485.482C598.17 488.156 598.292 491.009 598.17 493.972C598.06 496.479 596.931 497.8 596.01 498.464C595.089 499.137 593.467 499.796 591.009 499.136C589.069 498.627 581.067 494.922 579.27 494.246C579.122 494.185 578.988 494.136 578.855 494.086C584.339 498.577 593.379 505.038 597.441 515.119C607.007 538.886 586.721 552.349 564.71 549.565C560.983 549.096 506.896 543.557 502.197 542.995L500.865 542.828C499.996 542.718 496.987 542.207 494.387 541.628C491.571 541.008 490.291 536.338 495.186 534.325C497.138 533.514 499.034 532.923 499.271 532.825C503.118 531.129 504.671 527.893 505.935 523.234C507.088 518.938 507.874 515.106 508.339 511.536C511.531 486.847 513.867 467.849 516.011 449.935C518.514 428.981 515.46 428.291 514.099 424.917C513.577 423.648 513.015 419.06 519.724 418.591ZM479.155 406.909C482.452 406.179 486.438 406.509 488.819 408.164C491.415 409.969 493.021 412.986 493.478 416.886C495.072 430.773 494.313 443.213 493.131 455.148C491.717 469.312 489.972 480.966 487.881 493.601C487.046 498.659 486.206 503.701 485.378 508.743L484.832 512.078C483.952 517.519 483.031 523.14 482.053 528.667C480.818 535.624 476.114 538.502 468.871 539.607L467.856 539.757C467.098 539.867 466.343 539.99 465.585 540.1C463.456 540.418 452.253 542.154 450.097 542.444C449.726 542.485 441.905 543.548 439.964 543.658C436.83 543.821 434.922 539.896 436.128 537.719C438.068 534.218 444.501 531.312 441.725 523.625C440.355 519.833 432.057 504.549 432.008 504.459C422.136 486.052 411.937 467.009 401.849 448.312C400.748 446.246 399.249 444.082 397.174 441.494C395.002 438.808 392.527 437.389 389.601 437.181C389.05 437.153 386.849 436.863 384.775 436.394C383.69 436.145 382.121 434.739 382.028 432.95C381.918 430.993 385.297 428.308 387.058 427.427C389.793 426.062 392.829 424.847 396.045 423.816C400.651 422.34 403.635 421.114 408.75 419.875C413.531 418.513 419.18 420.893 422.877 426.738C425.269 430.523 466.827 506.71 466.853 506.758C466.853 506.758 468.146 499.002 468.708 495.129C469.079 492.582 469.502 490.018 469.918 487.47C470.962 481.034 472.046 474.394 472.348 467.889C473.188 449.527 467.937 435.098 456.309 423.788C454.234 421.762 453.366 419.463 453.888 417.298C454.177 416.071 455.208 413.841 458.824 412.667C464.762 410.74 471.826 408.551 479.138 406.924L479.155 406.909ZM368.812 484.532C355.879 461.372 334.545 453.465 320.687 461.605C306.833 469.749 307.162 492.525 318.628 514.018C332.401 539.811 352.895 545.089 366.749 536.946C380.608 528.802 380.689 505.804 368.812 484.532ZM546.376 490.059C542.267 489.065 540.481 488.943 540.45 489.122C539.13 499.507 538.514 504.318 537.332 514.899C536.917 518.591 536.672 519.598 537.165 523.47C537.508 526.238 538.91 527.094 542.635 527.546C546.442 528.003 550.253 528.472 554.06 528.924L560.328 529.682C565.358 530.289 574.677 531.031 577.689 528.276L577.7 528.292C580.876 525.386 582.209 522.655 581.769 518.539C580.094 502.61 555.943 492.358 546.376 490.059Z"></path>
+        <path fill="#FBF6F1" d="M299.331 338.945C309.199 304.417 342.34 283.173 373.75 291.602C405.159 300.035 423.029 331.738 413.075 369.461C403.92 404.168 370.066 425.237 338.656 416.804C307.247 408.371 288.375 377.247 299.331 338.945ZM563.487 278.402C565.081 278.068 566.715 278.194 568.256 278.357C570.208 278.565 572.172 278.757 574.125 278.953C579.648 279.491 585.355 280.053 590.951 280.933C594.097 281.43 596.555 282.849 598.067 285.042C599.665 287.357 600.105 290.345 599.335 293.708L598.965 295.252V295.333C605.315 290.716 611.209 288.046 617.396 286.958C631.528 284.463 646.62 291.433 654.112 303.889C659.472 312.803 661.877 323.095 661.685 336.293H661.698C661.559 346.076 660.377 354.636 658.098 362.461C653.546 378.068 645.81 389.714 634.454 398.078C622.332 407.004 608.694 410.628 593.93 408.863C585.807 407.885 577.74 406.315 569.808 404.579C565.741 403.682 561.726 402.748 557.74 401.823C551.528 400.376 543.51 398.559 538.741 397.609C528.225 395.526 525.531 399.19 521.712 397.343C520.733 396.878 518.496 395.374 519.486 392.44C521.272 387.109 535.264 388.804 536.928 388.405C543.897 386.709 548.365 382.108 550.345 373.993C555.457 353.022 560.255 331.598 564.901 310.888L566.275 304.77C567.017 301.465 567.033 298.876 567.033 295.832C567.033 293.117 563.842 290.194 561.449 288.017C561.396 287.976 561.339 287.936 561.286 287.895C560.903 287.606 560.255 287.092 559.896 286.241C559.827 286.061 559.745 285.882 559.651 285.69C559.125 284.585 558.412 283.069 559.044 281.512C559.761 279.735 561.889 278.732 563.487 278.402ZM227.014 271.499C237.583 270.023 248.634 270.92 260.87 274.091C264.897 275.135 269.776 278.375 271.618 284.656C271.948 285.773 272.197 287.729 272.388 289.274C272.719 291.931 273.049 294.675 273.309 297.389C273.338 297.634 273.362 297.899 273.403 298.16C273.64 299.949 273.13 306.153 269.132 307.861C265.365 309.487 262.064 307.033 260.992 305.75C260.788 305.505 260.581 305.256 260.373 305.048C252.869 297.54 248.303 293.379 240.869 290.925C234.616 288.859 229.35 290.155 224.292 292.662C219.221 295.185 214.489 300.748 211.644 306.593C208.278 313.535 205.224 320.949 205.832 331.628C206.504 343.599 207.067 345.226 213.898 357.502C218.011 364.872 222.792 369.873 228.539 373.664C235.468 378.237 242.23 379.684 250.561 379.823C252.237 379.851 253.9 379.766 255.661 379.684C256.456 379.643 257.267 379.602 258.078 379.574C257.984 375.95 257.968 375.608 257.898 371.98C257.764 364.912 257.625 357.584 257.283 350.418C257.116 346.974 255.754 340.155 251.303 336.532C245.776 332.052 240.4 333.348 238.586 330.633C238.036 329.822 238.313 327.894 238.643 327.397C239.675 325.852 243.922 325.84 248.14 326.032C249.995 326.117 258.229 325.771 258.738 325.771C262.822 325.689 264.937 325.563 269.021 325.314C272.812 325.082 273.049 325 276.966 324.654C281.062 324.295 284.661 325.139 286.984 329.793C289.075 333.984 287.783 336.698 286.723 341.7C285.859 345.857 285.514 349.635 285.489 353.479C285.42 363.441 285.639 373.293 285.884 383.348C285.969 387.029 281.363 392.099 277.887 393.627C263.963 399.717 257.845 399.979 244.595 400.199H243.273C228.677 400.227 217.24 397.651 207.303 392.071L207.315 392.112C197.541 386.613 190.037 378.804 185.048 368.895C177.226 353.353 174.821 336.299 177.915 318.165C180.303 304.098 186.891 292.552 197.488 283.817C205.554 277.161 215.219 273.137 227.014 271.499ZM362.439 309.21C346.025 307.213 331.14 325.69 327.003 350.174C322.507 376.819 334.6 396.371 351.014 398.369C367.428 400.366 381.845 381.807 386.451 357.409C391.978 328.115 378.849 311.208 362.439 309.21ZM623.869 311.923C620.254 304.925 612.75 303.987 607.198 306.702C603.004 308.752 599.706 309.939 595.842 314.569C594.811 315.796 593.988 317.463 593.576 319.129C591.884 326.002 590.29 333.045 588.75 339.852C588.379 341.519 588.008 343.186 587.621 344.853H587.678L587.128 347.25C586.508 349.948 585.876 352.634 585.244 355.336C583.691 361.976 582.081 368.824 580.708 375.59C580.047 378.827 578.837 382.287 579.033 386.061C579.143 388.197 580.749 389.436 584.021 390.166L586.687 390.773C589.439 391.392 592.267 392.028 595.059 392.579C601.63 393.858 607.43 392.359 612.309 388.087C617.258 383.763 620.71 377.767 622.883 369.75C625.683 359.388 628.858 345.676 628.613 331.488C628.487 324.42 627.443 318.84 623.869 311.923ZM433.213 305.198C448.567 274.514 483.384 260.211 511.342 273.425C539.303 286.652 550.45 319.402 534.448 353.074C519.726 384.063 484.277 398.06 456.32 384.846C428.359 371.62 416.167 339.244 433.213 305.198ZM497.626 288C482.585 283.358 465.364 298.158 457.155 320.409C448.237 344.628 456.112 364.992 471.152 369.651C486.188 374.293 502.986 359.347 511.619 337.247C521.968 310.72 512.662 292.659 497.626 288Z"></path>
+      </svg>
+      <span class="wordmark"><span>Good</span><span>Moves</span></span>
+    </a>
     <div class="nav-cta">
       <span class="nav-note" data-de="Sommer-Deal · 99 € pauschal">Summer Deal · €99 flat</span>
       <div class="lang" role="group" aria-label="Language / Sprache">
@@ -248,16 +420,21 @@
   </div>
 </header>
 
+<span id="top"></span>
+
 <!-- ============ 2. HERO — the offer, the price, one action ============ -->
 <section class="hero">
+  <!-- signature blobs, cut off at the edges -->
+  <svg class="blob blob-a" viewBox="78 77 851 726" aria-hidden="true"><path fill="currentColor" d="M438.091 104.607C461.697 104.607 484.085 109.819 504.168 119.156C554.495 142.553 614.02 166.945 664.361 143.576C742.969 107.084 836.277 141.225 872.77 219.834C909.262 298.442 875.119 391.75 796.511 428.242C729.329 459.429 715.057 548.695 769.165 599.274L776.084 605.742C814.94 642.063 816.994 703.006 780.673 741.861C744.352 780.716 683.409 782.771 644.554 746.45C602.852 707.468 534.225 718.333 479.116 733.221C458.365 738.827 436.465 740.089 415.2 736.981C272.9 716.182 240.474 695.486 161.691 575.173C157.554 568.855 153.823 562.16 150.549 555.108C131.64 514.376 131.696 469.698 147.077 431.022C167.218 380.376 178.578 310.868 138.761 273.648C99.906 237.327 97.8516 176.385 134.172 137.53C170.493 98.6746 231.436 96.6193 270.291 132.94C291.509 152.774 325.331 148.615 349.26 132.153C374.518 114.778 405.117 104.607 438.091 104.607Z"></path></svg>
+  <svg class="blob blob-b" viewBox="1222 40 993 758" aria-hidden="true"><path fill="currentColor" d="M1748.38 59.5289C1803.41 59.5289 1851.45 89.4604 1877.1 133.931C1894.28 163.7 1931.34 186.876 1962.51 172.405C2036.9 137.871 2125.2 170.181 2159.73 244.57C2194.27 318.959 2161.96 407.259 2087.57 441.793C2023.99 471.306 2010.49 555.782 2061.69 603.648L2068.24 609.765C2105.01 644.137 2106.95 701.809 2072.58 738.579C2038.21 775.348 1980.54 777.292 1943.77 742.921L1884.24 687.281C1815.97 623.459 1683.94 629.169 1603.73 666.405L1473.46 726.879C1399.07 761.412 1310.77 729.103 1276.24 654.714C1241.7 580.324 1274.01 492.024 1348.4 457.491L1446.5 411.95C1492.24 390.715 1501.96 329.935 1465.12 295.497C1428.35 261.125 1426.41 203.453 1460.78 166.683C1495.15 129.913 1552.82 127.969 1589.59 162.34C1595.75 168.094 1605.96 165 1608.85 157.086C1629.64 100.164 1684.27 59.5289 1748.38 59.5289Z"></path></svg>
+
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <span class="open-badge" data-de="Neues Studio · ab 2. Juli">New studio · open 2 July</span>
-      <p class="eyebrow" style="margin-top:16px" data-de="Sommer-Deal · Prenzlauer Berg, Berlin">Summer Deal · Prenzlauer Berg, Berlin</p>
-      <h1 data-de="Dein Sommer<br>in <em>Bewegung.</em>">Your summer<br>of <em>movement.</em></h1>
-      <p style="font-weight:700;color:var(--ink);font-size:1.12rem;margin:16px 0 0" data-de="Ein Preis, keine monatliche Bindung.">One price, no monthly commitment.</p>
-      <p class="lead" data-de="Unbegrenzt Kurse in unserem neuen Studio in Prenzlauer Berg, den ganzen Sommer. Einmal zahlen, so viel bewegen, wie du möchtest.">Unlimited classes at our new Prenzlauer Berg studio, all summer long. Pay once, move as much as you like.</p>
-      <p class="price-line" data-de="<b>99 €</b> pauschal. Unbegrenzt bis 15. September, rund 10 Wochen."><b>€99</b> flat. Unlimited until 15 September, around 10 weeks.</p>
+      <p class="eyebrow" data-de="Sommer-Deal · Prenzlauer Berg, Berlin">Summer Deal · Prenzlauer Berg, Berlin</p>
+      <h1 data-de="Dein Sommer&lt;br&gt;in &lt;em&gt;Bewegung.&lt;/em&gt;">Your summer<br>of <em>movement.</em></h1>
+      <p style="font-family:var(--display);font-weight:800;text-transform:uppercase;color:var(--ink);font-size:1.2rem;letter-spacing:-.01em;margin:16px 0 0" data-de="Ein Preis, keine monatliche Bindung.">One price, no monthly commitment.</p>
+      <p class="lead" data-de="Unbegrenzt Kurse in unserem Studio in Prenzlauer Berg, den ganzen Sommer. Einmal zahlen, so viel bewegen, wie du möchtest.">Unlimited classes at our Prenzlauer Berg studio, all summer long. Pay once, move as much as you like.</p>
+      <p class="price-line" data-de="&lt;b&gt;99 €&lt;/b&gt; pauschal. Unbegrenzt bis 15. September, rund 10 Wochen."><b>€99</b> flat. Unlimited until 15 September, around 10 weeks.</p>
 
       <div class="hero-cta-row">
         <a href="#buy" class="btn btn--lg" data-de="Sommer-Deal sichern · 99 €">Get the Summer Deal · €99</a>
@@ -270,12 +447,14 @@
       </ul>
     </div>
 
-    <!-- Deal graphic: the price carries the page -->
-    <div class="deal-visual" aria-hidden="true">
-      <span class="float-chip" data-de="Neues Studio · 2. Juli">New studio · 2 July</span>
+    <!-- Deal panel: deep-blue feature callout, the price carries the page -->
+    <div class="deal-visual">
+      <svg class="blob blob-c" viewBox="78 77 851 726" aria-hidden="true"><path fill="currentColor" d="M438.091 104.607C461.697 104.607 484.085 109.819 504.168 119.156C554.495 142.553 614.02 166.945 664.361 143.576C742.969 107.084 836.277 141.225 872.77 219.834C909.262 298.442 875.119 391.75 796.511 428.242C729.329 459.429 715.057 548.695 769.165 599.274L776.084 605.742C814.94 642.063 816.994 703.006 780.673 741.861C744.352 780.716 683.409 782.771 644.554 746.45C602.852 707.468 534.225 718.333 479.116 733.221C458.365 738.827 436.465 740.089 415.2 736.981C272.9 716.182 240.474 695.486 161.691 575.173C157.554 568.855 153.823 562.16 150.549 555.108C131.64 514.376 131.696 469.698 147.077 431.022C167.218 380.376 178.578 310.868 138.761 273.648C99.906 237.327 97.8516 176.385 134.172 137.53C170.493 98.6746 231.436 96.6193 270.291 132.94C291.509 152.774 325.331 148.615 349.26 132.153C374.518 114.778 405.117 104.607 438.091 104.607Z"></path></svg>
+      <svg class="blob blob-d" viewBox="1222 40 993 758" aria-hidden="true"><path fill="currentColor" d="M1748.38 59.5289C1803.41 59.5289 1851.45 89.4604 1877.1 133.931C1894.28 163.7 1931.34 186.876 1962.51 172.405C2036.9 137.871 2125.2 170.181 2159.73 244.57C2194.27 318.959 2161.96 407.259 2087.57 441.793C2023.99 471.306 2010.49 555.782 2061.69 603.648L2068.24 609.765C2105.01 644.137 2106.95 701.809 2072.58 738.579C2038.21 775.348 1980.54 777.292 1943.77 742.921L1884.24 687.281C1815.97 623.459 1683.94 629.169 1603.73 666.405L1473.46 726.879C1399.07 761.412 1310.77 729.103 1276.24 654.714C1241.7 580.324 1274.01 492.024 1348.4 457.491L1446.5 411.95C1492.24 390.715 1501.96 329.935 1465.12 295.497C1428.35 261.125 1426.41 203.453 1460.78 166.683C1495.15 129.913 1552.82 127.969 1589.59 162.34C1595.75 168.094 1605.96 165 1608.85 157.086C1629.64 100.164 1684.27 59.5289 1748.38 59.5289Z"></path></svg>
+      <span class="float-chip" data-de="Einmal zahlen">Pay once</span>
       <span class="dv-kicker" data-de="Sommer-Deal · pauschal">Summer Deal · flat</span>
       <span class="dv-price" data-de="99 €">€99</span>
-      <span class="dv-sub" data-de="Unbegrenzt,<br>den ganzen Sommer">Unlimited,<br>all summer</span>
+      <span class="dv-sub" data-de="Unbegrenzt,&lt;br&gt;den ganzen Sommer">Unlimited,<br>all summer</span>
       <span class="dv-until" data-de="bis 15. September">until 15 September</span>
     </div>
   </div>
@@ -283,11 +462,55 @@
 
 <!-- ============ 3. PROOF BAR ============ -->
 <section class="proof">
+  <svg class="blob blob-e" viewBox="1368 1031 788 922" aria-hidden="true"><path fill="currentColor" d="M2108.06 1343.75C2136.04 1420.84 2096.24 1506.02 2019.15 1534.01C2000.2 1540.89 1994.78 1565.11 2009 1579.4L2021.51 1591.97C2059.44 1630.09 2059.28 1691.75 2021.16 1729.68C1983.04 1767.61 1921.38 1767.45 1883.45 1729.33C1854.96 1700.7 1806.54 1709.99 1790.68 1747.14L1754.22 1832.57C1724.88 1901.31 1645.36 1933.25 1576.62 1903.9C1507.88 1874.56 1475.94 1795.04 1505.28 1726.3C1513.68 1706.63 1502.03 1684.28 1483.36 1673.85C1453.3 1657.06 1428.91 1629.81 1416.24 1594.9C1388.25 1517.81 1428.06 1432.63 1505.15 1404.64C1524.08 1397.77 1529.49 1373.57 1515.28 1359.29L1502.89 1346.83C1464.95 1308.71 1465.11 1247.06 1503.23 1209.12C1541.36 1171.19 1603.01 1171.35 1640.94 1209.47C1669.37 1238.04 1717.67 1228.76 1733.49 1191.7L1750.37 1152.16C1779.71 1083.42 1859.22 1051.48 1927.97 1080.83C1945.88 1088.47 1961.29 1099.52 1973.77 1112.9C2046.02 1190.35 2071.81 1243.92 2108.06 1343.75Z"></path></svg>
   <div class="wrap proof-grid">
-    <div><div class="big coral" data-de="4,9★">4.9★</div><small data-de="Durchschnitt">Average rating</small></div>
+    <div><div class="big beige" data-de="4,9★">4.9★</div><small data-de="Durchschnitt">Average rating</small></div>
     <div><div class="big" data-de="~4.000">~4,000</div><small data-de="Bewertungen">Member reviews</small></div>
-    <div><div class="big">22</div><small data-de="Plätze pro Kurs">People max / class</small></div>
-    <div><div class="big">17</div><small data-de="Lehrer:innen · EN &amp; DE">Teachers · EN &amp; DE</small></div>
+    <div><div class="big">∞</div><small data-de="Kurse den ganzen Sommer">Unlimited classes</small></div>
+    <div><div class="big" data-de="99 €">€99</div><small data-de="Pauschal bis 15. Sept.">Flat, until 15 Sep</small></div>
+  </div>
+</section>
+
+<!-- ============ 3.5 REVIEWS — wall of love ============ -->
+<section class="block" style="background:var(--beige)">
+  <svg class="blob" viewBox="1222 40 993 758" aria-hidden="true" style="color:var(--terracotta);width:min(340px,36vw);top:-16%;right:-9%;opacity:.1"><path fill="currentColor" d="M1748.38 59.5289C1803.41 59.5289 1851.45 89.4604 1877.1 133.931C1894.28 163.7 1931.34 186.876 1962.51 172.405C2036.9 137.871 2125.2 170.181 2159.73 244.57C2194.27 318.959 2161.96 407.259 2087.57 441.793C2023.99 471.306 2010.49 555.782 2061.69 603.648L2068.24 609.765C2105.01 644.137 2106.95 701.809 2072.58 738.579C2038.21 775.348 1980.54 777.292 1943.77 742.921L1884.24 687.281C1815.97 623.459 1683.94 629.169 1603.73 666.405L1473.46 726.879C1399.07 761.412 1310.77 729.103 1276.24 654.714C1241.7 580.324 1274.01 492.024 1348.4 457.491L1446.5 411.95C1492.24 390.715 1501.96 329.935 1465.12 295.497C1428.35 261.125 1426.41 203.453 1460.78 166.683C1495.15 129.913 1552.82 127.969 1589.59 162.34C1595.75 168.094 1605.96 165 1608.85 157.086C1629.64 100.164 1684.27 59.5289 1748.38 59.5289Z"></path></svg>
+  <div class="wrap">
+    <div class="sec-head center">
+      <p class="eyebrow" data-de="4,9 / 5 aus rund 4.000 Bewertungen">4.9 / 5 from ~4,000 reviews</p>
+      <h2 data-de="Good Movers über&lt;br&gt;Good Moves">Good Movers on<br>Good Moves</h2>
+    </div>
+    <div class="love">
+      <div class="rev reveal">
+        <div class="stars" aria-label="5 out of 5">★★★★★</div>
+        <p data-de="„Ich dachte, Pilates sei Dehnen. Ich ging klatschnass raus, mit Muskelkater an Stellen, von denen ich nichts wusste. Das ist ein echtes Workout.“">“I came thinking Pilates was stretching. I left soaked and sore in muscles I forgot I had. This is a real workout.”</p>
+        <div class="who"><span class="av b">JM</span><div><b>Jonas M.</b><small data-de="Kam, um stärker zu werden">Came to get stronger</small></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars" aria-label="5 out of 5">★★★★★</div>
+        <p data-de="„Nach der Schwangerschaft war ich bei allem nervös. Die Lehrer:innen haben mich genau da abgeholt, wo ich stand. Acht Monate später fühle ich mich stärker als vorher.“">“After my pregnancy I was nervous about everything. The teachers met me exactly where I was. Eight months in and I feel stronger than before.”</p>
+        <div class="who"><span class="av">LK</span><div><b>Lena K.</b><small data-de="Nach der Schwangerschaft">Post-pregnancy</small></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars" aria-label="5 out of 5">★★★★★</div>
+        <p data-de="„Kleine Gruppen, echte, persönliche Aufmerksamkeit, und sie kennen wirklich meinen Namen. Ich freue mich auf jede einzelne Stunde.“">“Small groups, real personal attention, and they actually know my name. I look forward to every single class.”</p>
+        <div class="who"><span class="av t">SR</span><div><b>Sophie R.</b><small data-de="Kommt nach der Arbeit">Comes after work</small></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars" aria-label="5 out of 5">★★★★★</div>
+        <p data-de="„Den ganzen Tag am Schreibtisch hat meinen Rücken ruiniert. Das hier hat ihn gerettet. Gelenkschonend, und trotzdem spüre ich am nächsten Tag jeden Muskel. Süchtig.“">“Sitting at a desk all day wrecked my back. This undid it. Low-impact, and I still feel every muscle the next day. Obsessed.”</p>
+        <div class="who"><span class="av">DT</span><div><b>David T.</b><small data-de="Bürojob">Desk worker</small></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars" aria-label="5 out of 5">★★★★★</div>
+        <p data-de="„Die Atmosphäre ist wie in keinem anderen Studio, in dem ich war: warm, bunt, überhaupt nicht einschüchternd. Ich buche meine Kurse immer rund um meine Lieblings-Lehrerin.“">“The atmosphere is unlike any studio I've been to: warm, colourful, not intimidating at all. I book around my favourite teacher.”</p>
+        <div class="who"><span class="av b">AM</span><div><b>Amélie M.</b><small data-de="3× die Woche">3× a week</small></div></div>
+      </div>
+      <div class="rev reveal">
+        <div class="stars" aria-label="5 out of 5">★★★★★</div>
+        <p data-de="„Sie haben mir genau gesagt, woran ich arbeiten soll, statt mich raten zu lassen. Meine Lehrer:innen kennen meinen Namen und meine Ziele. Das hält mich dabei.“">“They told me exactly what to work on instead of leaving me to guess. My teacher knows my name and my goals. That's what keeps me coming back.”</p>
+        <div class="who"><span class="av t">FB</span><div><b>Felix B.</b><small data-de="Stammgast seit dem Frühjahr">Regular since spring</small></div></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -296,20 +519,20 @@
   <div class="wrap">
     <div class="sec-head center">
       <p class="eyebrow" data-de="So einfach ist es">It is genuinely this simple</p>
-      <h2 data-de="Ein Preis. Der ganze<br>Sommer. Punkt.">One price. The whole<br>summer. That's it.</h2>
+      <h2 data-de="Ein Preis. Der ganze&lt;br&gt;Sommer. Punkt.">One price. The whole<br>summer. That's it.</h2>
     </div>
     <div class="val-grid">
-      <div class="val reveal">
+      <div class="val val--beige reveal">
         <div class="vnum" data-de="99 €">€99</div>
         <h3 data-de="Einmal zahlen">Pay once</h3>
         <p data-de="Keine Monatsgebühr, nichts, was du später kündigen musst. Du zahlst einmal und bist dabei.">No monthly fee, nothing to cancel later. You pay once and you're in.</p>
       </div>
-      <div class="val reveal">
+      <div class="val val--blue reveal">
         <div class="vnum" data-de="∞">∞</div>
         <h3 data-de="Unbegrenzt bewegen">Move unlimited</h3>
         <p data-de="So viele Kurse, wie du möchtest, den ganzen Sommer. Komm zweimal die Woche oder fünfmal, das entscheidest du.">As many classes as you like, all summer. Come twice a week or five times, it's up to you.</p>
       </div>
-      <div class="val reveal">
+      <div class="val val--terra reveal">
         <div class="vnum" data-de="15.9.">15 Sep</div>
         <h3 data-de="Läuft bis 15. September">Runs until 15 September</h3>
         <p data-de="Rund 10 Wochen, etwa 2,5 Monate unbegrenzte Bewegung zu einem Pauschalpreis.">Around 10 weeks, about 2.5 months of unlimited movement for one flat price.</p>
@@ -319,12 +542,13 @@
 </section>
 
 <!-- ============ 5. WHY NOW — summer logic ============ -->
-<section class="block" style="background:var(--cream-soft)">
+<section class="block" style="background:var(--beige)">
+  <svg class="blob" viewBox="3803 1116 899 783" aria-hidden="true" style="color:var(--blue);width:min(380px,40vw);bottom:-22%;right:-8%;opacity:.1"><path fill="currentColor" d="M3845.2 1377.84C3872.43 1287.25 3967.94 1235.88 4058.53 1263.11L4093.19 1273.53C4102.69 1276.39 4112.39 1269.76 4113.19 1259.87C4118.9 1189.07 4180.92 1136.31 4251.72 1142.02C4322.52 1147.72 4375.29 1209.75 4369.58 1280.55C4369.21 1285.17 4374.17 1288.43 4378.48 1286.7C4419.96 1270.03 4468.48 1285.86 4491.63 1325.64C4497.12 1335.07 4500.73 1345.07 4502.59 1355.21C4506.71 1377.75 4518.28 1401.3 4540.22 1407.9C4630.81 1435.13 4682.17 1530.64 4654.95 1621.23C4627.72 1711.82 4532.2 1763.18 4441.62 1735.95L4385.46 1719.07C4359.72 1711.34 4333.4 1729.31 4331.24 1756.1C4325.53 1826.9 4263.51 1879.67 4192.71 1873.96C4121.91 1868.25 4069.14 1806.23 4074.85 1735.43C4077.04 1708.28 4047.81 1689.87 4024.27 1703.57L3974.08 1732.79C3930.39 1758.22 3874.35 1743.41 3848.92 1699.72C3823.49 1656.03 3838.3 1599.99 3881.99 1574.56C3892.33 1568.54 3893.36 1553.89 3885.11 1545.21C3844.17 1502.1 3826.86 1438.85 3845.2 1377.84Z"></path></svg>
   <div class="wrap">
     <div class="sec-head">
       <p class="eyebrow" data-de="Warum jetzt">Why now</p>
-      <h2 data-de="Alle anderen pausieren.<br>Du bleibst in Bewegung.">Everyone else pauses.<br>You keep moving.</h2>
-      <p class="lead" data-de="Die meisten pausieren ihre Mitgliedschaft im Sommer. Reisen, Seen, lange Abende. Das hier ist das Gegenteil. Ein Pauschalpreis hält dich in Bewegung, mit voller Freiheit, ohne monatliche Bindung, ohne nachzudenken. Komm, wenn du kannst, pausier, wenn du verreist, und steig danach einfach wieder ein. Und das genau dann, wenn unser neues Studio öffnet, ein frischer, warmer Raum wartet auf dich.">Most people pause their membership in summer. Trips, lakes, long evenings. This is the opposite. One flat price keeps you moving with full freedom, no monthly commitment, no thinking about it. Come when you can, skip when you travel, pick right back up. And it lands just as our new studio opens, so there's a fresh, warm room waiting for you.</p>
+      <h2 data-de="Alle anderen pausieren.&lt;br&gt;Du bleibst in Bewegung.">Everyone else pauses.<br>You keep moving.</h2>
+      <p class="lead" style="color:var(--terracotta-deep)" data-de="Die meisten pausieren ihre Mitgliedschaft im Sommer. Reisen, Seen, lange Abende. Das hier ist das Gegenteil. Ein Pauschalpreis hält dich in Bewegung, mit voller Freiheit, ohne monatliche Bindung, ohne nachzudenken. Komm, wenn du kannst, pausier, wenn du verreist, und steig danach einfach wieder ein.">Most people pause their membership in summer. Trips, lakes, long evenings. This is the opposite. One flat price keeps you moving with full freedom, no monthly commitment, no thinking about it. Come when you can, skip when you travel, pick right back up.</p>
     </div>
     <div class="tag-row">
       <span class="tag" data-de="Gelenkschonend">Low-impact</span><span class="tag" data-de="Voller Bewegungsumfang">Full range of motion</span>
@@ -339,18 +563,26 @@
   <div class="wrap">
     <div class="sec-head center">
       <p class="eyebrow" data-de="Warum Good Moves">Why Good Moves</p>
-      <h2 data-de="Ein Studio, in das man<br>gern reinkommt">A studio worth<br>walking into</h2>
+      <h2 data-de="Ein Studio, in das man&lt;br&gt;gern reinkommt">A studio worth<br>walking into</h2>
+    </div>
+    <div class="photo-row">
+      <figure class="photo-slot reveal">
+        <img src="assets/studio-01.jpg" alt="A class moving together at Good Moves, Prenzlauer Berg" loading="lazy" onerror="this.closest('.photo-slot').remove()">
+      </figure>
+      <figure class="photo-slot reveal">
+        <img src="assets/studio-02.jpg" alt="Inside the Good Moves studio, Prenzlauer Berg" loading="lazy" onerror="this.closest('.photo-slot').remove()">
+      </figure>
     </div>
     <div class="val-grid">
-      <div class="val reveal">
+      <div class="val val--soft reveal">
         <h3 data-de="Echte ausgebildete Lehrer:innen">Real certified teachers</h3>
         <p data-de="Menschen, die aus der Mitte des Raums unterrichten und deinen Namen kennen.">Actual people who teach from the middle of the room and know your name.</p>
       </div>
-      <div class="val reveal">
+      <div class="val val--soft reveal">
         <h3 data-de="4,9 / 5 aus rund 4.000 Bewertungen">4.9 / 5 from ~4,000 reviews</h3>
         <p data-de="Ein warmes, buntes Studio in Prenzlauer Berg, für die Nachbarschaft gemacht.">A warm, colourful studio in Prenzlauer Berg, made for the neighbourhood.</p>
       </div>
-      <div class="val reveal">
+      <div class="val val--soft reveal">
         <h3 data-de="Gelenkschonend, voller Bewegungsumfang">Low-impact, full range of motion</h3>
         <p data-de="Auf der Matte, gelenkfreundlich, und mehr Workout, als du denkst.">Mat-based and joint-friendly, and more of a workout than you'd expect.</p>
       </div>
@@ -359,18 +591,19 @@
 </section>
 
 <!-- ============ 7. FAQ ============ -->
-<section class="block" style="background:var(--cream-soft)">
+<section class="block" style="background:var(--beige)">
   <div class="wrap">
     <div class="sec-head center">
       <p class="eyebrow" data-de="Kurz geklärt">Quickly answered</p>
       <h2 data-de="Bevor du zugreifst">Before you grab it</h2>
     </div>
     <div class="faq">
-      <details><summary data-de="Was ist enthalten?">What's included?</summary><p data-de="Jeder reguläre Kurs im Plan, so oft du möchtest, bis 15. September. Derselbe warme Raum, dieselben Lehrer:innen, keine Zusatzpakete, über die du nachdenken musst.">Every regular class on the schedule, as often as you like, until 15 September. Same warm room, same teachers, no add-ons to figure out.</p></details>
-      <details><summary data-de="Wie lange läuft das Angebot?">How long does it run?</summary><p data-de="Ab jetzt bis 15. September. Das sind rund 10 Wochen, etwa 2,5 Monate unbegrenzte Bewegung zu einem Pauschalpreis.">From now until 15 September. That's roughly 10 weeks, about 2.5 months of unlimited movement for one flat price.</p></details>
-      <details><summary data-de="Ist es wirklich unbegrenzt?">Is it really unlimited?</summary><p data-de="Ja. Buch so viele Kurse, wie du möchtest, den ganzen Sommer. Komm zweimal die Woche, komm fünfmal, das entscheidest du. Wir empfehlen einen Rhythmus, wir schreiben dir nie einen vor.">Yes. Book as many classes as you like across the summer. Come twice a week, come five times, it's up to you. We recommend a rhythm, we never lock you to one.</p></details>
-      <details><summary data-de="Wann kann ich starten?">When can I start?</summary><p data-de="Unser neues Studio öffnet am 2. Juli, und dein Sommer-Deal gilt ab dem Tag, an dem du ihn kaufst. Sicher ihn dir jetzt, starte, sobald die Türen offen sind.">Our new studio opens on 2 July, and your Summer Deal is good from the day you buy it. Grab it now, start as soon as the doors open.</p></details>
-      <details><summary data-de="Wo seid ihr?">Where are you?</summary><p data-de="Mitten in Prenzlauer Berg, Berlin. Genaue Adresse und Anfahrt kommen mit deiner Bestätigung.">In the heart of Prenzlauer Berg, Berlin. Exact address and directions land in your confirmation.</p></details>
+      <details><summary data-de="Was ist enthalten?">What's included?</summary><p class="faq-answer" data-de="Jeder reguläre Kurs im Plan, so oft du möchtest, bis 15. September. Derselbe warme Raum, dieselben Lehrer:innen, keine Zusatzpakete, über die du nachdenken musst.">Every regular class on the schedule, as often as you like, until 15 September. Same warm room, same teachers, no add-ons to figure out.</p></details>
+      <details><summary data-de="Wie lange läuft das Angebot?">How long does it run?</summary><p class="faq-answer" data-de="Ab jetzt bis 15. September. Das sind rund 10 Wochen, etwa 2,5 Monate unbegrenzte Bewegung zu einem Pauschalpreis.">From now until 15 September. That's roughly 10 weeks, about 2.5 months of unlimited movement for one flat price.</p></details>
+      <details><summary data-de="Ist es wirklich unbegrenzt?">Is it really unlimited?</summary><p class="faq-answer" data-de="Ja. Buch so viele Kurse, wie du möchtest, den ganzen Sommer. Komm zweimal die Woche, komm fünfmal, das entscheidest du. Wir empfehlen einen Rhythmus, wir schreiben dir nie einen vor.">Yes. Book as many classes as you like across the summer. Come twice a week, come five times, it's up to you. We recommend a rhythm, we never lock you to one.</p></details>
+      <details><summary data-de="Wann kann ich starten?">When can I start?</summary><p class="faq-answer" data-de="Wann immer du m\u00f6chtest. Du w\u00e4hlst deinen Starttag beim Bezahlen, und dein Sommer-Deal l\u00e4uft von da an bis 15. September. Nimm einen Tag diese Woche oder sp\u00e4ter, du entscheidest.">Whenever you like. You pick your start day at checkout, and your Summer Deal runs from there until 15 September. Choose a day this week or further out, it's your call.</p></details>
+      <details><summary data-de="Was, wenn ich einen Kurs nicht schaffe?">What if I can't make a class?</summary><p class="faq-answer" data-de="Kein Problem, sag einfach rechtzeitig ab. Bitte beachte: Bei einer späten Stornierung berechnen wir 5 €, bei Nichterscheinen 14 €. So bleiben die kleinen Gruppen für alle fair.">No problem, just cancel in good time. Please note: a late cancellation costs €5 and a no-show costs €14. It keeps our small classes fair for everyone.</p></details>
+      <details><summary data-de="Wo seid ihr?">Where are you?</summary><p class="faq-answer" data-de="Mitten in Prenzlauer Berg, Berlin. Genaue Adresse und Anfahrt kommen mit deiner Bestätigung.">In the heart of Prenzlauer Berg, Berlin. Exact address and directions land in your confirmation.</p></details>
     </div>
   </div>
 </section>
@@ -379,8 +612,10 @@
 <section class="block" id="buy">
   <div class="wrap">
     <div class="final reveal">
+      <svg class="blob blob-f" viewBox="78 77 851 726" aria-hidden="true"><path fill="currentColor" d="M438.091 104.607C461.697 104.607 484.085 109.819 504.168 119.156C554.495 142.553 614.02 166.945 664.361 143.576C742.969 107.084 836.277 141.225 872.77 219.834C909.262 298.442 875.119 391.75 796.511 428.242C729.329 459.429 715.057 548.695 769.165 599.274L776.084 605.742C814.94 642.063 816.994 703.006 780.673 741.861C744.352 780.716 683.409 782.771 644.554 746.45C602.852 707.468 534.225 718.333 479.116 733.221C458.365 738.827 436.465 740.089 415.2 736.981C272.9 716.182 240.474 695.486 161.691 575.173C157.554 568.855 153.823 562.16 150.549 555.108C131.64 514.376 131.696 469.698 147.077 431.022C167.218 380.376 178.578 310.868 138.761 273.648C99.906 237.327 97.8516 176.385 134.172 137.53C170.493 98.6746 231.436 96.6193 270.291 132.94C291.509 152.774 325.331 148.615 349.26 132.153C374.518 114.778 405.117 104.607 438.091 104.607Z"></path></svg>
+      <svg class="blob blob-g" viewBox="1222 40 993 758" aria-hidden="true"><path fill="currentColor" d="M1748.38 59.5289C1803.41 59.5289 1851.45 89.4604 1877.1 133.931C1894.28 163.7 1931.34 186.876 1962.51 172.405C2036.9 137.871 2125.2 170.181 2159.73 244.57C2194.27 318.959 2161.96 407.259 2087.57 441.793C2023.99 471.306 2010.49 555.782 2061.69 603.648L2068.24 609.765C2105.01 644.137 2106.95 701.809 2072.58 738.579C2038.21 775.348 1980.54 777.292 1943.77 742.921L1884.24 687.281C1815.97 623.459 1683.94 629.169 1603.73 666.405L1473.46 726.879C1399.07 761.412 1310.77 729.103 1276.24 654.714C1241.7 580.324 1274.01 492.024 1348.4 457.491L1446.5 411.95C1492.24 390.715 1501.96 329.935 1465.12 295.497C1428.35 261.125 1426.41 203.453 1460.78 166.683C1495.15 129.913 1552.82 127.969 1589.59 162.34C1595.75 168.094 1605.96 165 1608.85 157.086C1629.64 100.164 1684.27 59.5289 1748.38 59.5289Z"></path></svg>
       <p class="eyebrow" data-de="Dein Sommer wartet">Your summer is waiting</p>
-      <h2 data-de="Sichere dir den<br>Sommer-Deal">Grab the<br>Summer Deal</h2>
+      <h2 data-de="Sichere dir den&lt;br&gt;Sommer-Deal">Grab the<br>Summer Deal</h2>
       <div class="big-price" data-de="99 € pauschal">€99 flat</div>
       <p class="lead" data-de="Unbegrenzt bis 15. September. Ein Preis, keine monatliche Bindung. Das Einzige, was du riskierst: einen richtig guten Sommer.">Unlimited until 15 September. One price, no monthly commitment. The only thing you risk is a really good summer.</p>
       <a href="#buy" class="btn btn--lg" data-de="Sommer-Deal sichern · 99 €">Get the Summer Deal · €99</a>
@@ -397,19 +632,91 @@
 <footer>
   <div class="wrap">
     <div class="foot-grid">
-      <div class="logo">Good Moves</div>
-      <div class="foot-col"><b data-de="Studio">Studio</b><p data-de="Prenzlauer Berg<br>Berlin">Prenzlauer Berg<br>Berlin</p></div>
-      <div class="foot-col"><b data-de="Öffnungszeiten">Hours</b><p data-de="Mo bis Fr · 7:00 bis 21:00<br>Sa und So · 9:00 bis 15:00">Mon to Fri · 7:00 to 21:00<br>Sat and Sun · 9:00 to 15:00</p></div>
-      <div class="foot-col"><b data-de="Bewertung">Rated</b><p data-de="★ 4,9 / 5<br>~4.000 Bewertungen">★ 4.9 / 5<br>~4,000 reviews</p></div>
+      <div class="foot-brand">
+        <svg class="mark" viewBox="0 0 830 830" role="img" aria-label="Good Moves Studio">
+          <circle cx="415" cy="415" r="415" fill="#B0482D"></circle>
+          <path fill="#FBF6F1" d="M318.861 440.153C348.208 428.125 381.872 440.952 397.006 476.874C410.64 509.249 398.216 545.129 368.869 557.158C339.522 569.186 306.27 555.324 290.724 520.438C276.413 488.336 289.514 452.181 318.861 440.153ZM618.59 434.767C631.841 423.966 653.819 420.851 672.98 422.563C676.746 422.808 679.828 424.242 681.051 428.237C682.372 432.537 683.594 436.878 685.31 441.052C687.539 445.197 684.144 449.705 679.66 447.072C670.701 442.429 661.889 437.579 651.304 437.62C644.375 437.607 635.595 437.221 631.511 443.546C625.519 452.872 634.976 461.085 643.442 463.714C657.406 468.304 671.786 472.107 685.159 478.225C704.17 486.658 712.652 508.082 702.976 526.558H702.947C685.599 561.693 644.983 552.073 620.294 540.143C614.947 536.96 612.941 533.834 613.173 530.304C613.491 525.221 613.956 518.854 614.204 515.027C614.384 512.215 618.26 510.589 620.636 512.822C624.72 516.678 627.443 519.184 631.8 522.743C642.907 532.37 658.963 538.048 670.906 535.375C681.45 533.544 687.344 517.367 674.052 506.125C670.755 503.342 666.866 501.315 662.794 499.787C647.179 493.367 629.049 491.395 616.157 479.864C604.035 468.524 600.46 447.981 618.59 434.767ZM165.361 404.538C166.363 402.883 170.598 402.511 172.51 402.744C175.49 403.103 189.677 405.667 191.805 406.176C194.568 406.853 197.784 407.623 200.907 408.434C207.379 410.117 208.933 412.734 209.524 419.129C210.131 425.728 211.562 455.151 211.627 456.025C213.637 452.939 217.223 447.412 219.135 444.437C221.071 441.433 222.995 438.429 224.935 435.425C227.299 431.749 229.664 428.068 232.028 424.404C235.382 419.211 238.748 417.862 244.895 419.251C247.23 419.773 249.578 420.381 251.861 420.959L254.225 421.567C261.692 423.442 263.918 426.001 264.562 433.468C265.088 439.452 265.569 445.444 266.062 451.436C266.404 455.777 266.763 460.105 267.134 464.442L267.973 474.351C269.359 490.785 270.79 507.762 272.29 524.461C272.576 527.645 273.183 531.089 274.075 534.712C274.858 537.879 277.482 540.276 280.657 541.132L280.674 541.103C285.732 542.468 287.987 542.978 288.496 544.963C289.047 547.083 287.999 548.212 287.163 549.096C285.484 550.845 281.567 550.515 278.225 550.543C270.86 550.596 260.963 551.081 252.301 549.125C246.558 547.8 243.835 544.478 242.926 539.273C241.895 533.363 241.39 527.355 241.019 522.256C239.767 505.06 238.557 487.578 237.375 470.67C236.894 463.811 235.847 457.016 234.983 449.867C233.527 452.084 219.547 473.952 215.283 480.661C214.941 481.227 214.749 481.858 214.778 482.148C215.764 493.585 215.711 503.437 216.865 515.16C217.032 516.843 217.443 518.523 218.022 520.548C219.024 524.103 221.059 525.562 223.875 527.135C225.428 528.003 227.05 530.18 226.981 532.206C226.887 534.794 224.658 536.543 221.458 536.559C213.991 536.6 206.858 537.769 198.172 535.8C192.303 534.463 188.507 530.441 187.492 524.445C186.706 519.888 187.326 515.49 187.008 511.014C185.761 493.349 184.521 475.671 183.286 457.994L180.853 436.611C180.054 437.936 171.369 452.939 167.492 459.4C163.107 466.704 157.179 476.279 155.834 482.935C153.482 494.535 154.144 503.658 157.926 512.833C158.13 513.342 158.309 513.851 158.489 514.361C159.642 517.735 158.802 519.818 157.881 520.959C156.976 522.076 155.174 523.357 151.698 523.083C146.309 522.643 138.98 522.944 131.864 521.828C131.407 521.758 130.955 521.677 130.527 521.567C127.641 520.866 125.428 519.403 124.042 517.295C122.404 514.801 122.061 511.617 123.064 508.063C126.626 495.456 131.355 484.517 137.554 474.653C148.963 456.482 160.702 438.099 172.041 420.311C172.055 420.289 172.605 419.387 172.811 419.101C175.904 414.801 169.098 412.392 165.678 408.792C164.932 408.01 164.452 406.037 165.361 404.538ZM519.724 418.591C524.672 418.249 544.135 420.535 549.181 421.155C561.205 422.643 575.284 424.791 587.312 426.238C588.836 426.417 590.61 426.694 592.301 427.326C596.728 428.993 598.884 432.604 598.721 438.086C598.611 441.889 598.403 445.749 598.211 449.466L598.084 451.729C597.921 454.896 596.532 456.934 593.964 457.79C590.638 458.89 588.56 456.62 587.557 455.532L587.447 455.405C580.754 448.105 571.432 442.59 563.133 440.511C559.228 439.533 555.05 438.995 551.019 438.473C549.633 438.294 548.243 438.115 546.869 437.923C545.427 449.275 545.357 450.775 543.817 462.115C543.405 465.147 545.305 470.605 554.24 471.844C564.466 473.263 577.456 475.647 586.513 476.984C588.037 477.216 589.607 477.517 591.131 477.986C594.926 479.172 597.359 481.899 597.824 485.482C598.17 488.156 598.292 491.009 598.17 493.972C598.06 496.479 596.931 497.8 596.01 498.464C595.089 499.137 593.467 499.796 591.009 499.136C589.069 498.627 581.067 494.922 579.27 494.246C579.122 494.185 578.988 494.136 578.855 494.086C584.339 498.577 593.379 505.038 597.441 515.119C607.007 538.886 586.721 552.349 564.71 549.565C560.983 549.096 506.896 543.557 502.197 542.995L500.865 542.828C499.996 542.718 496.987 542.207 494.387 541.628C491.571 541.008 490.291 536.338 495.186 534.325C497.138 533.514 499.034 532.923 499.271 532.825C503.118 531.129 504.671 527.893 505.935 523.234C507.088 518.938 507.874 515.106 508.339 511.536C511.531 486.847 513.867 467.849 516.011 449.935C518.514 428.981 515.46 428.291 514.099 424.917C513.577 423.648 513.015 419.06 519.724 418.591ZM479.155 406.909C482.452 406.179 486.438 406.509 488.819 408.164C491.415 409.969 493.021 412.986 493.478 416.886C495.072 430.773 494.313 443.213 493.131 455.148C491.717 469.312 489.972 480.966 487.881 493.601C487.046 498.659 486.206 503.701 485.378 508.743L484.832 512.078C483.952 517.519 483.031 523.14 482.053 528.667C480.818 535.624 476.114 538.502 468.871 539.607L467.856 539.757C467.098 539.867 466.343 539.99 465.585 540.1C463.456 540.418 452.253 542.154 450.097 542.444C449.726 542.485 441.905 543.548 439.964 543.658C436.83 543.821 434.922 539.896 436.128 537.719C438.068 534.218 444.501 531.312 441.725 523.625C440.355 519.833 432.057 504.549 432.008 504.459C422.136 486.052 411.937 467.009 401.849 448.312C400.748 446.246 399.249 444.082 397.174 441.494C395.002 438.808 392.527 437.389 389.601 437.181C389.05 437.153 386.849 436.863 384.775 436.394C383.69 436.145 382.121 434.739 382.028 432.95C381.918 430.993 385.297 428.308 387.058 427.427C389.793 426.062 392.829 424.847 396.045 423.816C400.651 422.34 403.635 421.114 408.75 419.875C413.531 418.513 419.18 420.893 422.877 426.738C425.269 430.523 466.827 506.71 466.853 506.758C466.853 506.758 468.146 499.002 468.708 495.129C469.079 492.582 469.502 490.018 469.918 487.47C470.962 481.034 472.046 474.394 472.348 467.889C473.188 449.527 467.937 435.098 456.309 423.788C454.234 421.762 453.366 419.463 453.888 417.298C454.177 416.071 455.208 413.841 458.824 412.667C464.762 410.74 471.826 408.551 479.138 406.924L479.155 406.909ZM368.812 484.532C355.879 461.372 334.545 453.465 320.687 461.605C306.833 469.749 307.162 492.525 318.628 514.018C332.401 539.811 352.895 545.089 366.749 536.946C380.608 528.802 380.689 505.804 368.812 484.532ZM546.376 490.059C542.267 489.065 540.481 488.943 540.45 489.122C539.13 499.507 538.514 504.318 537.332 514.899C536.917 518.591 536.672 519.598 537.165 523.47C537.508 526.238 538.91 527.094 542.635 527.546C546.442 528.003 550.253 528.472 554.06 528.924L560.328 529.682C565.358 530.289 574.677 531.031 577.689 528.276L577.7 528.292C580.876 525.386 582.209 522.655 581.769 518.539C580.094 502.61 555.943 492.358 546.376 490.059Z"></path>
+          <path fill="#FBF6F1" d="M299.331 338.945C309.199 304.417 342.34 283.173 373.75 291.602C405.159 300.035 423.029 331.738 413.075 369.461C403.92 404.168 370.066 425.237 338.656 416.804C307.247 408.371 288.375 377.247 299.331 338.945ZM563.487 278.402C565.081 278.068 566.715 278.194 568.256 278.357C570.208 278.565 572.172 278.757 574.125 278.953C579.648 279.491 585.355 280.053 590.951 280.933C594.097 281.43 596.555 282.849 598.067 285.042C599.665 287.357 600.105 290.345 599.335 293.708L598.965 295.252V295.333C605.315 290.716 611.209 288.046 617.396 286.958C631.528 284.463 646.62 291.433 654.112 303.889C659.472 312.803 661.877 323.095 661.685 336.293H661.698C661.559 346.076 660.377 354.636 658.098 362.461C653.546 378.068 645.81 389.714 634.454 398.078C622.332 407.004 608.694 410.628 593.93 408.863C585.807 407.885 577.74 406.315 569.808 404.579C565.741 403.682 561.726 402.748 557.74 401.823C551.528 400.376 543.51 398.559 538.741 397.609C528.225 395.526 525.531 399.19 521.712 397.343C520.733 396.878 518.496 395.374 519.486 392.44C521.272 387.109 535.264 388.804 536.928 388.405C543.897 386.709 548.365 382.108 550.345 373.993C555.457 353.022 560.255 331.598 564.901 310.888L566.275 304.77C567.017 301.465 567.033 298.876 567.033 295.832C567.033 293.117 563.842 290.194 561.449 288.017C561.396 287.976 561.339 287.936 561.286 287.895C560.903 287.606 560.255 287.092 559.896 286.241C559.827 286.061 559.745 285.882 559.651 285.69C559.125 284.585 558.412 283.069 559.044 281.512C559.761 279.735 561.889 278.732 563.487 278.402ZM227.014 271.499C237.583 270.023 248.634 270.92 260.87 274.091C264.897 275.135 269.776 278.375 271.618 284.656C271.948 285.773 272.197 287.729 272.388 289.274C272.719 291.931 273.049 294.675 273.309 297.389C273.338 297.634 273.362 297.899 273.403 298.16C273.64 299.949 273.13 306.153 269.132 307.861C265.365 309.487 262.064 307.033 260.992 305.75C260.788 305.505 260.581 305.256 260.373 305.048C252.869 297.54 248.303 293.379 240.869 290.925C234.616 288.859 229.35 290.155 224.292 292.662C219.221 295.185 214.489 300.748 211.644 306.593C208.278 313.535 205.224 320.949 205.832 331.628C206.504 343.599 207.067 345.226 213.898 357.502C218.011 364.872 222.792 369.873 228.539 373.664C235.468 378.237 242.23 379.684 250.561 379.823C252.237 379.851 253.9 379.766 255.661 379.684C256.456 379.643 257.267 379.602 258.078 379.574C257.984 375.95 257.968 375.608 257.898 371.98C257.764 364.912 257.625 357.584 257.283 350.418C257.116 346.974 255.754 340.155 251.303 336.532C245.776 332.052 240.4 333.348 238.586 330.633C238.036 329.822 238.313 327.894 238.643 327.397C239.675 325.852 243.922 325.84 248.14 326.032C249.995 326.117 258.229 325.771 258.738 325.771C262.822 325.689 264.937 325.563 269.021 325.314C272.812 325.082 273.049 325 276.966 324.654C281.062 324.295 284.661 325.139 286.984 329.793C289.075 333.984 287.783 336.698 286.723 341.7C285.859 345.857 285.514 349.635 285.489 353.479C285.42 363.441 285.639 373.293 285.884 383.348C285.969 387.029 281.363 392.099 277.887 393.627C263.963 399.717 257.845 399.979 244.595 400.199H243.273C228.677 400.227 217.24 397.651 207.303 392.071L207.315 392.112C197.541 386.613 190.037 378.804 185.048 368.895C177.226 353.353 174.821 336.299 177.915 318.165C180.303 304.098 186.891 292.552 197.488 283.817C205.554 277.161 215.219 273.137 227.014 271.499ZM362.439 309.21C346.025 307.213 331.14 325.69 327.003 350.174C322.507 376.819 334.6 396.371 351.014 398.369C367.428 400.366 381.845 381.807 386.451 357.409C391.978 328.115 378.849 311.208 362.439 309.21ZM623.869 311.923C620.254 304.925 612.75 303.987 607.198 306.702C603.004 308.752 599.706 309.939 595.842 314.569C594.811 315.796 593.988 317.463 593.576 319.129C591.884 326.002 590.29 333.045 588.75 339.852C588.379 341.519 588.008 343.186 587.621 344.853H587.678L587.128 347.25C586.508 349.948 585.876 352.634 585.244 355.336C583.691 361.976 582.081 368.824 580.708 375.59C580.047 378.827 578.837 382.287 579.033 386.061C579.143 388.197 580.749 389.436 584.021 390.166L586.687 390.773C589.439 391.392 592.267 392.028 595.059 392.579C601.63 393.858 607.43 392.359 612.309 388.087C617.258 383.763 620.71 377.767 622.883 369.75C625.683 359.388 628.858 345.676 628.613 331.488C628.487 324.42 627.443 318.84 623.869 311.923ZM433.213 305.198C448.567 274.514 483.384 260.211 511.342 273.425C539.303 286.652 550.45 319.402 534.448 353.074C519.726 384.063 484.277 398.06 456.32 384.846C428.359 371.62 416.167 339.244 433.213 305.198ZM497.626 288C482.585 283.358 465.364 298.158 457.155 320.409C448.237 344.628 456.112 364.992 471.152 369.651C486.188 374.293 502.986 359.347 511.619 337.247C521.968 310.72 512.662 292.659 497.626 288Z"></path>
+        </svg>
+        <span class="wordmark"><span>Good</span><span>Moves</span></span>
+      </div>
+      <div class="foot-col"><b data-de="Studio">Studio</b><p data-de="Prenzlauer Berg&lt;br&gt;Berlin">Prenzlauer Berg<br>Berlin</p></div>
+      <div class="foot-col"><b data-de="Öffnungszeiten">Hours</b><p data-de="Mo bis Fr · 7:00 bis 21:00&lt;br&gt;Sa und So · 9:00 bis 15:00">Mon to Fri · 7:00 to 21:00<br>Sat and Sun · 9:00 to 15:00</p></div>
+      <div class="foot-col"><b data-de="Bewertung">Rated</b><p data-de="★ 4,9 / 5&lt;br&gt;~4.000 Bewertungen">★ 4.9 / 5<br>~4,000 reviews</p></div>
     </div>
-    <div class="foot-bottom" data-de="© Good Moves Studio · Sommer-Deal · <em>Konzeptentwurf, nicht zur Veröffentlichung.</em>">© Good Moves Studio · Summer Deal · <em>Concept draft, not for publication.</em></div>
+    <div class="foot-bottom" data-de="© Good Moves Pilates Studio · Prenzlauer Berg, Berlin · Sommer-Deal · &lt;em&gt;Konzeptentwurf, nicht zur Veröffentlichung.&lt;/em&gt;">© Good Moves Pilates Studio · Prenzlauer Berg, Berlin · Summer Deal · <em>Concept draft, not for publication.</em></div>
   </div>
 </footer>
 
 <!-- ============ 10. STICKY MOBILE CTA ============ -->
 <div class="sticky-cta">
-  <div class="s-price" data-de="bis 15. Sept.<br><b>99 € pauschal</b>">until 15 Sept<br><b>€99 flat</b></div>
+  <div class="s-price" data-de="bis 15. Sept.&lt;br&gt;&lt;b&gt;99 € pauschal&lt;/b&gt;">until 15 Sept<br><b>€99 flat</b></div>
   <a href="#buy" class="btn" data-de="Sommer-Deal sichern">Get the Summer Deal</a>
+</div>
+
+<!-- ============ 11. CHECKOUT MODAL (branded · creates a Mindbody account behind the scenes) ============ -->
+<div class="modal-overlay" id="checkout" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+  <div class="modal">
+    <div class="modal-head">
+      <svg class="mh-blob" viewBox="78 77 851 726" aria-hidden="true"><path fill="currentColor" d="M438.091 104.607C461.697 104.607 484.085 109.819 504.168 119.156C554.495 142.553 614.02 166.945 664.361 143.576C742.969 107.084 836.277 141.225 872.77 219.834C909.262 298.442 875.119 391.75 796.511 428.242C729.329 459.429 715.057 548.695 769.165 599.274L776.084 605.742C814.94 642.063 816.994 703.006 780.673 741.861C744.352 780.716 683.409 782.771 644.554 746.45C602.852 707.468 534.225 718.333 479.116 733.221C458.365 738.827 436.465 740.089 415.2 736.981C272.9 716.182 240.474 695.486 161.691 575.173C157.554 568.855 153.823 562.16 150.549 555.108C131.64 514.376 131.696 469.698 147.077 431.022C167.218 380.376 178.578 310.868 138.761 273.648C99.906 237.327 97.8516 176.385 134.172 137.53C170.493 98.6746 231.436 96.6193 270.291 132.94C291.509 152.774 325.331 148.615 349.26 132.153C374.518 114.778 405.117 104.607 438.091 104.607Z"></path></svg>
+      <div class="mh-text">
+        <span class="mh-eyebrow" data-de="Sommer-Deal · Checkout">Summer Deal · Checkout</span>
+        <div class="mh-title" id="checkout-title" data-de="Sichere dir den Sommer">Secure your summer</div>
+        <div class="mh-sub" data-de="Unbegrenzt bis 15. September">Unlimited until 15 September</div>
+      </div>
+      <button type="button" class="modal-close" data-close="" aria-label="Close">×</button>
+    </div>
+
+    <form class="modal-body" id="checkoutForm" novalidate="">
+      <!-- branded deal recap, echoing the hero deal panel -->
+      <div class="os-panel">
+        <svg class="os-blob" viewBox="1222 40 993 758" aria-hidden="true"><path fill="currentColor" d="M1748.38 59.5289C1803.41 59.5289 1851.45 89.4604 1877.1 133.931C1894.28 163.7 1931.34 186.876 1962.51 172.405C2036.9 137.871 2125.2 170.181 2159.73 244.57C2194.27 318.959 2161.96 407.259 2087.57 441.793C2023.99 471.306 2010.49 555.782 2061.69 603.648L2068.24 609.765C2105.01 644.137 2106.95 701.809 2072.58 738.579C2038.21 775.348 1980.54 777.292 1943.77 742.921L1884.24 687.281C1815.97 623.459 1683.94 629.169 1603.73 666.405L1473.46 726.879C1399.07 761.412 1310.77 729.103 1276.24 654.714C1241.7 580.324 1274.01 492.024 1348.4 457.491L1446.5 411.95C1492.24 390.715 1501.96 329.935 1465.12 295.497C1428.35 261.125 1426.41 203.453 1460.78 166.683C1495.15 129.913 1552.82 127.969 1589.59 162.34C1595.75 168.094 1605.96 165 1608.85 157.086C1629.64 100.164 1684.27 59.5289 1748.38 59.5289Z"></path></svg>
+        <span class="os-kicker" data-de="Sommer-Deal · pauschal">Summer Deal · flat</span>
+        <div class="os-price" data-de="99 €">€99</div>
+        <span class="os-meta" data-de="Unbegrenzt, den ganzen Sommer">Unlimited, all summer</span>
+        <ul class="os-inc">
+          <li><span class="check">✓</span><span data-de="Einmal zahlen, keine Monatsgebühr">Pay once, no monthly fee</span></li>
+          <li><span class="check">✓</span><span data-de="Unbegrenzt bis 15. September">Unlimited until 15 September</span></li>
+          <li><span class="check">✓</span><span data-de="4,9★ aus rund 4.000 Bewertungen">4.9★ from ~4,000 reviews</span></li>
+        </ul>
+      </div>
+
+      <div class="form-sec-head" data-de="Deine Daten">Your details</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="co-first" data-de="Vorname">First name</label>
+          <input id="co-first" name="first" type="text" autocomplete="given-name" placeholder="Alex" required="">
+        </div>
+        <div class="field">
+          <label for="co-last" data-de="Nachname">Last name</label>
+          <input id="co-last" name="last" type="text" autocomplete="family-name" placeholder="Berg" required="">
+        </div>
+      </div>
+      <div class="field">
+        <label for="co-email" data-de="E-Mail">Email</label>
+        <input id="co-email" name="email" type="email" autocomplete="email" placeholder="you@email.com" required="">
+      </div>
+      <div class="field">
+        <label for="co-phone" data-de="Telefon">Phone</label>
+        <input id="co-phone" name="phone" type="tel" autocomplete="tel" placeholder="+49 ..." required="">
+      </div>
+
+      <div class="form-sec-head" data-de="Wähle deinen Starttag">Pick your start day</div>
+      <p class="daypick-sub" data-de="Dein Deal läuft von diesem Tag bis 15. September.">Your deal runs from this day until 15 September.</p>
+      <div class="day-grid" id="dayGrid" role="group" aria-label="Start day"></div>
+
+      <button type="submit" class="btn btn--lg full" data-de="Kauf abschließen · 99 €">Complete purchase · €99</button>
+      <p class="fineprint" data-de="Sicherer Checkout. Wir richten dein Good-Moves-Konto ein, damit du sofort Kurse buchen kannst. Späte Stornierung 5 €, Nichterscheinen 14 €.">Secure checkout. We'll set up your Good Moves account so you can book classes right away. Late cancellation €5, no-show €14.</p>
+    </form>
+
+    <div class="modal-success">
+      <svg class="succ-blob" viewBox="78 77 851 726" aria-hidden="true"><path fill="currentColor" d="M438.091 104.607C461.697 104.607 484.085 109.819 504.168 119.156C554.495 142.553 614.02 166.945 664.361 143.576C742.969 107.084 836.277 141.225 872.77 219.834C909.262 298.442 875.119 391.75 796.511 428.242C729.329 459.429 715.057 548.695 769.165 599.274L776.084 605.742C814.94 642.063 816.994 703.006 780.673 741.861C744.352 780.716 683.409 782.771 644.554 746.45C602.852 707.468 534.225 718.333 479.116 733.221C458.365 738.827 436.465 740.089 415.2 736.981C272.9 716.182 240.474 695.486 161.691 575.173C157.554 568.855 153.823 562.16 150.549 555.108C131.64 514.376 131.696 469.698 147.077 431.022C167.218 380.376 178.578 310.868 138.761 273.648C99.906 237.327 97.8516 176.385 134.172 137.53C170.493 98.6746 231.436 96.6193 270.291 132.94C291.509 152.774 325.331 148.615 349.26 132.153C374.518 114.778 405.117 104.607 438.091 104.607Z"></path></svg>
+      <div class="succ-check">✓</div>
+      <h3 data-de="Du bist dabei!">You're in!</h3>
+      <p id="successMsg"></p>
+      <button type="button" class="btn" data-close="" data-de="Fertig">Done</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -423,6 +730,7 @@
       i18n.forEach(n => { n.innerHTML = (lang === 'de' ? n.dataset.de : n.dataset.en); });
       btns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
       try { localStorage.setItem('gms_lang', lang); } catch(e){}
+      if(window.__gmsRenderDays) window.__gmsRenderDays();
     }
     let lang; try { lang = localStorage.getItem('gms_lang'); } catch(e){}
     if(lang !== 'de' && lang !== 'en'){                        // no saved choice, detect system language
@@ -444,16 +752,98 @@
     reveals.forEach(el=>el.classList.add('in'));
   }
 
-  // Mock checkout: every CTA goes straight to checkout (real flow connects to Mindbody).
-  // When GMS sends the real Mindbody SKU/link, point these hrefs at it (target=_blank) instead.
-  document.querySelectorAll('a[href="#buy"]').forEach(a=>{
-    a.addEventListener('click',(e)=>{
+  // ---- Checkout (visual concept). The real flow creates a Mindbody account from
+  //      name/email/phone behind the scenes; wire that up at submit time. No class
+  //      selection here — just the customer's details and their chosen start day. ----
+  (function(){
+    const overlay = document.getElementById('checkout');
+    const form    = document.getElementById('checkoutForm');
+    const grid    = document.getElementById('dayGrid');
+    const succ    = document.getElementById('successMsg');
+    let selectedDay = null;
+    let lastFocused = null;
+
+    const MONTHS_LIMIT = new Date(new Date().getFullYear(), 8, 15); // 15 September
+
+    function fmt(d, lang){
+      const loc = lang === 'de' ? 'de-DE' : 'en-GB';
+      return {
+        dow: d.toLocaleDateString(loc, {weekday:'short'}),
+        day: d.getDate(),
+        mon: d.toLocaleDateString(loc, {month:'short'})
+      };
+    }
+
+    function renderDays(){
+      if(!grid) return;
+      const lang = document.documentElement.lang === 'de' ? 'de' : 'en';
+      const start = new Date(); start.setHours(0,0,0,0);
+      const prevKey = selectedDay ? selectedDay.toDateString() : null;
+      grid.innerHTML = '';
+      let firstBtn = null;
+      for(let i=0;i<8;i++){
+        const d = new Date(start); d.setDate(start.getDate()+i);
+        const p = fmt(d, lang);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'day-chip';
+        btn.innerHTML = '<span class="dc-dow">'+p.dow+'</span><span class="dc-day">'+p.day+'</span><span class="dc-mon">'+p.mon+'</span>';
+        const isSel = prevKey ? d.toDateString() === prevKey : i === 0;
+        btn.setAttribute('aria-pressed', String(isSel));
+        if(isSel) selectedDay = d;
+        if(i===0) firstBtn = btn;
+        btn.addEventListener('click', ()=>{
+          selectedDay = d;
+          grid.querySelectorAll('.day-chip').forEach(c=>c.setAttribute('aria-pressed','false'));
+          btn.setAttribute('aria-pressed','true');
+        });
+        grid.appendChild(btn);
+      }
+      if(!selectedDay && firstBtn){ firstBtn.setAttribute('aria-pressed','true'); selectedDay = new Date(start); }
+    }
+    window.__gmsRenderDays = renderDays;
+
+    function openCheckout(){
+      lastFocused = document.activeElement;
+      renderDays();
+      overlay.classList.remove('done');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      const f = document.getElementById('co-first');
+      if(f) setTimeout(()=>f.focus(), 60);
+    }
+    function closeCheckout(){
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      if(lastFocused && lastFocused.focus) lastFocused.focus();
+    }
+
+    document.querySelectorAll('a[href="#buy"]').forEach(a=>{
+      a.addEventListener('click', e=>{ e.preventDefault(); openCheckout(); });
+    });
+    overlay.querySelectorAll('[data-close]').forEach(b=> b.addEventListener('click', closeCheckout));
+    overlay.addEventListener('mousedown', e=>{ if(e.target === overlay) closeCheckout(); });
+    document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && overlay.classList.contains('open')) closeCheckout(); });
+
+    form.addEventListener('submit', e=>{
       e.preventDefault();
       const de = document.documentElement.lang === 'de';
-      alert(de ? 'Checkout kommt hierhin (Mindbody). Das ist ein visuelles Konzept.'
-              : 'Checkout goes here (Mindbody). This is a visual concept.');
+      // Basic native validation (real submit hands details to Mindbody).
+      if(!form.checkValidity()){ form.reportValidity(); return; }
+      const first = document.getElementById('co-first').value.trim();
+      const email = document.getElementById('co-email').value.trim();
+      const loc = de ? 'de-DE' : 'en-GB';
+      const dayStr = (selectedDay || new Date()).toLocaleDateString(loc, {weekday:'long', day:'numeric', month:'long'});
+      succ.textContent = de
+        ? 'Dein Sommer-Deal ist bereit, ' + first + '. Du startest am ' + dayStr + '. Wir haben dir an ' + email + ' eine Bestätigung samt Konto-Zugang geschickt.'
+        : "Your Summer Deal is ready, " + first + ". You start on " + dayStr + ". We've emailed your confirmation and account details to " + email + '.';
+      overlay.classList.add('done');
+      overlay.querySelector('.modal').scrollTop = 0;
     });
-  });
+  })();
 </script>
-</body>
-</html>
+
+
+
+
+</body></html>
