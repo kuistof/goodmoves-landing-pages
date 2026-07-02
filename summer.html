@@ -46,7 +46,8 @@
      https://gms-summer-landing-production.up.railway.app/fonts/nersans-three.otf */
   @font-face{
     font-family:'Nersans Three';
-    src:url('https://summer.goodmovesstudio.com/fonts/nersans-three.otf') format('opentype');
+    src:url('https://summer.goodmovesstudio.com/fonts/nersans-three.otf') format('opentype'),
+        url('https://gms-summer-landing-production.up.railway.app/fonts/nersans-three.otf') format('opentype');
     font-weight:400 900;
     font-display:swap;
   }
@@ -730,11 +731,22 @@
 <script>
   // ---- Checkout config ----
   // Backend: the GMS purchase-flow app (Stripe PaymentIntents + webhook that
-  // creates the Mindbody account). The custom domain is registered on the
-  // backend; while its DNS propagates, or if it ever fails, switch to the
-  // direct Railway URL below.
-  const CHECKOUT_API = 'https://summer.goodmovesstudio.com';
-  // const CHECKOUT_API = 'https://gms-summer-landing-production.up.railway.app';
+  // creates the Mindbody account). The custom domain is primary; the direct
+  // Railway URL is a runtime fallback so checkout keeps working even while
+  // DNS is propagating (or if the domain ever breaks).
+  const CHECKOUT_APIS = [
+    'https://summer.goodmovesstudio.com',
+    'https://gms-summer-landing-production.up.railway.app',
+  ];
+  /** POST to the first backend that answers; falls through on network errors. */
+  async function checkoutFetch(path, init){
+    let lastErr;
+    for (const base of CHECKOUT_APIS){
+      try { return await fetch(base + path, init); }
+      catch (err) { lastErr = err; }               // DNS/network failure → next
+    }
+    throw lastErr;
+  }
   // Stripe TEST publishable key (pk_test_… keys are public by design).
   // Swap for the live pk_live_… key at go-live.
   const STRIPE_PK = 'pk_test_51TRnvvPulh0FETRrgMnfQr8kOqf8XphMkAle5Yu4mLiXxlGI6ZUhbek93gv7NME44Rd10eU8xv9Qmvinurrip9LI00INCqC78D';
@@ -870,7 +882,7 @@
 
       setBusy(coBtn, true, t('One moment…', 'Einen Moment…'));
       try{
-        const res  = await fetch(CHECKOUT_API + '/api/checkout', {
+        const res  = await checkoutFetch('/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ packageId: 'summer-deal', name: billing.name, email: email, phone: phone })
