@@ -32,10 +32,16 @@
 
 <style>
   /* Good Moves brand display face. Falls back to Nunito (the rounded
-     Google font the GMS guidelines sanction as the Nersans stand-in). */
+     Google font the GMS guidelines sanction as the Nersans stand-in).
+     The licensed .otf is NOT committed to this repo — it's served from the
+     GMS checkout backend, which sends CORS headers for cross-origin
+     @font-face. Once summer.goodmovesstudio.com DNS is live this page and
+     the font share the same origin. If the custom domain ever fails,
+     switch to the direct backend host:
+     https://gms-summer-landing-production.up.railway.app/fonts/nersans-three.otf */
   @font-face{
     font-family:'Nersans Three';
-    src:url('fonts/nersans-three.otf') format('opentype');
+    src:url('https://summer.goodmovesstudio.com/fonts/nersans-three.otf') format('opentype');
     font-weight:400 900;
     font-display:swap;
   }
