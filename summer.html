@@ -634,8 +634,8 @@
     </div>
     <div class="foot-bottom" data-de="© Good Moves Pilates Studio · Prenzlauer Berg, Berlin · Sommer-Deal">© Good Moves Pilates Studio · Prenzlauer Berg, Berlin · Summer Deal</div>
     <div class="foot-legal">
-      <a href="impressum.html" data-de="Impressum">Imprint</a> ·
-      <a href="datenschutz.html" data-de="Datenschutzerklärung">Privacy policy</a> ·
+      <a href="https://goodmoves-summer.vercel.app/impressum.html" data-de="Impressum">Imprint</a> ·
+      <a href="https://goodmoves-summer.vercel.app/datenschutz.html" data-de="Datenschutzerklärung">Privacy policy</a> ·
       <a href="#" id="consentSettings" data-de="Cookie-Einstellungen">Cookie settings</a>
     </div>
   </div>
@@ -649,7 +649,7 @@
 
 <!-- ============ 10b. CONSENT BANNER (Meta pixel loads only after opt-in AND with a real pixel ID) ============ -->
 <div class="consent" id="consent" hidden>
-  <p data-de="Wir würden gern mit dem Meta-Pixel messen, ob unsere Anzeigen funktionieren. Das passiert nur mit deiner Zustimmung. Details in der &lt;a href='datenschutz.html'&gt;Datenschutzerklärung&lt;/a&gt;.">We would like to use the Meta pixel to measure whether our ads work. That only happens with your consent. Details in the <a href="datenschutz.html">privacy policy</a>.</p>
+  <p data-de="Wir würden gern mit dem Meta-Pixel messen, ob unsere Anzeigen funktionieren. Das passiert nur mit deiner Zustimmung. Details in der &lt;a href='https://goodmoves-summer.vercel.app/datenschutz.html'&gt;Datenschutzerklärung&lt;/a&gt;.">We would like to use the Meta pixel to measure whether our ads work. That only happens with your consent. Details in the <a href="https://goodmoves-summer.vercel.app/datenschutz.html">privacy policy</a>.</p>
   <div class="consent-btns">
     <button type="button" class="btn consent-accept" data-de="Einverstanden">Sounds good</button>
     <button type="button" class="consent-decline" data-de="Ablehnen">Decline</button>
@@ -850,8 +850,8 @@
     function showSuccess(firstName, email){
       const who = firstName ? ' ' + firstName : '';
       succ.textContent = t(
-        'Thanks' + who + " — your Summer Deal is ready. We're setting up your Good Moves account; book your classes whenever you like, any time until 15 September." + (email ? ' You’ll get an email at ' + email + '.' : ''),
-        'Danke' + who + ' — dein Sommer-Deal ist bereit. Wir richten dein Good-Moves-Konto ein; buche deine Kurse, wann immer du möchtest, jederzeit bis 15. September.' + (email ? ' Du bekommst eine E-Mail an ' + email + '.' : '')
+        'Thanks' + who + ", your Summer Deal is ready. We're setting up your Good Moves account; book your classes whenever you like, any time until 15 September." + (email ? ' You’ll get an email at ' + email + '.' : ''),
+        'Danke' + who + ', dein Sommer-Deal ist bereit. Wir richten dein Good-Moves-Konto ein; buche deine Kurse, wann immer du möchtest, jederzeit bis 15. September.' + (email ? ' Du bekommst eine E-Mail an ' + email + '.' : '')
       );
       overlay.classList.remove('open');       // ensure re-open animation state is sane
       overlay.classList.add('open', 'done');
