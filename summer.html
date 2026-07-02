@@ -131,8 +131,14 @@
   .hero{padding:clamp(40px,6vw,82px) 0 clamp(44px,6vw,76px);position:relative;overflow:hidden}
   .hero .blob-a{color:var(--beige);width:min(680px,70vw);top:-14%;right:-12%;opacity:.9}
   .hero .blob-b{color:var(--terracotta);width:min(240px,34vw);bottom:-12%;left:-9%;opacity:.16}
-  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,4vw,56px);align-items:center}
-  @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:34px}}
+  /* copy is split around the visual so the photo lands right under the
+     subheadline on mobile; on desktop the areas rebuild the two columns */
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;column-gap:clamp(28px,4vw,56px);row-gap:0;
+    grid-template-areas:"copytop visual" "copyrest visual"}
+  .hero-copy-top{grid-area:copytop;align-self:end}
+  .hero-copy-rest{grid-area:copyrest;align-self:start}
+  .hero-visual{grid-area:visual;align-self:center}
+  @media(max-width:880px){.hero-grid{grid-template-columns:1fr;grid-template-areas:"copytop" "visual" "copyrest";row-gap:28px}}
 
   .hero h1{color:var(--ink);margin:14px 0 0}
   .hero h1 em{font-style:normal;color:var(--terracotta)}
@@ -312,6 +318,9 @@
   .sticky-cta .s-price b{font-family:var(--display);display:block;font-size:1.04rem;text-transform:uppercase;color:var(--terracotta)}
   .sticky-cta .btn{padding:14px 22px;font-size:.9rem}
   @media(max-width:880px){.sticky-cta{display:flex}}
+  /* with JS the bar stays tucked away until the hero (price included) is scrolled past */
+  .js .sticky-cta{transform:translateY(110%);transition:transform .25s ease}
+  .js .sticky-cta.show{transform:none}
 
   /* reveal on scroll, gated by .js so content is ALWAYS visible if JS is off */
   .js .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease, transform .6s ease}
@@ -457,10 +466,30 @@
   <svg class="blob blob-b" viewBox="1222 40 993 758" aria-hidden="true"><path fill="currentColor" d="M1748.38 59.5289C1803.41 59.5289 1851.45 89.4604 1877.1 133.931C1894.28 163.7 1931.34 186.876 1962.51 172.405C2036.9 137.871 2125.2 170.181 2159.73 244.57C2194.27 318.959 2161.96 407.259 2087.57 441.793C2023.99 471.306 2010.49 555.782 2061.69 603.648L2068.24 609.765C2105.01 644.137 2106.95 701.809 2072.58 738.579C2038.21 775.348 1980.54 777.292 1943.77 742.921L1884.24 687.281C1815.97 623.459 1683.94 629.169 1603.73 666.405L1473.46 726.879C1399.07 761.412 1310.77 729.103 1276.24 654.714C1241.7 580.324 1274.01 492.024 1348.4 457.491L1446.5 411.95C1492.24 390.715 1501.96 329.935 1465.12 295.497C1428.35 261.125 1426.41 203.453 1460.78 166.683C1495.15 129.913 1552.82 127.969 1589.59 162.34C1595.75 168.094 1605.96 165 1608.85 157.086C1629.64 100.164 1684.27 59.5289 1748.38 59.5289Z"></path></svg>
 
   <div class="wrap hero-grid">
-    <div class="hero-copy">
+    <div class="hero-copy hero-copy-top">
       <p class="eyebrow" data-de="Sommer-Deal · Prenzlauer Berg, Berlin">Summer Deal · Prenzlauer Berg, Berlin</p>
       <h1 data-de="Ein ganzer Sommer&lt;br&gt;&lt;em&gt;Pilates.&lt;/em&gt;">A whole summer<br>of <em>pilates.</em></h1>
       <p style="font-family:var(--display);font-weight:800;text-transform:uppercase;color:var(--ink);font-size:1.2rem;letter-spacing:-.01em;margin:16px 0 0" data-de="Ein Preis, keine monatliche Bindung.">One price, no monthly commitment.</p>
+    </div>
+
+    <!-- Hero visual: the studio itself, with the deep-blue deal card on top.
+         Sits between the copy halves so it follows the subheadline on mobile. -->
+    <div class="hero-visual">
+      <figure class="hero-photo">
+        <img src="assets/studio-hero.jpg" alt="Inside Good Moves Studio in Prenzlauer Berg, the blue arch and the mirror wall" fetchpriority="high" onerror="this.closest('.hero-visual').classList.add('no-photo');this.closest('.hero-photo').remove()">
+      </figure>
+      <span class="float-chip" data-de="Einmal zahlen">Pay once</span>
+      <div class="deal-visual" id="hero-deal">
+      <svg class="blob blob-c" viewBox="78 77 851 726" aria-hidden="true"><path fill="currentColor" d="M438.091 104.607C461.697 104.607 484.085 109.819 504.168 119.156C554.495 142.553 614.02 166.945 664.361 143.576C742.969 107.084 836.277 141.225 872.77 219.834C909.262 298.442 875.119 391.75 796.511 428.242C729.329 459.429 715.057 548.695 769.165 599.274L776.084 605.742C814.94 642.063 816.994 703.006 780.673 741.861C744.352 780.716 683.409 782.771 644.554 746.45C602.852 707.468 534.225 718.333 479.116 733.221C458.365 738.827 436.465 740.089 415.2 736.981C272.9 716.182 240.474 695.486 161.691 575.173C157.554 568.855 153.823 562.16 150.549 555.108C131.64 514.376 131.696 469.698 147.077 431.022C167.218 380.376 178.578 310.868 138.761 273.648C99.906 237.327 97.8516 176.385 134.172 137.53C170.493 98.6746 231.436 96.6193 270.291 132.94C291.509 152.774 325.331 148.615 349.26 132.153C374.518 114.778 405.117 104.607 438.091 104.607Z"></path></svg>
+      <svg class="blob blob-d" viewBox="1222 40 993 758" aria-hidden="true"><path fill="currentColor" d="M1748.38 59.5289C1803.41 59.5289 1851.45 89.4604 1877.1 133.931C1894.28 163.7 1931.34 186.876 1962.51 172.405C2036.9 137.871 2125.2 170.181 2159.73 244.57C2194.27 318.959 2161.96 407.259 2087.57 441.793C2023.99 471.306 2010.49 555.782 2061.69 603.648L2068.24 609.765C2105.01 644.137 2106.95 701.809 2072.58 738.579C2038.21 775.348 1980.54 777.292 1943.77 742.921L1884.24 687.281C1815.97 623.459 1683.94 629.169 1603.73 666.405L1473.46 726.879C1399.07 761.412 1310.77 729.103 1276.24 654.714C1241.7 580.324 1274.01 492.024 1348.4 457.491L1446.5 411.95C1492.24 390.715 1501.96 329.935 1465.12 295.497C1428.35 261.125 1426.41 203.453 1460.78 166.683C1495.15 129.913 1552.82 127.969 1589.59 162.34C1595.75 168.094 1605.96 165 1608.85 157.086C1629.64 100.164 1684.27 59.5289 1748.38 59.5289Z"></path></svg>
+      <span class="dv-kicker" data-de="Sommer-Deal · pauschal">Summer Deal · flat</span>
+      <span class="dv-price" data-de="99 €">€99</span>
+      <span class="dv-sub" data-de="Unbegrenzt,&lt;br&gt;den ganzen Sommer">Unlimited,<br>all summer</span>
+      <span class="dv-until" data-de="bis 15. September">until 15 September</span>
+      </div>
+    </div>
+
+    <div class="hero-copy hero-copy-rest">
       <p class="lead" data-de="Unbegrenzt Pilates-Kurse in unserem Studio in Prenzlauer Berg. Einmal zahlen, so viel bewegen, wie du möchtest.">Unlimited pilates classes at our Prenzlauer Berg studio. Pay once, move as much as you like.</p>
       <p class="price-line" data-de="&lt;b&gt;99 €&lt;/b&gt; pauschal. Unbegrenzt bis 15. September, rund 10 Wochen."><b>€99</b> flat. Unlimited until 15 September, around 10 weeks.</p>
 
@@ -473,22 +502,6 @@
         <li><span class="check">✓</span> <span data-de="Unbegrenzt bis 15. September">Unlimited until 15 September</span></li>
         <li><span class="check">✓</span> <span data-de="Nichts zu kündigen">Nothing to cancel</span></li>
       </ul>
-    </div>
-
-    <!-- Hero visual: the studio itself, with the deep-blue deal card on top -->
-    <div class="hero-visual">
-      <figure class="hero-photo">
-        <img src="assets/studio-hero.jpg" alt="Inside Good Moves Studio in Prenzlauer Berg, the blue arch and the mirror wall" fetchpriority="high" onerror="this.closest('.hero-visual').classList.add('no-photo');this.closest('.hero-photo').remove()">
-      </figure>
-      <span class="float-chip" data-de="Einmal zahlen">Pay once</span>
-      <div class="deal-visual">
-      <svg class="blob blob-c" viewBox="78 77 851 726" aria-hidden="true"><path fill="currentColor" d="M438.091 104.607C461.697 104.607 484.085 109.819 504.168 119.156C554.495 142.553 614.02 166.945 664.361 143.576C742.969 107.084 836.277 141.225 872.77 219.834C909.262 298.442 875.119 391.75 796.511 428.242C729.329 459.429 715.057 548.695 769.165 599.274L776.084 605.742C814.94 642.063 816.994 703.006 780.673 741.861C744.352 780.716 683.409 782.771 644.554 746.45C602.852 707.468 534.225 718.333 479.116 733.221C458.365 738.827 436.465 740.089 415.2 736.981C272.9 716.182 240.474 695.486 161.691 575.173C157.554 568.855 153.823 562.16 150.549 555.108C131.64 514.376 131.696 469.698 147.077 431.022C167.218 380.376 178.578 310.868 138.761 273.648C99.906 237.327 97.8516 176.385 134.172 137.53C170.493 98.6746 231.436 96.6193 270.291 132.94C291.509 152.774 325.331 148.615 349.26 132.153C374.518 114.778 405.117 104.607 438.091 104.607Z"></path></svg>
-      <svg class="blob blob-d" viewBox="1222 40 993 758" aria-hidden="true"><path fill="currentColor" d="M1748.38 59.5289C1803.41 59.5289 1851.45 89.4604 1877.1 133.931C1894.28 163.7 1931.34 186.876 1962.51 172.405C2036.9 137.871 2125.2 170.181 2159.73 244.57C2194.27 318.959 2161.96 407.259 2087.57 441.793C2023.99 471.306 2010.49 555.782 2061.69 603.648L2068.24 609.765C2105.01 644.137 2106.95 701.809 2072.58 738.579C2038.21 775.348 1980.54 777.292 1943.77 742.921L1884.24 687.281C1815.97 623.459 1683.94 629.169 1603.73 666.405L1473.46 726.879C1399.07 761.412 1310.77 729.103 1276.24 654.714C1241.7 580.324 1274.01 492.024 1348.4 457.491L1446.5 411.95C1492.24 390.715 1501.96 329.935 1465.12 295.497C1428.35 261.125 1426.41 203.453 1460.78 166.683C1495.15 129.913 1552.82 127.969 1589.59 162.34C1595.75 168.094 1605.96 165 1608.85 157.086C1629.64 100.164 1684.27 59.5289 1748.38 59.5289Z"></path></svg>
-      <span class="dv-kicker" data-de="Sommer-Deal · pauschal">Summer Deal · flat</span>
-      <span class="dv-price" data-de="99 €">€99</span>
-      <span class="dv-sub" data-de="Unbegrenzt,&lt;br&gt;den ganzen Sommer">Unlimited,<br>all summer</span>
-      <span class="dv-until" data-de="bis 15. September">until 15 September</span>
-      </div>
     </div>
   </div>
 </section>
@@ -889,6 +902,20 @@
       overlay.querySelector('.modal').scrollTop = 0;
       if(window.gmsTrack) window.gmsTrack('Lead');
     });
+  })();
+
+  /* ---- Sticky CTA appears only once the hero, price panel included, is scrolled past ---- */
+  (function(){
+    var hero = document.querySelector('.hero');
+    var sticky = document.querySelector('.sticky-cta');
+    if(!sticky) return;
+    if(!hero){ sticky.classList.add('show'); return; }
+    var update = function(){
+      sticky.classList.toggle('show', hero.getBoundingClientRect().bottom < 0);
+    };
+    document.addEventListener('scroll', update, {passive:true});
+    window.addEventListener('resize', update);
+    update();
   })();
 
   /* ---- Consent + Meta pixel.
