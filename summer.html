@@ -853,7 +853,7 @@
       fbq('init', PIXEL_ID);
       fbq('track', 'PageView');
     }
-    window.gmsTrack = function(ev){ if(window.fbq) fbq('track', ev); };
+    window.gmsTrack = function(ev, params){ if(window.fbq) fbq('track', ev, params || undefined); };
 
     function choose(v){
       try{ localStorage.setItem(KEY, v); }catch(e){}
