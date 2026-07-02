@@ -1018,11 +1018,16 @@
 
   /* ---- Consent + Meta pixel.
      The pixel loads ONLY if (a) a real numeric pixel ID is configured below and
-     (b) the visitor accepted via the banner. With the placeholder ID the banner
-     stays hidden and nothing loads. Swap in the ID from the GMS Business Manager. ---- */
+     (b) the visitor accepted via the banner. With a placeholder ID (e.g.
+     'PIXEL_ID_TBD') the banner stays hidden, nothing loads, and every
+     gmsTrack call is a no-op. Events: PageView on load (post-consent),
+     InitiateCheckout on modal open, Lead when the payment step is reached,
+     Purchase (value 99 EUR) on payment success — with the PaymentIntent id
+     as eventID so the upcoming server-side Conversions API events dedup
+     against the browser ones. ---- */
   (function(){
-    var PIXEL_ID = '1523466119279616';
-    var live = /^\d{5,}$/.test(PIXEL_ID);
+    var META_PIXEL_ID = '1523466119279616'; // from the GMS Business Manager
+    var live = /^\d{5,}$/.test(META_PIXEL_ID);
     var KEY = 'gms_consent';
     var banner = document.getElementById('consent');
     if(!banner) return;
@@ -1034,10 +1039,15 @@
         n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
         t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
         document,'script','https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', PIXEL_ID);
+      fbq('init', META_PIXEL_ID);
       fbq('track', 'PageView');
     }
-    window.gmsTrack = function(ev, params){ if(window.fbq) fbq('track', ev, params || undefined); };
+    // eventID (the Stripe PaymentIntent id for Purchase) lets Meta dedup the
+    // browser event against the same event sent via the Conversions API.
+    window.gmsTrack = function(ev, params, eventID){
+      if(!window.fbq) return;
+      fbq('track', ev, params || undefined, eventID ? { eventID: eventID } : undefined);
+    };
 
     function choose(v){
       try{ localStorage.setItem(KEY, v); }catch(e){}
