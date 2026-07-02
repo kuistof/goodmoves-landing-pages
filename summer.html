@@ -16,11 +16,12 @@
              deep blue #001DA2 · ink #000044  (bold, flat, no gradients)
     type     Nersans Three display (Nunito fallback) + system body
     signature  organic blob shapes, the real circle logo lockup
-  ONE JOB: explain the €99 flat summer deal, build quick trust, send to
-  the Mindbody checkout. Deliberately simple and transactional.
-  OFFER: €99 flat, unlimited classes until 15 September (~10 weeks),
-  unlimited classes until 15 September (~10 weeks). Price/date are
-  drafts; the checkout creates a Mindbody account behind the scenes.
+  ONE JOB: explain the €99 flat summer deal, build quick trust, take
+  payment in the on-page checkout. Deliberately simple and transactional.
+  OFFER: €99 flat, unlimited classes until 15 September (~10 weeks).
+  CHECKOUT: details -> POST {CHECKOUT_API}/api/checkout -> Stripe Payment
+  Element (card) -> success. The GMS backend takes it from there
+  (webhook -> order -> Mindbody account, confirmation email).
   Bilingual: EN default in markup, DE in data-de ("Lehrer:innen", no
   dashes in visible copy). Positive framing only, no comparisons.
   ===================================================================
@@ -30,12 +31,23 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600..900&display=swap" rel="stylesheet">
 
+<!-- Stripe.js — powers the embedded card form in the checkout modal.
+     Loaded on every page view per Stripe's guidance (fraud signals). -->
+<script src="https://js.stripe.com/v3/"></script>
+
 <style>
   /* Good Moves brand display face. Falls back to Nunito (the rounded
-     Google font the GMS guidelines sanction as the Nersans stand-in). */
+     Google font the GMS guidelines sanction as the Nersans stand-in).
+     The licensed .otf is NOT committed to this repo — it's served from the
+     GMS checkout backend, which sends CORS headers for cross-origin
+     @font-face. Once summer.goodmovesstudio.com DNS is live this page and
+     the font share the same origin. If the custom domain ever fails,
+     switch to the direct backend host:
+     https://gms-summer-landing-production.up.railway.app/fonts/nersans-three.otf */
   @font-face{
     font-family:'Nersans Three';
-    src:url('fonts/nersans-three.otf') format('opentype');
+    src:url('https://summer.goodmovesstudio.com/fonts/nersans-three.otf') format('opentype'),
+        url('https://gms-summer-landing-production.up.railway.app/fonts/nersans-three.otf') format('opentype');
     font-weight:400 900;
     font-display:swap;
   }
@@ -386,7 +398,17 @@
 
 
   .modal .btn.full{width:100%;margin-top:24px;min-height:56px}
+  .modal .btn.full[disabled]{opacity:.6;cursor:default;transform:none;box-shadow:none}
   .fineprint{font-size:.78rem;font-weight:500;color:var(--muted);text-align:center;margin-top:22px;line-height:1.5}
+
+  /* inline form/payment errors — matches the Stripe appearance colorDanger */
+  .form-error{margin:14px 0 0;font-size:.88rem;font-weight:700;color:#962c19}
+  .form-error[hidden]{display:none}
+  /* payment step: Stripe mounts its own iframe into #payment-element */
+  #payment-element{min-height:120px;margin-top:4px}
+  .pay-back{display:block;margin:18px auto 0;background:none;border:0;padding:0;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.84rem;color:var(--muted)}
+  .pay-back:hover{color:var(--ink)}
 
   .modal-success{display:none;position:relative;overflow:hidden;padding:46px 30px 48px;text-align:center}
   .modal-overlay.done .modal-body{display:none}
@@ -510,7 +532,7 @@
       <div class="val val--beige reveal">
         <div class="vnum" data-de="99 €">€99</div>
         <h3 data-de="Einmal zahlen">Pay once</h3>
-        <p data-de="Keine Monatsgebühr, nichts, was du später kündigen musst. Du zahlst einmal und bist dabei.">No monthly fee, nothing to cancel later. You pay once and you're in.</p>
+        <p data-de="Keine Monatsgebühr, kein Abo, das du später kündigen musst. Du zahlst einmal und bist dabei.">No monthly fee, no subscription to cancel later. You pay once and you're in.</p>
       </div>
       <div class="val val--blue reveal">
         <div class="vnum" data-de="∞">∞</div>
@@ -573,6 +595,7 @@
       <details><summary data-de="Wie lange läuft das Angebot?">How long does it run?</summary><p class="faq-answer" data-de="Ab jetzt bis 15. September. Das sind rund 10 Wochen, etwa 2,5 Monate unbegrenzte Bewegung zu einem Pauschalpreis.">From now until 15 September. That's roughly 10 weeks, about 2.5 months of unlimited movement for one flat price.</p></details>
       <details><summary data-de="Ist es wirklich unbegrenzt?">Is it really unlimited?</summary><p class="faq-answer" data-de="Ja. Buch so viele Kurse, wie du möchtest, den ganzen Sommer. Wir empfehlen einen Rhythmus, wir schreiben dir nie einen vor.">Yes. Book as many classes as you like across the summer. We recommend a rhythm, we never lock you to one.</p></details>
       <details><summary data-de="Wann kann ich starten?">When can I start?</summary><p class="faq-answer" data-de="Wann immer du möchtest. Kauf den Deal und buch direkt deine erste Stunde. Dein Sommer läuft ab da bis zum 15. September.">Whenever you like. Get the deal and book your first class right away. Your summer runs from there until 15 September.</p></details>
+      <details><summary data-de="Gibt es versteckte Kosten?">Are there hidden costs?</summary><p class="faq-answer" data-de="Nein. Kein Abo, keine Zusatzgebühren. Nur fair gegenüber allen, die auf einen Platz warten: Wenn du einen gebuchten Kurs zu spät stornierst, kostet das 5 €, bei Nichterscheinen 14 €. Rechtzeitig storniert kostet es nichts.">No. No subscription, no extra charges. The one thing to know, to keep spots fair for everyone on the waitlist: cancelling a booked class late is €5, not showing up is €14. Cancel in time and it costs nothing.</p></details>
       <details><summary data-de="Wo seid ihr?">Where are you?</summary><p class="faq-answer" data-de="Immanuelkirchstraße 24 in Prenzlauer Berg, 10405 Berlin. Vier Minuten von der M4 Hufelandstraße, fünf Minuten von der M2 Knaackstraße.">Immanuelkirchstraße 24 in Prenzlauer Berg, 10405 Berlin. Four minutes from the M4 Hufelandstraße stop, five from the M2 Knaackstraße.</p></details>
     </div>
   </div>
@@ -609,7 +632,7 @@
       <div class="foot-col"><b data-de="Öffnungszeiten">Hours</b><p data-de="Mo bis Fr · 7:00 bis 21:00&lt;br&gt;Sa und So · 9:00 bis 15:00">Mon to Fri · 7:00 to 21:00<br>Sat and Sun · 9:00 to 15:00</p></div>
       <div class="foot-col"><b data-de="Bewertung">Rated</b><p data-de="★ 4,9 / 5&lt;br&gt;~4.000 Bewertungen">★ 4.9 / 5<br>~4,000 reviews</p></div>
     </div>
-    <div class="foot-bottom" data-de="© Good Moves Pilates Studio · Prenzlauer Berg, Berlin · Sommer-Deal · &lt;em&gt;Konzeptentwurf, nicht zur Veröffentlichung.&lt;/em&gt;">© Good Moves Pilates Studio · Prenzlauer Berg, Berlin · Summer Deal · <em>Concept draft, not for publication.</em></div>
+    <div class="foot-bottom" data-de="© Good Moves Pilates Studio · Prenzlauer Berg, Berlin · Sommer-Deal">© Good Moves Pilates Studio · Prenzlauer Berg, Berlin · Summer Deal</div>
     <div class="foot-legal">
       <a href="impressum.html" data-de="Impressum">Imprint</a> ·
       <a href="datenschutz.html" data-de="Datenschutzerklärung">Privacy policy</a> ·
@@ -680,14 +703,25 @@
         <input id="co-phone" name="phone" type="tel" autocomplete="tel" placeholder="+49 ..." required="">
       </div>
 
-      <button type="submit" class="btn btn--lg full" data-de="Kauf abschließen · 99 €">Complete purchase · €99</button>
-      <p class="fineprint" data-de="Sicherer Checkout. Wir richten dein Good-Moves-Konto ein, damit du sofort Kurse buchen kannst. Späte Stornierung 5 €, Nichterscheinen 14 €.">Secure checkout. We'll set up your Good Moves account so you can book classes right away. Late cancellation €5, no-show €14.</p>
+      <p class="form-error" id="co-error" role="alert" hidden></p>
+      <button type="submit" class="btn btn--lg full" id="co-continue" data-de="Weiter zur Zahlung · 99 €">Continue to payment · €99</button>
+      <p class="fineprint" data-de="Sicherer Checkout. Wir richten dein Good-Moves-Konto ein, damit du jederzeit bis 15. September Kurse buchen kannst. Späte Stornierung 5 €, Nichterscheinen 14 €.">Secure checkout. We'll set up your Good Moves account so you can book classes whenever you like, until 15 September. Late cancellation €5, no-show €14.</p>
+    </form>
+
+    <!-- step 2: Stripe Payment Element (card). Mounted by JS once the
+         backend returns a PaymentIntent client secret. -->
+    <form class="modal-body" id="payForm" hidden>
+      <div class="form-sec-head" data-de="Zahlung">Payment</div>
+      <div id="payment-element"></div>
+      <p class="form-error" id="pay-error" role="alert" hidden></p>
+      <button type="submit" class="btn btn--lg full" id="pay-submit" data-de="99 € zahlen">Pay €99</button>
+      <button type="button" class="pay-back" id="pay-back" data-de="← Zurück zu den Daten">← Back to details</button>
     </form>
 
     <div class="modal-success">
       <svg class="succ-blob" viewBox="78 77 851 726" aria-hidden="true"><path fill="currentColor" d="M438.091 104.607C461.697 104.607 484.085 109.819 504.168 119.156C554.495 142.553 614.02 166.945 664.361 143.576C742.969 107.084 836.277 141.225 872.77 219.834C909.262 298.442 875.119 391.75 796.511 428.242C729.329 459.429 715.057 548.695 769.165 599.274L776.084 605.742C814.94 642.063 816.994 703.006 780.673 741.861C744.352 780.716 683.409 782.771 644.554 746.45C602.852 707.468 534.225 718.333 479.116 733.221C458.365 738.827 436.465 740.089 415.2 736.981C272.9 716.182 240.474 695.486 161.691 575.173C157.554 568.855 153.823 562.16 150.549 555.108C131.64 514.376 131.696 469.698 147.077 431.022C167.218 380.376 178.578 310.868 138.761 273.648C99.906 237.327 97.8516 176.385 134.172 137.53C170.493 98.6746 231.436 96.6193 270.291 132.94C291.509 152.774 325.331 148.615 349.26 132.153C374.518 114.778 405.117 104.607 438.091 104.607Z"></path></svg>
       <div class="succ-check">✓</div>
-      <h3 data-de="Du bist dabei!">You're in!</h3>
+      <h3 data-de="Zahlung erhalten!">Payment received!</h3>
       <p id="successMsg"></p>
       <button type="button" class="btn" data-close="" data-de="Fertig">Done</button>
     </div>
@@ -695,6 +729,27 @@
 </div>
 
 <script>
+  // ---- Checkout config ----
+  // Backend: the GMS purchase-flow app (Stripe PaymentIntents + webhook that
+  // creates the Mindbody account). The custom domain is primary; the direct
+  // Railway URL is a runtime fallback so checkout keeps working even while
+  // DNS is propagating (or if the domain ever breaks).
+  const CHECKOUT_APIS = [
+    'https://summer.goodmovesstudio.com',
+    'https://gms-summer-landing-production.up.railway.app',
+  ];
+  /** POST to the first backend that answers; falls through on network errors. */
+  async function checkoutFetch(path, init){
+    let lastErr;
+    for (const base of CHECKOUT_APIS){
+      try { return await fetch(base + path, init); }
+      catch (err) { lastErr = err; }               // DNS/network failure → next
+    }
+    throw lastErr;
+  }
+  // Stripe LIVE publishable key (publishable keys are public by design).
+  const STRIPE_PK = 'pk_live_51TRnvvPulh0FETRrkkaz9wXC1EFDC9K5fBfjtyuuLqXZ0OdeydDupfNHpd9jVQiQAUG0RQYCmMux7MWkwh3wmoTr00Djz8pRLC';
+
   // ---- Language switch: EN default, auto-detect DE from the browser, remember the choice ----
   (function(){
     const i18n = document.querySelectorAll('[data-de]');
@@ -726,19 +781,62 @@
     reveals.forEach(el=>el.classList.add('in'));
   }
 
-  // ---- Checkout (visual concept). The real flow creates a Mindbody account from
-  //      name/email/phone behind the scenes; wire that up at submit time. No class
-  //      selection here — just the customer's details. ----
+  // ---- Checkout: details -> POST /api/checkout -> Stripe Payment Element ->
+  //      success. The backend webhook creates the Mindbody account and sends
+  //      the confirmation email; the pass activates on the first booking. ----
   (function(){
     const overlay = document.getElementById('checkout');
     const form    = document.getElementById('checkoutForm');
+    const payForm = document.getElementById('payForm');
     const succ    = document.getElementById('successMsg');
+    const coError  = document.getElementById('co-error');
+    const payError = document.getElementById('pay-error');
+    const coBtn    = document.getElementById('co-continue');
+    const payBtn   = document.getElementById('pay-submit');
+    const PENDING_KEY = 'gms_summer_pending';
     let lastFocused = null;
+    let stripe = null, elements = null;
+    let billing = { name:'', email:'', phone:'' };
+    let busy = false;
+
+    const isDe = () => document.documentElement.lang === 'de';
+    const t = (en, de) => isDe() ? de : en;
+
+    // Stripe Payment Element, dressed like the page (same as the GMS app).
+    const appearance = {
+      theme: 'flat',
+      variables: {
+        colorPrimary: '#001da2',
+        colorBackground: '#ffffff',
+        colorText: '#000044',
+        colorDanger: '#962c19',
+        fontSizeBase: '16px',
+        borderRadius: '10px',
+        spacingUnit: '4px'
+      }
+    };
+
+    function showError(el, msg){ el.textContent = msg; el.hidden = false; }
+    function clearErrors(){ coError.hidden = true; payError.hidden = true; }
+    function setBusy(btn, on, busyLabel){
+      busy = on;
+      btn.disabled = on;
+      btn.setAttribute('aria-busy', String(on));
+      if(on){ btn.dataset.label = btn.textContent; btn.textContent = busyLabel; }
+      else if(btn.dataset.label){ btn.textContent = btn.dataset.label; }
+    }
+    function toStep(step){ // 'details' | 'pay'
+      form.hidden    = step !== 'details';
+      payForm.hidden = step !== 'pay';
+      overlay.querySelector('.modal').scrollTop = 0;
+    }
 
     function openCheckout(){
       if(window.gmsTrack) window.gmsTrack('InitiateCheckout');
       lastFocused = document.activeElement;
       overlay.classList.remove('done');
+      toStep('details');
+      clearErrors();
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
       const f = document.getElementById('co-first');
@@ -749,6 +847,17 @@
       document.body.style.overflow = '';
       if(lastFocused && lastFocused.focus) lastFocused.focus();
     }
+    function showSuccess(firstName, email){
+      const who = firstName ? ' ' + firstName : '';
+      succ.textContent = t(
+        'Thanks' + who + " — your Summer Deal is ready. We're setting up your Good Moves account; book your classes whenever you like, any time until 15 September." + (email ? ' You’ll get an email at ' + email + '.' : ''),
+        'Danke' + who + ' — dein Sommer-Deal ist bereit. Wir richten dein Good-Moves-Konto ein; buche deine Kurse, wann immer du möchtest, jederzeit bis 15. September.' + (email ? ' Du bekommst eine E-Mail an ' + email + '.' : '')
+      );
+      overlay.classList.remove('open');       // ensure re-open animation state is sane
+      overlay.classList.add('open', 'done');
+      document.body.style.overflow = 'hidden';
+      overlay.querySelector('.modal').scrollTop = 0;
+    }
 
     document.querySelectorAll('a[href="#buy"]').forEach(a=>{
       a.addEventListener('click', e=>{ e.preventDefault(); openCheckout(); });
@@ -757,20 +866,106 @@
     overlay.addEventListener('mousedown', e=>{ if(e.target === overlay) closeCheckout(); });
     document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && overlay.classList.contains('open')) closeCheckout(); });
 
-    form.addEventListener('submit', e=>{
+    // Step 1: contact details -> create the PaymentIntent, mount the card form.
+    form.addEventListener('submit', async e=>{
       e.preventDefault();
-      const de = document.documentElement.lang === 'de';
-      // Basic native validation (real submit hands details to Mindbody).
+      if(busy) return;
+      clearErrors();
       if(!form.checkValidity()){ form.reportValidity(); return; }
+
       const first = document.getElementById('co-first').value.trim();
+      const last  = document.getElementById('co-last').value.trim();
       const email = document.getElementById('co-email').value.trim();
-      succ.textContent = de
-        ? 'Dein Sommer-Deal ist bereit, ' + first + '. Wir haben dir an ' + email + ' eine Bestätigung samt Konto-Zugang geschickt.'
-        : "Your Summer Deal is ready, " + first + ". We've emailed your confirmation and account details to " + email + '.';
-      overlay.classList.add('done');
-      overlay.querySelector('.modal').scrollTop = 0;
-      if(window.gmsTrack) window.gmsTrack('Lead');
+      const phone = document.getElementById('co-phone').value.trim();
+      billing = { name: (first + ' ' + last).trim(), email: email, phone: phone };
+
+      setBusy(coBtn, true, t('One moment…', 'Einen Moment…'));
+      try{
+        const res  = await checkoutFetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packageId: 'summer-deal', name: billing.name, email: email, phone: phone })
+        });
+        const data = await res.json().catch(()=>({}));
+        if(res.ok && data.ok && data.clientSecret){
+          // Context for a redirect-based payment: the returning page can
+          // still greet the buyer by name (see the ?paid=1 handler below).
+          try{ sessionStorage.setItem(PENDING_KEY, JSON.stringify({ firstName: first, email: email })); }catch(err){}
+          if(window.gmsTrack) window.gmsTrack('Lead');
+          stripe = stripe || Stripe(STRIPE_PK);
+          elements = stripe.elements({ clientSecret: data.clientSecret, appearance: appearance });
+          const payEl = elements.create('payment', {
+            layout: 'tabs',
+            // Contact was collected on step 1 — don't re-ask; we supply the
+            // billing details on confirm instead.
+            fields: { billingDetails: { name: 'never', email: 'never', phone: 'never' } }
+          });
+          document.getElementById('payment-element').innerHTML = '';
+          payEl.mount('#payment-element');
+          toStep('pay');
+        } else {
+          showError(coError, data.error || t("We couldn't start the payment. Please try again.", 'Die Zahlung konnte nicht gestartet werden. Bitte versuche es erneut.'));
+        }
+      } catch(err){
+        showError(coError, t("We couldn't reach the payment service. Please try again.", 'Der Zahlungsdienst war nicht erreichbar. Bitte versuche es erneut.'));
+      } finally {
+        setBusy(coBtn, false);
+      }
     });
+
+    // Step 2: confirm the payment. Cards complete inline (redirect:
+    // 'if_required'); only redirect methods navigate to return_url.
+    payForm.addEventListener('submit', async e=>{
+      e.preventDefault();
+      if(!stripe || !elements || busy) return;
+      clearErrors();
+      setBusy(payBtn, true, t('Processing…', 'Wird verarbeitet…'));
+      const returnUrl = new URL(window.location.href);
+      returnUrl.searchParams.set('paid', '1');
+      const result = await stripe.confirmPayment({
+        elements: elements,
+        confirmParams: {
+          return_url: returnUrl.toString(),
+          payment_method_data: {
+            billing_details: {
+              name:  billing.name  || undefined,
+              email: billing.email || undefined,
+              phone: billing.phone || undefined
+            }
+          }
+        },
+        redirect: 'if_required'
+      });
+      if(result.error){
+        showError(payError, result.error.message || t("Your payment couldn't be completed. Please try again.", 'Deine Zahlung konnte nicht abgeschlossen werden. Bitte versuche es erneut.'));
+        setBusy(payBtn, false);
+        return;
+      }
+      if(result.paymentIntent && result.paymentIntent.status === 'succeeded'){
+        try{ sessionStorage.removeItem(PENDING_KEY); }catch(err){}
+        if(window.gmsTrack) window.gmsTrack('Purchase', { value: 99, currency: 'EUR' }, result.paymentIntent.id);
+        showSuccess(billing.name.split(' ')[0], billing.email);
+        return;
+      }
+      setBusy(payBtn, false);
+    });
+
+    document.getElementById('pay-back').addEventListener('click', ()=>{ clearErrors(); toStep('details'); });
+
+    // Returning from a redirect-based payment (?paid=1 from return_url):
+    // restore the buyer's context and go straight to the success panel.
+    (function(){
+      const params = new URLSearchParams(window.location.search);
+      if(params.get('paid') !== '1' || params.get('redirect_status') === 'failed') return;
+      let pending = null;
+      try{ pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null'); }catch(err){}
+      try{ sessionStorage.removeItem(PENDING_KEY); }catch(err){}
+      const pi = params.get('payment_intent');
+      if(window.gmsTrack && pi) window.gmsTrack('Purchase', { value: 99, currency: 'EUR' }, pi);
+      showSuccess(pending && pending.firstName, pending && pending.email);
+      // tidy the URL so a reload doesn't re-show the success panel
+      try{ history.replaceState(null, '', window.location.pathname); }catch(err){}
+    })();
   })();
 
   /* ---- Gallery: dots + gentle auto advance until the visitor takes over ---- */
@@ -834,11 +1029,16 @@
 
   /* ---- Consent + Meta pixel.
      The pixel loads ONLY if (a) a real numeric pixel ID is configured below and
-     (b) the visitor accepted via the banner. With the placeholder ID the banner
-     stays hidden and nothing loads. Swap in the ID from the GMS Business Manager. ---- */
+     (b) the visitor accepted via the banner. With a placeholder ID (e.g.
+     'PIXEL_ID_TBD') the banner stays hidden, nothing loads, and every
+     gmsTrack call is a no-op. Events: PageView on load (post-consent),
+     InitiateCheckout on modal open, Lead when the payment step is reached,
+     Purchase (value 99 EUR) on payment success — with the PaymentIntent id
+     as eventID so the upcoming server-side Conversions API events dedup
+     against the browser ones. ---- */
   (function(){
-    var PIXEL_ID = '1523466119279616';
-    var live = /^\d{5,}$/.test(PIXEL_ID);
+    var META_PIXEL_ID = '1523466119279616'; // from the GMS Business Manager
+    var live = /^\d{5,}$/.test(META_PIXEL_ID);
     var KEY = 'gms_consent';
     var banner = document.getElementById('consent');
     if(!banner) return;
@@ -850,10 +1050,15 @@
         n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
         t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
         document,'script','https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', PIXEL_ID);
+      fbq('init', META_PIXEL_ID);
       fbq('track', 'PageView');
     }
-    window.gmsTrack = function(ev, params){ if(window.fbq) fbq('track', ev, params || undefined); };
+    // eventID (the Stripe PaymentIntent id for Purchase) lets Meta dedup the
+    // browser event against the same event sent via the Conversions API.
+    window.gmsTrack = function(ev, params, eventID){
+      if(!window.fbq) return;
+      fbq('track', ev, params || undefined, eventID ? { eventID: eventID } : undefined);
+    };
 
     function choose(v){
       try{ localStorage.setItem(KEY, v); }catch(e){}
