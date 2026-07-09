@@ -1,0 +1,228 @@
+<!--
+  =====================================================================
+  GET STRONG · FREE FIRST CLASS — real booking snippet (drop-in)
+  =====================================================================
+
+  What this is
+  ------------
+  The finder page's "book your free first class" button currently shows
+  a confirmation without booking anything. This snippet replaces that
+  placeholder with a real booking against the GMS backend:
+
+    visitor picks a live class slot → name/email(/phone) →
+    POST /api/book-first-class → Mindbody client + unpaid reservation
+    (front desk comps it at check-in) → real confirmation →
+    consent-gated Meta `Lead` event (pixel + server-side mirror, deduped).
+
+  How to integrate (2 steps, no design changes)
+  ---------------------------------------------
+  1. Paste the single <script> block below just before </body> of the
+     finder page (it injects its own minimal styles, inherits the page's
+     CSS variables, and is bilingual EN/DE via the existing gms_lang key).
+
+  2. In the quiz's click handler, replace the placeholder branch
+
+        if(e.target.closest('[data-book]')){
+          qstate.booked = true;
+          renderQuiz();
+          return;
+        }
+
+     with
+
+        if(e.target.closest('[data-book]')){
+          if(window.gmsOpenBooking) gmsOpenBooking();
+          return;
+        }
+
+  Notes
+  -----
+  - Endpoints are CORS-allowlisted for goodmoves-finder.vercel.app.
+  - Slots come from GET /api/classes?date=YYYY-MM-DD (live Mindbody
+    availability). Booking POSTs to /api/book-first-class.
+  - No secrets involved; everything sensitive lives in the backend.
+  - Repeat submits are idempotent server-side (one mat per class).
+  - If Meta consent was declined, no tracking fires anywhere (the
+    booking itself still works).
+  =====================================================================
+-->
+
+<script>
+/* ---- GMS real booking: free first class (Get Strong funnel) ---- */
+(function(){
+  'use strict';
+  var API_BASES = [
+    'https://summer.goodmovesstudio.com',
+    'https://gms-summer-landing-production.up.railway.app' // failover
+  ];
+  var DAYS_AHEAD = 7, MAX_SLOTS = 14;
+
+  function lang(){
+    try{ var l = localStorage.getItem('gms_lang'); if(l==='de'||l==='en') return l; }catch(e){}
+    return /^de/i.test(document.documentElement.lang||navigator.language||'en') ? 'de' : 'en';
+  }
+  function t(en, de){ return lang()==='de' ? de : en; }
+  function consented(){
+    try{ return localStorage.getItem('gms_consent') === 'granted'; }catch(e){ return false; }
+  }
+  function eventId(prefix){
+    return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
+  }
+  function apiFetch(path, opts){
+    var chain = Promise.reject();
+    API_BASES.forEach(function(base){
+      chain = chain.catch(function(){ return fetch(base + path, opts); });
+    });
+    return chain;
+  }
+  function pad(n){ return n<10 ? '0'+n : ''+n; }
+  function isoPlus(days){
+    var d = new Date(); d.setDate(d.getDate()+days);
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  }
+  function niceDate(iso){
+    var p = iso.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
+    return d.toLocaleDateString(lang()==='de'?'de-DE':'en-GB', {weekday:'short', day:'numeric', month:'short'});
+  }
+
+  /* Minimal styles — inherits the page's CSS variables. */
+  var css = ''
+    + '.gmsbk-overlay{position:fixed;inset:0;background:rgba(2,15,82,.55);display:none;align-items:center;justify-content:center;z-index:999;padding:18px}'
+    + '.gmsbk-overlay.open{display:flex}'
+    + '.gmsbk{background:var(--cream,#F7F0E9);color:var(--ink,#020F52);border-radius:22px;max-width:430px;width:100%;max-height:92vh;overflow:auto;padding:26px 22px;position:relative;font-family:inherit}'
+    + '.gmsbk h3{margin:0 0 6px;font-size:1.3rem}'
+    + '.gmsbk p{margin:0 0 14px;font-size:.95rem}'
+    + '.gmsbk label{display:block;font-weight:700;font-size:.8rem;margin:12px 0 4px}'
+    + '.gmsbk input,.gmsbk select{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid rgba(2,15,82,.25);background:#fff;font:inherit;font-size:.95rem}'
+    + '.gmsbk .gmsbk-err{color:#B0482D;font-size:.82rem;margin:6px 0 0;display:none}'
+    + '.gmsbk .gmsbk-x{position:absolute;top:12px;right:14px;border:0;background:none;font-size:1.5rem;cursor:pointer;color:inherit}'
+    + '.gmsbk button[type=submit]{margin-top:18px;width:100%;padding:13px;border:0;border-radius:999px;font-weight:800;font-size:1rem;cursor:pointer;background:var(--coral,#F26D5B);color:#fff}'
+    + '.gmsbk button[disabled]{opacity:.6;cursor:wait}'
+    + '.gmsbk .gmsbk-done{text-align:center;padding:18px 4px}'
+    + '.gmsbk .gmsbk-done .mark{font-size:2rem}'
+    + '.gmsbk .gmsbk-done b{display:block;margin:8px 0 4px;font-size:1.1rem}';
+  var style = document.createElement('style');
+  style.textContent = css;
+  document.head.appendChild(style);
+
+  var overlay = document.createElement('div');
+  overlay.className = 'gmsbk-overlay';
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
+  document.body.appendChild(overlay);
+  overlay.addEventListener('mousedown', function(e){ if(e.target===overlay) close(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
+
+  function close(){ overlay.classList.remove('open'); document.body.style.overflow=''; }
+
+  function formHTML(slotOptions){
+    return ''
+      + '<div class="gmsbk">'
+      + '<button type="button" class="gmsbk-x" aria-label="Close">×</button>'
+      + '<h3>'+t('Book your free first class','Buch deine gratis erste Stunde')+'</h3>'
+      + '<p>'+t('Pick a class, tell us who you are, done. No card, no commitment.',
+               'Such dir eine Stunde aus, sag uns kurz wer du bist, fertig. Keine Karte, keine Verpflichtung.')+'</p>'
+      + '<form novalidate>'
+      + '<label>'+t('Class','Stunde')+'</label><select name="slot" required>'+slotOptions+'</select>'
+      + '<label>'+t('Name','Name')+'</label><input name="name" autocomplete="name" required maxlength="100">'
+      + '<label>'+t('Email','E-Mail')+'</label><input name="email" type="email" autocomplete="email" required maxlength="254">'
+      + '<label>'+t('Phone','Telefon')+'</label><input name="phone" type="tel" autocomplete="tel" required maxlength="20">'
+      + '<p class="gmsbk-err"></p>'
+      + '<button type="submit">'+t('Book my free class','Meine Gratis-Stunde buchen')+'</button>'
+      + '</form></div>';
+  }
+
+  function doneHTML(res){
+    var b = res.booked;
+    var when = b ? niceDate(b.date)+' · '+b.time : '';
+    var head = b
+      ? t('You\'re in!','Du bist dabei!')
+      : t('Almost done!','Fast geschafft!');
+    var body = b
+      ? (b.className+'<br>'+when+(b.teacher?('<br>'+t('with ','mit ')+b.teacher):''))
+      : t('We got your details and will confirm your class by email shortly.',
+          'Wir haben deine Daten und bestätigen dir deine Stunde gleich per E-Mail.');
+    return '<div class="gmsbk"><button type="button" class="gmsbk-x" aria-label="Close">×</button>'
+      + '<div class="gmsbk-done"><span class="mark">🎉</span><b>'+head+'</b><p>'+body+'</p>'
+      + '<p>'+t('See you on the mat.','Wir sehen uns auf der Matte.')+'</p></div></div>';
+  }
+
+  function loadSlots(){
+    var dates = [];
+    for(var i=0;i<DAYS_AHEAD;i++) dates.push(isoPlus(i));
+    return Promise.all(dates.map(function(d){
+      return apiFetch('/api/classes?date='+d).then(function(r){ return r.json(); }).catch(function(){ return {slots:[]}; });
+    })).then(function(days){
+      var slots = [];
+      days.forEach(function(day){ (day.slots||[]).forEach(function(s){
+        if(!s.soldOut && s.spotsLeft>0 && String(s.classId).indexOf('mb-')===0) slots.push(s);
+      });});
+      return slots.slice(0, MAX_SLOTS);
+    });
+  }
+
+  window.gmsOpenBooking = function(){
+    overlay.innerHTML = '<div class="gmsbk"><p style="margin:0">'+t('Loading classes…','Lade Stunden…')+'</p></div>';
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    loadSlots().then(function(slots){
+      if(!slots.length){
+        overlay.innerHTML = doneHTML({booked:null});
+        bindClose();
+        return;
+      }
+      var opts = slots.map(function(s, i){
+        var label = niceDate(s.date)+' · '+s.time+' · '+s.className;
+        return '<option value="'+i+'">'+label+'</option>';
+      }).join('');
+      overlay.innerHTML = formHTML(opts);
+      bindClose();
+
+      var form = overlay.querySelector('form');
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var err = overlay.querySelector('.gmsbk-err');
+        err.style.display = 'none';
+        var name = form.name.value.trim(), email = form.email.value.trim(), phone = form.phone.value.trim();
+        if(!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.replace(/\D/g,'').length < 6){
+          err.textContent = t('Please check your name, email and phone.','Bitte prüfe Name, E-Mail und Telefon.');
+          err.style.display = 'block';
+          return;
+        }
+        var slot = slots[Number(form.slot.value)] || slots[0];
+        var btn = form.querySelector('button[type=submit]');
+        btn.disabled = true;
+        var leadId = eventId('lead');
+
+        apiFetch('/api/book-first-class', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            name:name, email:email, phone:phone,
+            classId:slot.classId, date:slot.date, time:slot.time,
+            className:slot.className, teacher:slot.teacher,
+            leadEventId:leadId, metaConsent: consented()
+          })
+        }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok, data:d}; }); })
+        .then(function(res){
+          if(!res.ok || !res.data.ok) throw new Error('booking failed');
+          if(window.gmsTrack) gmsTrack('Lead', {value:0, currency:'EUR'}, leadId);
+          overlay.innerHTML = doneHTML(res.data);
+          bindClose();
+        })
+        .catch(function(){
+          btn.disabled = false;
+          err.textContent = t('Something went wrong. Please try again.','Etwas ist schiefgelaufen. Bitte versuch es nochmal.');
+          err.style.display = 'block';
+        });
+      });
+    });
+
+    function bindClose(){
+      var x = overlay.querySelector('.gmsbk-x');
+      if(x) x.addEventListener('click', close);
+    }
+  };
+})();
+</script>
