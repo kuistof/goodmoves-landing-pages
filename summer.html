@@ -831,8 +831,34 @@
       overlay.querySelector('.modal').scrollTop = 0;
     }
 
+    let icFired = false;   // in-memory fallback when sessionStorage is blocked
+    let leadEid = null;    // one Lead event id per session (see getLeadEventId)
+    // Retries and resubmits reuse the same Lead id, so Meta's
+    // event_name+event_id dedup collapses any repeat into a single Lead.
+    function getLeadEventId(){
+      if(!window.gmsEventId) return null;
+      if(!leadEid){
+        try{ leadEid = sessionStorage.getItem('gms_lead_eid'); }catch(e){}
+        if(!leadEid){
+          leadEid = gmsEventId('lead');
+          try{ sessionStorage.setItem('gms_lead_eid', leadEid); }catch(e){}
+        }
+      }
+      return leadEid;
+    }
+
     function openCheckout(){
-      if(window.gmsTrack) window.gmsTrack('InitiateCheckout');
+      // InitiateCheckout once per session — re-opens don't re-fire. Only
+      // marked sent when the pixel actually ran, so a visitor who consents
+      // later still produces the event on their next open.
+      let icSent = icFired;
+      try{ icSent = icSent || sessionStorage.getItem('gms_ic_sent') === '1'; }catch(e){}
+      if(!icSent && window.fbq && window.gmsTrack){
+        window.gmsTrack('InitiateCheckout', { value: 99, currency: 'EUR' },
+          window.gmsEventId ? gmsEventId('ic') : undefined);
+        icFired = true;
+        try{ sessionStorage.setItem('gms_ic_sent', '1'); }catch(e){}
+      }
       lastFocused = document.activeElement;
       overlay.classList.remove('done');
       toStep('details');
@@ -880,18 +906,24 @@
       billing = { name: (first + ' ' + last).trim(), email: email, phone: phone };
 
       setBusy(coBtn, true, t('One moment…', 'Einen Moment…'));
+      // Shared dedup id: the pixel Lead below and the backend's
+      // Conversions-API mirror send the same eventID, so Meta counts one.
+      // metaConsent tells the backend whether the visitor opted in — without
+      // it the server sends nothing.
+      const leadEventId = getLeadEventId();
       try{
         const res  = await checkoutFetch('/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ packageId: 'summer-deal', name: billing.name, email: email, phone: phone })
+          body: JSON.stringify({ packageId: 'summer-deal', name: billing.name, email: email, phone: phone,
+            leadEventId: leadEventId, metaConsent: !!(window.gmsConsented && gmsConsented()) })
         });
         const data = await res.json().catch(()=>({}));
         if(res.ok && data.ok && data.clientSecret){
           // Context for a redirect-based payment: the returning page can
           // still greet the buyer by name (see the ?paid=1 handler below).
           try{ sessionStorage.setItem(PENDING_KEY, JSON.stringify({ firstName: first, email: email })); }catch(err){}
-          if(window.gmsTrack) window.gmsTrack('Lead');
+          if(window.gmsTrack) window.gmsTrack('Lead', { value: 99, currency: 'EUR' }, leadEventId || undefined);
           stripe = stripe || Stripe(STRIPE_PK);
           elements = stripe.elements({ clientSecret: data.clientSecret, appearance: appearance });
           const payEl = elements.create('payment', {
@@ -1032,14 +1064,27 @@
      (b) the visitor accepted via the banner. With a placeholder ID (e.g.
      'PIXEL_ID_TBD') the banner stays hidden, nothing loads, and every
      gmsTrack call is a no-op. Events: PageView on load (post-consent),
-     InitiateCheckout on modal open, Lead when the payment step is reached,
-     Purchase (value 99 EUR) on payment success — with the PaymentIntent id
-     as eventID so the upcoming server-side Conversions API events dedup
-     against the browser ones. ---- */
+     InitiateCheckout on first modal open (once per session, value 99 EUR),
+     Lead when the payment step is reached, Purchase (value 99 EUR) on
+     payment success. Every conversion event carries an eventID — the
+     PaymentIntent id for Purchase, gmsEventId() otherwise — so the
+     server-side Conversions API mirrors dedup against the browser ones. ---- */
   (function(){
     var META_PIXEL_ID = '1523466119279616'; // from the GMS Business Manager
     var live = /^\d{5,}$/.test(META_PIXEL_ID);
     var KEY = 'gms_consent';
+
+    // Random id for event dedup: the browser event and its Conversions-API
+    // mirror share it, so Meta counts the pair once.
+    window.gmsEventId = function(prefix){
+      return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    };
+    // Whether the visitor granted tracking consent — the checkout sends this
+    // to the backend, which mirrors events server-side only when true.
+    window.gmsConsented = function(){
+      try{ return localStorage.getItem(KEY) === 'granted'; }catch(e){ return false; }
+    };
+
     var banner = document.getElementById('consent');
     if(!banner) return;
 
