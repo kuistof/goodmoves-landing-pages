@@ -206,6 +206,14 @@
           })
         }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok, data:d}; }); })
         .then(function(res){
+          if(res.data && res.data.code === 'not_eligible'){
+            btn.disabled = false;
+            err.textContent = t(
+              'This offer is for your very first visit with us. You already have an account, so just book your class in the Mindbody app or send us a message.',
+              'Dieses Angebot gilt für deinen allerersten Besuch bei uns. Du hast schon ein Konto, buch deine Stunde einfach in der Mindbody-App oder schreib uns.');
+            err.style.display = 'block';
+            return;
+          }
           if(!res.ok || !res.data.ok) throw new Error('booking failed');
           if(window.gmsTrack) gmsTrack('Lead', {value:0, currency:'EUR'}, leadId);
           overlay.innerHTML = doneHTML(res.data);
