@@ -127,6 +127,8 @@
       + '<label>'+t('Name','Name')+'</label><input name="name" autocomplete="name" required maxlength="100">'
       + '<label>'+t('Email','E-Mail')+'</label><input name="email" type="email" autocomplete="email" required maxlength="254">'
       + '<label>'+t('Phone','Telefon')+'</label><input name="phone" type="tel" autocomplete="tel" required maxlength="20">'
+      // Honeypot — invisible to humans, bots fill it and get quietly dropped.
+      + '<div style="position:absolute;left:-9999px" aria-hidden="true"><label>Website</label><input name="website" tabindex="-1" autocomplete="off"></div>'
       + '<p class="gmsbk-err"></p>'
       + '<button type="submit">'+t('Book my free class','Meine Gratis-Stunde buchen')+'</button>'
       + '</form></div>';
@@ -142,8 +144,18 @@
       ? (b.className+'<br>'+when+(b.teacher?('<br>'+t('with ','mit ')+b.teacher):''))
       : t('We got your details and will confirm your class by email shortly.',
           'Wir haben deine Daten und bestätigen dir deine Stunde gleich per E-Mail.');
+    var cal = (b && b.calendarUrl)
+      ? '<p><a href="'+b.calendarUrl+'" target="_blank" rel="noopener" style="font-weight:700">'
+        + t('Add to calendar','Zum Kalender hinzufügen')+'</a></p>'
+      : '';
+    var addr = b
+      ? '<p style="font-size:.85rem">Immanuelkirchstraße 24, 10405 Berlin<br>'
+        + t('Come 10 minutes early — mats and props are at the studio.',
+            'Komm 10 Minuten früher — Matten und Props sind im Studio.')+'</p>'
+      : '';
     return '<div class="gmsbk"><button type="button" class="gmsbk-x" aria-label="Close">×</button>'
       + '<div class="gmsbk-done"><span class="mark">🎉</span><b>'+head+'</b><p>'+body+'</p>'
+      + cal + addr
       + '<p>'+t('See you on the mat.','Wir sehen uns auf der Matte.')+'</p></div></div>';
   }
 
@@ -172,9 +184,21 @@
         bindClose();
         return;
       }
-      var opts = slots.map(function(s, i){
-        var label = niceDate(s.date)+' · '+s.time+' · '+s.className;
-        return '<option value="'+i+'">'+label+'</option>';
+      // Group by day; surface teacher and (when scarce) remaining spots.
+      var byDay = {};
+      slots.forEach(function(s, i){ (byDay[s.date] = byDay[s.date] || []).push([s, i]); });
+      var opts = Object.keys(byDay).sort().map(function(day){
+        var inner = byDay[day].map(function(pair){
+          var s = pair[0];
+          var label = s.time+' · '+s.className+(s.teacher?' · '+s.teacher:'');
+          if(s.spotsLeft <= 3){
+            label += ' · '+(lang()==='de'
+              ? (s.spotsLeft===1 ? 'nur noch 1 Platz' : 'nur noch '+s.spotsLeft+' Plätze')
+              : (s.spotsLeft===1 ? 'only 1 spot left' : 'only '+s.spotsLeft+' spots left'));
+          }
+          return '<option value="'+pair[1]+'">'+label+'</option>';
+        }).join('');
+        return '<optgroup label="'+niceDate(day)+'">'+inner+'</optgroup>';
       }).join('');
       overlay.innerHTML = formHTML(opts);
       bindClose();
@@ -202,6 +226,8 @@
             name:name, email:email, phone:phone,
             classId:slot.classId, date:slot.date, time:slot.time,
             className:slot.className, teacher:slot.teacher,
+            website: form.website ? form.website.value : '',
+            locale: lang(),
             leadEventId:leadId, metaConsent: consented()
           })
         }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok, data:d}; }); })
@@ -215,7 +241,9 @@
             return;
           }
           if(!res.ok || !res.data.ok) throw new Error('booking failed');
-          if(window.gmsTrack) gmsTrack('Lead', {value:0, currency:'EUR'}, leadId);
+          // No tracking on the honeypot path (a filled hidden field means
+          // the server quietly did nothing) — humans never fill it.
+          if(window.gmsTrack && !(form.website && form.website.value)) gmsTrack('Lead', {value:0, currency:'EUR'}, leadId);
           overlay.innerHTML = doneHTML(res.data);
           bindClose();
         })
