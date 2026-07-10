@@ -61,7 +61,7 @@
     'https://summer.goodmovesstudio.com',
     'https://gms-summer-landing-production.up.railway.app' // failover
   ];
-  var DAYS_AHEAD = 14, MAX_SLOTS = 60;
+  var DAYS_AHEAD = 14;
 
   function lang(){
     try{ var l = localStorage.getItem('gms_lang'); if(l==='de'||l==='en') return l; }catch(e){}
@@ -196,7 +196,7 @@
       days.forEach(function(day){ (day.slots||[]).forEach(function(s){
         if(!s.soldOut && s.spotsLeft>0 && String(s.classId).indexOf('mb-')===0) slots.push(s);
       });});
-      return slots.slice(0, MAX_SLOTS);
+      return { dates: dates, slots: slots };
     });
   }
 
@@ -205,7 +205,8 @@
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    loadSlots().then(function(slots){
+    loadSlots().then(function(loaded){
+      var slots = loaded.slots;
       if(!slots.length){
         overlay.innerHTML = doneHTML({booked:null});
         bindClose();
@@ -213,8 +214,11 @@
       }
       var byDay = {};
       slots.forEach(function(s, i){ (byDay[s.date] = byDay[s.date] || []).push(i); });
-      var dayKeys = Object.keys(byDay).sort();
-      var currentDay = dayKeys[0];
+      // Chips for ALL requested days — empty ones stay visible but disabled,
+      // so the two-week window reads honestly.
+      var dayKeys = loaded.dates;
+      var currentDay = null;
+      for(var i=0;i<dayKeys.length;i++){ if((byDay[dayKeys[i]]||[]).length){ currentDay = dayKeys[i]; break; } }
 
       /* ---- STEP 1: the schedule ---- */
       function renderStep1(){
@@ -231,11 +235,11 @@
         var daysBox  = overlay.querySelector('.gmsbk-days');
         var slotsBox = overlay.querySelector('.gmsbk-slots');
         daysBox.innerHTML = dayKeys.map(function(d){
-          var c = chipDate(d);
-          return '<button type="button" class="gmsbk-day" data-day="'+d+'" aria-pressed="'+(d===currentDay)+'">'
+          var c = chipDate(d), n = (byDay[d]||[]).length;
+          return '<button type="button" class="gmsbk-day" data-day="'+d+'" aria-pressed="'+(d===currentDay)+'"'+(n?'':' disabled')+'>'
             + c.top + '<small>' + c.sub + '</small></button>';
         }).join('');
-        slotsBox.innerHTML = byDay[currentDay].map(function(i){
+        slotsBox.innerHTML = (byDay[currentDay]||[]).map(function(i){
           var s = slots[i], left = scarcity(s);
           return '<button type="button" class="gmsbk-slot" data-slot="'+i+'" role="listitem">'
             + '<span class="tm">'+s.time+'</span>'
@@ -249,7 +253,7 @@
         }).join('') || '<p class="gmsbk-empty">'+t('No open spots on this day.','Keine freien Plätze an diesem Tag.')+'</p>';
         daysBox.addEventListener('click', function(e){
           var b = e.target.closest('[data-day]');
-          if(!b) return;
+          if(!b || b.disabled) return;
           currentDay = b.dataset.day;
           renderStep1();
         });
