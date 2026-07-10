@@ -5,20 +5,23 @@
 
   What this is
   ------------
-  The finder page's "book your free first class" button currently shows
-  a confirmation without booking anything. This snippet replaces that
-  placeholder with a real booking against the GMS backend:
+  The page's "book your free first class" CTA opens a full-screen,
+  two-step booking flow:
 
-    visitor picks a live class slot → name/email(/phone) →
-    POST /api/book-first-class → Mindbody client + unpaid reservation
-    (front desk comps it at check-in) → real confirmation →
-    consent-gated Meta `Lead` event (pixel + server-side mirror, deduped).
+    STEP 1 · schedule — the next 14 days as day chips + tappable class
+             cards (live Mindbody availability, teacher, spots left)
+    STEP 2 · registration — the chosen class + name/email/phone;
+             submitting verifies the visitor (new-customers-only gates
+             run server-side) and registers their Good Moves account
+             with a real reservation on the class roster
+    DONE   · honest confirmation: class, date, teacher, add-to-calendar
+             link, studio address (+ confirmation email)
 
   How to integrate (2 steps, no design changes)
   ---------------------------------------------
-  1. Paste the single <script> block below just before </body> of the
-     finder page (it injects its own minimal styles, inherits the page's
-     CSS variables, and is bilingual EN/DE via the existing gms_lang key).
+  1. Paste the single script block below just before the closing body
+     tag (it injects its own styles, inherits the page's CSS variables,
+     and is bilingual EN/DE via the existing gms_lang key).
 
   2. In the quiz's click handler, replace the placeholder branch
 
@@ -41,7 +44,10 @@
   - Slots come from GET /api/classes?date=YYYY-MM-DD (live Mindbody
     availability). Booking POSTs to /api/book-first-class.
   - No secrets involved; everything sensitive lives in the backend.
-  - Repeat submits are idempotent server-side (one mat per class).
+  - Repeat submits are idempotent server-side (one mat per class), the
+    offer is enforced new-customers-only (email/alias/phone identity
+    checks), attempts are rate-limited, and a hidden honeypot field
+    quietly drops bots.
   - If Meta consent was declined, no tracking fires anywhere (the
     booking itself still works).
   =====================================================================
@@ -55,7 +61,7 @@
     'https://summer.goodmovesstudio.com',
     'https://gms-summer-landing-production.up.railway.app' // failover
   ];
-  var DAYS_AHEAD = 7, MAX_SLOTS = 14;
+  var DAYS_AHEAD = 14, MAX_SLOTS = 60;
 
   function lang(){
     try{ var l = localStorage.getItem('gms_lang'); if(l==='de'||l==='en') return l; }catch(e){}
@@ -82,18 +88,24 @@
   }
   function niceDate(iso){
     var p = iso.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
-    return d.toLocaleDateString(lang()==='de'?'de-DE':'en-GB', {weekday:'short', day:'numeric', month:'short'});
+    return d.toLocaleDateString(lang()==='de'?'de-DE':'en-GB', {weekday:'long', day:'numeric', month:'long'});
+  }
+  function chipDate(iso){
+    var p = iso.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
+    var loc = lang()==='de'?'de-DE':'en-GB';
+    return { top: d.toLocaleDateString(loc,{weekday:'short'}), sub: d.toLocaleDateString(loc,{day:'numeric',month:'short'}) };
   }
 
-  /* Minimal styles — inherits the page's CSS variables. */
+  /* Styles — inherits the page's CSS variables; full-screen sheet on phones. */
   var css = ''
     + '.gmsbk-overlay{position:fixed;inset:0;background:rgba(2,15,82,.55);display:none;align-items:center;justify-content:center;z-index:999;padding:18px}'
     + '.gmsbk-overlay.open{display:flex}'
-    + '.gmsbk{background:var(--cream,#F7F0E9);color:var(--ink,#020F52);border-radius:22px;max-width:430px;width:100%;max-height:92vh;overflow:auto;padding:26px 22px;position:relative;font-family:inherit}'
+    + '.gmsbk{background:var(--cream,#F7F0E9);color:var(--ink,#020F52);border-radius:22px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:26px 22px;position:relative;font-family:inherit}'
+    + '@media(max-width:560px){.gmsbk-overlay{padding:0}.gmsbk{border-radius:0;max-height:100vh;height:100vh}}'
     + '.gmsbk h3{margin:0 0 6px;font-size:1.3rem}'
     + '.gmsbk p{margin:0 0 14px;font-size:.95rem}'
     + '.gmsbk label{display:block;font-weight:700;font-size:.8rem;margin:12px 0 4px}'
-    + '.gmsbk input,.gmsbk select{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid rgba(2,15,82,.25);background:#fff;font:inherit;font-size:.95rem}'
+    + '.gmsbk input{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid rgba(2,15,82,.25);background:#fff;font:inherit;font-size:.95rem}'
     + '.gmsbk .gmsbk-err{color:#B0482D;font-size:.82rem;margin:6px 0 0;display:none}'
     + '.gmsbk .gmsbk-x{position:absolute;top:12px;right:14px;border:0;background:none;font-size:1.5rem;cursor:pointer;color:inherit}'
     + '.gmsbk button[type=submit]{margin-top:18px;width:100%;padding:13px;border:0;border-radius:999px;font-weight:800;font-size:1rem;cursor:pointer;background:var(--coral,#F26D5B);color:#fff}'
@@ -101,19 +113,28 @@
     + '.gmsbk .gmsbk-done{text-align:center;padding:18px 4px}'
     + '.gmsbk .gmsbk-done .mark{font-size:2rem}'
     + '.gmsbk .gmsbk-done b{display:block;margin:8px 0 4px;font-size:1.1rem}'
-    /* day chips + slot cards (replaces the native select) */
-    + '.gmsbk-days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;-webkit-overflow-scrolling:touch}'
+    /* step 1: day chips + slot cards */
+    + '.gmsbk-days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch}'
     + '.gmsbk-day{flex:0 0 auto;border:1.5px solid rgba(2,15,82,.25);background:#fff;border-radius:999px;'
-    +   'padding:8px 14px;font:inherit;font-size:.84rem;font-weight:700;cursor:pointer;color:inherit}'
+    +   'padding:8px 13px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;color:inherit;text-align:center;line-height:1.15}'
+    + '.gmsbk-day small{display:block;font-size:.68rem;font-weight:600;opacity:.75}'
     + '.gmsbk-day[aria-pressed=true]{background:var(--ink,#020F52);color:var(--cream,#F7F0E9);border-color:var(--ink,#020F52)}'
-    + '.gmsbk-slots{display:flex;flex-direction:column;gap:8px;margin-top:8px;max-height:238px;overflow:auto;padding:2px}'
+    + '.gmsbk-day[disabled]{opacity:.4;cursor:default}'
+    + '.gmsbk-slots{display:flex;flex-direction:column;gap:8px;margin-top:8px;overflow:auto;padding:2px;flex:1}'
     + '.gmsbk-slot{display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid rgba(2,15,82,.2);'
-    +   'background:#fff;border-radius:14px;padding:10px 14px;font:inherit;cursor:pointer;color:inherit;width:100%}'
-    + '.gmsbk-slot[aria-checked=true]{border-color:var(--coral,#B0482D);box-shadow:0 0 0 1.5px var(--coral,#B0482D) inset;background:rgba(176,72,45,.06)}'
-    + '.gmsbk-slot .tm{font-weight:800;font-size:1.02rem;min-width:50px}'
+    +   'background:#fff;border-radius:14px;padding:12px 14px;font:inherit;cursor:pointer;color:inherit;width:100%}'
+    + '.gmsbk-slot:hover{border-color:var(--coral,#F26D5B)}'
+    + '.gmsbk-slot .tm{font-weight:800;font-size:1.05rem;min-width:52px}'
     + '.gmsbk-slot .nm{font-weight:700;font-size:.92rem}'
     + '.gmsbk-slot .sub{display:block;font-weight:500;font-size:.78rem;color:#54547E}'
-    + '.gmsbk-slot .left{margin-left:auto;font-size:.72rem;font-weight:800;color:var(--coral,#B0482D);white-space:nowrap;padding-left:8px}';
+    + '.gmsbk-slot .go{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px}'
+    + '.gmsbk-slot .pick{background:var(--coral,#F26D5B);color:#fff;border-radius:999px;font-weight:800;font-size:.74rem;padding:6px 12px;white-space:nowrap}'
+    + '.gmsbk-slot .left{font-size:.7rem;font-weight:800;color:var(--coral,#F26D5B);white-space:nowrap}'
+    + '.gmsbk-empty{color:#54547E;font-weight:500;padding:18px 2px}'
+    /* step 2: registration */
+    + '.gmsbk-back{border:0;background:none;color:#54547E;font:inherit;font-size:.85rem;font-weight:700;cursor:pointer;padding:0;margin-bottom:10px}'
+    + '.gmsbk-chosen{background:#fff;border:1.5px solid var(--coral,#F26D5B);border-radius:14px;padding:10px 14px;margin:2px 0 10px;font-weight:700;font-size:.92rem}'
+    + '.gmsbk-chosen small{display:block;font-weight:500;color:#54547E}';
   var style = document.createElement('style');
   style.textContent = css;
   document.head.appendChild(style);
@@ -127,35 +148,23 @@
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
 
   function close(){ overlay.classList.remove('open'); document.body.style.overflow=''; }
+  function bindClose(){
+    var x = overlay.querySelector('.gmsbk-x');
+    if(x) x.addEventListener('click', close);
+  }
 
-  function formHTML(){
-    return ''
-      + '<div class="gmsbk">'
-      + '<button type="button" class="gmsbk-x" aria-label="Close">×</button>'
-      + '<h3>'+t('Book your free first class','Buch deine gratis erste Stunde')+'</h3>'
-      + '<p>'+t('Pick a class, tell us who you are, done. No card, no commitment.',
-               'Such dir eine Stunde aus, sag uns kurz wer du bist, fertig. Keine Karte, keine Verpflichtung.')+'</p>'
-      + '<form novalidate>'
-      + '<label>'+t('Day','Tag')+'</label><div class="gmsbk-days" role="tablist"></div>'
-      + '<div class="gmsbk-slots" role="radiogroup" aria-label="'+t('Available classes','Verfügbare Stunden')+'"></div>'
-      + '<label>'+t('Name','Name')+'</label><input name="name" autocomplete="name" required maxlength="100">'
-      + '<label>'+t('Email','E-Mail')+'</label><input name="email" type="email" autocomplete="email" required maxlength="254">'
-      + '<label>'+t('Phone','Telefon')+'</label><input name="phone" type="tel" autocomplete="tel" required maxlength="20">'
-      // Honeypot — invisible to humans, bots fill it and get quietly dropped.
-      + '<div style="position:absolute;left:-9999px" aria-hidden="true"><label>Website</label><input name="website" tabindex="-1" autocomplete="off"></div>'
-      + '<p class="gmsbk-err"></p>'
-      + '<button type="submit">'+t('Book my free class','Meine Gratis-Stunde buchen')+'</button>'
-      + '</form></div>';
+  function scarcity(s){
+    if(s.spotsLeft > 3) return '';
+    return lang()==='de'
+      ? (s.spotsLeft===1 ? 'nur noch 1 Platz' : 'nur noch '+s.spotsLeft+' Plätze')
+      : (s.spotsLeft===1 ? 'only 1 spot left' : 'only '+s.spotsLeft+' spots left');
   }
 
   function doneHTML(res){
     var b = res.booked;
-    var when = b ? niceDate(b.date)+' · '+b.time : '';
-    var head = b
-      ? t('You\'re in!','Du bist dabei!')
-      : t('Almost done!','Fast geschafft!');
+    var head = b ? t('You\'re in!','Du bist dabei!') : t('Almost done!','Fast geschafft!');
     var body = b
-      ? (b.className+'<br>'+when+(b.teacher?('<br>'+t('with ','mit ')+b.teacher):''))
+      ? (b.className+'<br>'+niceDate(b.date)+' · '+b.time+(b.teacher?('<br>'+t('with ','mit ')+b.teacher):''))
       : t('We got your details and will confirm your class by email shortly.',
           'Wir haben deine Daten und bestätigen dir deine Stunde gleich per E-Mail.');
     var cal = (b && b.calendarUrl)
@@ -167,9 +176,13 @@
         + t('Come 10 minutes early — mats and props are at the studio.',
             'Komm 10 Minuten früher — Matten und Props sind im Studio.')+'</p>'
       : '';
+    var acct = b
+      ? '<p style="font-size:.85rem">'+t('Your Good Moves account is set up — your confirmation is on its way by email.',
+          'Dein Good-Moves-Konto ist eingerichtet — deine Bestätigung kommt per E-Mail.')+'</p>'
+      : '';
     return '<div class="gmsbk"><button type="button" class="gmsbk-x" aria-label="Close">×</button>'
       + '<div class="gmsbk-done"><span class="mark">🎉</span><b>'+head+'</b><p>'+body+'</p>'
-      + cal + addr
+      + cal + acct + addr
       + '<p>'+t('See you on the mat.','Wir sehen uns auf der Matte.')+'</p></div></div>';
   }
 
@@ -198,116 +211,135 @@
         bindClose();
         return;
       }
-      // Group by day → tappable day chips + slot cards (no native select:
-      // the whole schedule stays visible and on-brand, also on mobile).
       var byDay = {};
       slots.forEach(function(s, i){ (byDay[s.date] = byDay[s.date] || []).push(i); });
       var dayKeys = Object.keys(byDay).sort();
       var currentDay = dayKeys[0];
-      var selected = -1; // deliberate choice — no accidental 07:15 bookings
 
-      overlay.innerHTML = formHTML();
-      bindClose();
-      var daysBox  = overlay.querySelector('.gmsbk-days');
-      var slotsBox = overlay.querySelector('.gmsbk-slots');
-
-      function scarcity(s){
-        if(s.spotsLeft > 3) return '';
-        return lang()==='de'
-          ? (s.spotsLeft===1 ? 'nur noch 1 Platz' : 'nur noch '+s.spotsLeft+' Plätze')
-          : (s.spotsLeft===1 ? 'only 1 spot left' : 'only '+s.spotsLeft+' spots left');
-      }
-      function renderPicker(){
+      /* ---- STEP 1: the schedule ---- */
+      function renderStep1(){
+        overlay.innerHTML = ''
+          + '<div class="gmsbk" style="display:flex;flex-direction:column">'
+          + '<button type="button" class="gmsbk-x" aria-label="Close">×</button>'
+          + '<h3>'+t('Pick your free first class','Wähl deine gratis erste Stunde')+'</h3>'
+          + '<p>'+t('The next two weeks at the studio. No card, no commitment.',
+                   'Die nächsten zwei Wochen im Studio. Keine Karte, keine Verpflichtung.')+'</p>'
+          + '<div class="gmsbk-days" role="tablist"></div>'
+          + '<div class="gmsbk-slots" role="list"></div>'
+          + '</div>';
+        bindClose();
+        var daysBox  = overlay.querySelector('.gmsbk-days');
+        var slotsBox = overlay.querySelector('.gmsbk-slots');
         daysBox.innerHTML = dayKeys.map(function(d){
+          var c = chipDate(d);
           return '<button type="button" class="gmsbk-day" data-day="'+d+'" aria-pressed="'+(d===currentDay)+'">'
-            + niceDate(d) + '</button>';
+            + c.top + '<small>' + c.sub + '</small></button>';
         }).join('');
         slotsBox.innerHTML = byDay[currentDay].map(function(i){
           var s = slots[i], left = scarcity(s);
-          return '<button type="button" class="gmsbk-slot" data-slot="'+i+'" role="radio" aria-checked="'+(i===selected)+'">'
+          return '<button type="button" class="gmsbk-slot" data-slot="'+i+'" role="listitem">'
             + '<span class="tm">'+s.time+'</span>'
             + '<span><span class="nm">'+s.className+'</span>'
             + (s.teacher ? '<span class="sub">'+t('with ','mit ')+s.teacher+'</span>' : '')
             + '</span>'
+            + '<span class="go"><span class="pick">'+t('Book free','Gratis buchen')+'</span>'
             + (left ? '<span class="left">'+left+'</span>' : '')
+            + '</span>'
             + '</button>';
-        }).join('');
+        }).join('') || '<p class="gmsbk-empty">'+t('No open spots on this day.','Keine freien Plätze an diesem Tag.')+'</p>';
+        daysBox.addEventListener('click', function(e){
+          var b = e.target.closest('[data-day]');
+          if(!b) return;
+          currentDay = b.dataset.day;
+          renderStep1();
+        });
+        slotsBox.addEventListener('click', function(e){
+          var b = e.target.closest('[data-slot]');
+          if(!b) return;
+          renderStep2(slots[Number(b.dataset.slot)]);
+        });
       }
-      renderPicker();
-      daysBox.addEventListener('click', function(e){
-        var b = e.target.closest('[data-day]');
-        if(!b) return;
-        currentDay = b.dataset.day;
-        renderPicker();
-      });
-      slotsBox.addEventListener('click', function(e){
-        var b = e.target.closest('[data-slot]');
-        if(!b) return;
-        selected = Number(b.dataset.slot);
-        renderPicker();
-      });
 
-      var form = overlay.querySelector('form');
-      form.addEventListener('submit', function(e){
-        e.preventDefault();
-        var err = overlay.querySelector('.gmsbk-err');
-        err.style.display = 'none';
-        var name = form.name.value.trim(), email = form.email.value.trim(), phone = form.phone.value.trim();
-        if(selected < 0){
-          err.textContent = t('Please pick a class above.','Bitte wähl oben eine Stunde aus.');
-          err.style.display = 'block';
-          return;
-        }
-        if(!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.replace(/\D/g,'').length < 6){
-          err.textContent = t('Please check your name, email and phone.','Bitte prüfe Name, E-Mail und Telefon.');
-          err.style.display = 'block';
-          return;
-        }
-        var slot = slots[selected];
-        var btn = form.querySelector('button[type=submit]');
-        btn.disabled = true;
-        var leadId = eventId('lead');
+      /* ---- STEP 2: verification & registration ---- */
+      function renderStep2(slot){
+        overlay.innerHTML = ''
+          + '<div class="gmsbk">'
+          + '<button type="button" class="gmsbk-x" aria-label="Close">×</button>'
+          + '<button type="button" class="gmsbk-back">‹ '+t('All classes','Alle Stunden')+'</button>'
+          + '<h3>'+t('Lock in your spot','Sicher dir deinen Platz')+'</h3>'
+          + '<div class="gmsbk-chosen">'+slot.time+' · '+slot.className
+          +   '<small>'+niceDate(slot.date)+(slot.teacher?(' · '+t('with ','mit ')+slot.teacher):'')+'</small></div>'
+          + '<p>'+t('We set up your Good Moves account with these details and reserve your mat.',
+                   'Mit diesen Angaben richten wir dein Good-Moves-Konto ein und reservieren deine Matte.')+'</p>'
+          + '<form novalidate>'
+          + '<label>'+t('Name','Name')+'</label><input name="name" autocomplete="name" required maxlength="100">'
+          + '<label>'+t('Email','E-Mail')+'</label><input name="email" type="email" autocomplete="email" required maxlength="254">'
+          + '<label>'+t('Phone','Telefon')+'</label><input name="phone" type="tel" autocomplete="tel" required maxlength="20">'
+          + '<div style="position:absolute;left:-9999px" aria-hidden="true"><label>Website</label><input name="website" tabindex="-1" autocomplete="off"></div>'
+          + '<p class="gmsbk-err"></p>'
+          + '<button type="submit">'+t('Book my free class','Meine Gratis-Stunde buchen')+'</button>'
+          + '</form></div>';
+        bindClose();
+        overlay.querySelector('.gmsbk-back').addEventListener('click', renderStep1);
 
-        apiFetch('/api/book-first-class', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            name:name, email:email, phone:phone,
-            classId:slot.classId, date:slot.date, time:slot.time,
-            className:slot.className, teacher:slot.teacher,
-            website: form.website ? form.website.value : '',
-            locale: lang(),
-            leadEventId:leadId, metaConsent: consented()
-          })
-        }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok, data:d}; }); })
-        .then(function(res){
-          if(res.data && res.data.code === 'not_eligible'){
-            btn.disabled = false;
-            err.textContent = t(
-              'This offer is for your very first visit with us. You already have an account, so just book your class in the Mindbody app or send us a message.',
-              'Dieses Angebot gilt für deinen allerersten Besuch bei uns. Du hast schon ein Konto, buch deine Stunde einfach in der Mindbody-App oder schreib uns.');
+        var form = overlay.querySelector('form');
+        form.addEventListener('submit', function(e){
+          e.preventDefault();
+          var err = overlay.querySelector('.gmsbk-err');
+          err.style.display = 'none';
+          var name = form.name.value.trim(), email = form.email.value.trim(), phone = form.phone.value.trim();
+          if(!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.replace(/\D/g,'').length < 6){
+            err.textContent = t('Please check your name, email and phone.','Bitte prüfe Name, E-Mail und Telefon.');
             err.style.display = 'block';
             return;
           }
-          if(!res.ok || !res.data.ok) throw new Error('booking failed');
-          // No tracking on the honeypot path (a filled hidden field means
-          // the server quietly did nothing) — humans never fill it.
-          if(window.gmsTrack && !(form.website && form.website.value)) gmsTrack('Lead', {value:0, currency:'EUR'}, leadId);
-          overlay.innerHTML = doneHTML(res.data);
-          bindClose();
-        })
-        .catch(function(){
-          btn.disabled = false;
-          err.textContent = t('Something went wrong. Please try again.','Etwas ist schiefgelaufen. Bitte versuch es nochmal.');
-          err.style.display = 'block';
-        });
-      });
-    });
+          var btn = form.querySelector('button[type=submit]');
+          btn.disabled = true;
+          var leadId = eventId('lead');
 
-    function bindClose(){
-      var x = overlay.querySelector('.gmsbk-x');
-      if(x) x.addEventListener('click', close);
-    }
+          apiFetch('/api/book-first-class', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+              name:name, email:email, phone:phone,
+              classId:slot.classId, date:slot.date, time:slot.time,
+              className:slot.className, teacher:slot.teacher,
+              website: form.website ? form.website.value : '',
+              locale: lang(),
+              leadEventId:leadId, metaConsent: consented()
+            })
+          }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); })
+          .then(function(res){
+            if(res.data && res.data.code === 'not_eligible'){
+              btn.disabled = false;
+              err.textContent = t(
+                'This offer is for your very first visit with us. You already have an account, so just book your class in the Mindbody app or send us a message.',
+                'Dieses Angebot gilt für deinen allerersten Besuch bei uns. Du hast schon ein Konto, buch deine Stunde einfach in der Mindbody-App oder schreib uns.');
+              err.style.display = 'block';
+              return;
+            }
+            if(res.status === 429){
+              btn.disabled = false;
+              err.textContent = t('Too many attempts — please try again in a few minutes.','Zu viele Versuche — bitte probier es in ein paar Minuten nochmal.');
+              err.style.display = 'block';
+              return;
+            }
+            if(!res.ok || !res.data.ok) throw new Error('booking failed');
+            // No tracking on the honeypot path — humans never fill it.
+            if(window.gmsTrack && !(form.website && form.website.value)) gmsTrack('Lead', {value:0, currency:'EUR'}, leadId);
+            overlay.innerHTML = doneHTML(res.data);
+            bindClose();
+          })
+          .catch(function(){
+            btn.disabled = false;
+            err.textContent = t('Something went wrong. Please try again.','Etwas ist schiefgelaufen. Bitte versuch es nochmal.');
+            err.style.display = 'block';
+          });
+        });
+      }
+
+      renderStep1();
+    });
   };
 })();
 </script>
