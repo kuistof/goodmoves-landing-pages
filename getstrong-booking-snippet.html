@@ -3,25 +3,24 @@
   GET STRONG · FREE FIRST CLASS — real booking snippet (drop-in)
   =====================================================================
 
-  What this is
-  ------------
-  The page's "book your free first class" CTA opens a full-screen,
-  two-step booking flow:
+  Implements the Claude Design "Good Moves Booking" flow 1:1 on top of
+  the real backend. The page's "book your free first class" CTA opens
+  a full-screen (mobile) / centered (desktop) sheet:
 
-    STEP 1 · schedule — the next 14 days as day chips + tappable class
-             cards (live Mindbody availability, teacher, spots left)
-    STEP 2 · registration — the chosen class + name/email/phone;
-             submitting verifies the visitor (new-customers-only gates
-             run server-side) and registers their Good Moves account
-             with a real reservation on the class roster
-    DONE   · honest confirmation: class, date, teacher, add-to-calendar
-             link, studio address (+ confirmation email)
+    LOADING  · skeleton day tiles + class cards
+    SCHEDULE · next 14 days as day tiles (full days dashed/disabled),
+               class cards with teacher, language tag, scarcity pill,
+               fully-booked cards, empty-day state with jump-to-next-day
+    REGISTER · chosen class summary, per-field validation, error banner
+               with retry, returning-customer notice (deep blue card)
+    DONE     · celebration block, personalized title, .ics download,
+               account+email line, address card with directions
 
   How to integrate (2 steps, no design changes)
   ---------------------------------------------
   1. Paste the single script block below just before the closing body
-     tag (it injects its own styles, inherits the page's CSS variables,
-     and is bilingual EN/DE via the existing gms_lang key).
+     tag (self-contained: styles, brand SVGs and logic are inline; the
+     Nersans font is picked up from the page when it is loaded there).
 
   2. In the quiz's click handler, replace the placeholder branch
 
@@ -41,15 +40,12 @@
   Notes
   -----
   - Endpoints are CORS-allowlisted for goodmoves-finder.vercel.app.
-  - Slots come from GET /api/classes?date=YYYY-MM-DD (live Mindbody
-    availability). Booking POSTs to /api/book-first-class.
-  - No secrets involved; everything sensitive lives in the backend.
-  - Repeat submits are idempotent server-side (one mat per class), the
-    offer is enforced new-customers-only (email/alias/phone identity
-    checks), attempts are rate-limited, and a hidden honeypot field
-    quietly drops bots.
-  - If Meta consent was declined, no tracking fires anywhere (the
-    booking itself still works).
+  - GET /api/classes?date=YYYY-MM-DD for live availability; booking
+    POSTs to /api/book-first-class. No secrets in the page.
+  - Server-side: new-customers-only identity gates, rate limiting,
+    honeypot, idempotent one-mat-per-class booking.
+  - Tracking is consent-gated (gms_consent); nothing fires without
+    opt-in, on the returning-customer path, or on the honeypot path.
   =====================================================================
 -->
 
@@ -62,12 +58,80 @@
     'https://gms-summer-landing-production.up.railway.app' // failover
   ];
   var DAYS_AHEAD = 14;
+  var MINDBODY_URL = 'https://clients.mindbodyonline.com/classic/ws?studioid=5746579';
+  var LOGO = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODMwIiBoZWlnaHQ9IjgzMCIgdmlld0JveD0iMCAwIDgzMCA4MzAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjQxNSIgY3k9IjQxNSIgcj0iNDE1IiBmaWxsPSIjQjA0ODJEIj48L2NpcmNsZT4KPHBhdGggZD0iTTMxOC44NjEgNDQwLjE1M0MzNDguMjA4IDQyOC4xMjUgMzgxLjg3MiA0NDAuOTUyIDM5Ny4wMDYgNDc2Ljg3NEM0MTAuNjQgNTA5LjI0OSAzOTguMjE2IDU0NS4xMjkgMzY4Ljg2OSA1NTcuMTU4QzMzOS41MjIgNTY5LjE4NiAzMDYuMjcgNTU1LjMyNCAyOTAuNzI0IDUyMC40MzhDMjc2LjQxMyA0ODguMzM2IDI4OS41MTQgNDUyLjE4MSAzMTguODYxIDQ0MC4xNTNaTTYxOC41OSA0MzQuNzY3QzYzMS44NDEgNDIzLjk2NiA2NTMuODE5IDQyMC44NTEgNjcyLjk4IDQyMi41NjNDNjc2Ljc0NiA0MjIuODA4IDY3OS44MjggNDI0LjI0MiA2ODEuMDUxIDQyOC4yMzdDNjgyLjM3MiA0MzIuNTM3IDY4My41OTQgNDM2Ljg3OCA2ODUuMzEgNDQxLjA1MkM2ODcuNTM5IDQ0NS4xOTcgNjg0LjE0NCA0NDkuNzA1IDY3OS42NiA0NDcuMDcyQzY3MC43MDEgNDQyLjQyOSA2NjEuODg5IDQzNy41NzkgNjUxLjMwNCA0MzcuNjJDNjQ0LjM3NSA0MzcuNjA3IDYzNS41OTUgNDM3LjIyMSA2MzEuNTExIDQ0My41NDZDNjI1LjUxOSA0NTIuODcyIDYzNC45NzYgNDYxLjA4NSA2NDMuNDQyIDQ2My43MTRDNjU3LjQwNiA0NjguMzA0IDY3MS43ODYgNDcyLjEwNyA2ODUuMTU5IDQ3OC4yMjVDNzA0LjE3IDQ4Ni42NTggNzEyLjY1MiA1MDguMDgyIDcwMi45NzYgNTI2LjU1OEg3MDIuOTQ3QzY4NS41OTkgNTYxLjY5MyA2NDQuOTgzIDU1Mi4wNzMgNjIwLjI5NCA1NDAuMTQzQzYxNC45NDcgNTM2Ljk2IDYxMi45NDEgNTMzLjgzNCA2MTMuMTczIDUzMC4zMDRDNjEzLjQ5MSA1MjUuMjIxIDYxMy45NTYgNTE4Ljg1NCA2MTQuMjA0IDUxNS4wMjdDNjE0LjM4NCA1MTIuMjE1IDYxOC4yNiA1MTAuNTg5IDYyMC42MzYgNTEyLjgyMkM2MjQuNzIgNTE2LjY3OCA2MjcuNDQzIDUxOS4xODQgNjMxLjggNTIyLjc0M0M2NDIuOTA3IDUzMi4zNyA2NTguOTYzIDUzOC4wNDggNjcwLjkwNiA1MzUuMzc1QzY4MS40NSA1MzMuNTQ0IDY4Ny4zNDQgNTE3LjM2NyA2NzQuMDUyIDUwNi4xMjVDNjcwLjc1NSA1MDMuMzQyIDY2Ni44NjYgNTAxLjMxNSA2NjIuNzk0IDQ5OS43ODdDNjQ3LjE3OSA0OTMuMzY3IDYyOS4wNDkgNDkxLjM5NSA2MTYuMTU3IDQ3OS44NjRDNjA0LjAzNSA0NjguNTI0IDYwMC40NiA0NDcuOTgxIDYxOC41OSA0MzQuNzY3Wk0xNjUuMzYxIDQwNC41MzhDMTY2LjM2MyA0MDIuODgzIDE3MC41OTggNDAyLjUxMSAxNzIuNTEgNDAyLjc0NEMxNzUuNDkgNDAzLjEwMyAxODkuNjc3IDQwNS42NjcgMTkxLjgwNSA0MDYuMTc2QzE5NC41NjggNDA2Ljg1MyAxOTcuNzg0IDQwNy42MjMgMjAwLjkwNyA0MDguNDM0QzIwNy4zNzkgNDEwLjExNyAyMDguOTMzIDQxMi43MzQgMjA5LjUyNCA0MTkuMTI5QzIxMC4xMzEgNDI1LjcyOCAyMTEuNTYyIDQ1NS4xNTEgMjExLjYyNyA0NTYuMDI1QzIxMy42MzcgNDUyLjkzOSAyMTcuMjIzIDQ0Ny40MTIgMjE5LjEzNSA0NDQuNDM3QzIyMS4wNzEgNDQxLjQzMyAyMjIuOTk1IDQzOC40MjkgMjI0LjkzNSA0MzUuNDI1QzIyNy4yOTkgNDMxLjc0OSAyMjkuNjY0IDQyOC4wNjggMjMyLjAyOCA0MjQuNDA0QzIzNS4zODIgNDE5LjIxMSAyMzguNzQ4IDQxNy44NjIgMjQ0Ljg5NSA0MTkuMjUxQzI0Ny4yMyA0MTkuNzczIDI0OS41NzggNDIwLjM4MSAyNTEuODYxIDQyMC45NTlMMjU0LjIyNSA0MjEuNTY3QzI2MS42OTIgNDIzLjQ0MiAyNjMuOTE4IDQyNi4wMDEgMjY0LjU2MiA0MzMuNDY4QzI2NS4wODggNDM5LjQ1MiAyNjUuNTY5IDQ0NS40NDQgMjY2LjA2MiA0NTEuNDM2QzI2Ni40MDQgNDU1Ljc3NyAyNjYuNzYzIDQ2MC4xMDUgMjY3LjEzNCA0NjQuNDQyTDI2Ny45NzMgNDc0LjM1MUMyNjkuMzU5IDQ5MC43ODUgMjcwLjc5IDUwNy43NjIgMjcyLjI5IDUyNC40NjFDMjcyLjU3NiA1MjcuNjQ1IDI3My4xODMgNTMxLjA4OSAyNzQuMDc1IDUzNC43MTJDMjc0Ljg1OCA1MzcuODc5IDI3Ny40ODIgNTQwLjI3NiAyODAuNjU3IDU0MS4xMzJMMjgwLjY3NCA1NDEuMTAzQzI4NS43MzIgNTQyLjQ2OCAyODcuOTg3IDU0Mi45NzggMjg4LjQ5NiA1NDQuOTYzQzI4OS4wNDcgNTQ3LjA4MyAyODcuOTk5IDU0OC4yMTIgMjg3LjE2MyA1NDkuMDk2QzI4NS40ODQgNTUwLjg0NSAyODEuNTY3IDU1MC41MTUgMjc4LjIyNSA1NTAuNTQzQzI3MC44NiA1NTAuNTk2IDI2MC45NjMgNTUxLjA4MSAyNTIuMzAxIDU0OS4xMjVDMjQ2LjU1OCA1NDcuOCAyNDMuODM1IDU0NC40NzggMjQyLjkyNiA1MzkuMjczQzI0MS44OTUgNTMzLjM2MyAyNDEuMzkgNTI3LjM1NSAyNDEuMDE5IDUyMi4yNTZDMjM5Ljc2NyA1MDUuMDYgMjM4LjU1NyA0ODcuNTc4IDIzNy4zNzUgNDcwLjY3QzIzNi44OTQgNDYzLjgxMSAyMzUuODQ3IDQ1Ny4wMTYgMjM0Ljk4MyA0NDkuODY3QzIzMy41MjcgNDUyLjA4NCAyMTkuNTQ3IDQ3My45NTIgMjE1LjI4MyA0ODAuNjYxQzIxNC45NDEgNDgxLjIyNyAyMTQuNzQ5IDQ4MS44NTggMjE0Ljc3OCA0ODIuMTQ4QzIxNS43NjQgNDkzLjU4NSAyMTUuNzExIDUwMy40MzcgMjE2Ljg2NSA1MTUuMTZDMjE3LjAzMiA1MTYuODQzIDIxNy40NDMgNTE4LjUyMyAyMTguMDIyIDUyMC41NDhDMjE5LjAyNCA1MjQuMTAzIDIyMS4wNTkgNTI1LjU2MiAyMjMuODc1IDUyNy4xMzVDMjI1LjQyOCA1MjguMDAzIDIyNy4wNSA1MzAuMTggMjI2Ljk4MSA1MzIuMjA2QzIyNi44ODcgNTM0Ljc5NCAyMjQuNjU4IDUzNi41NDMgMjIxLjQ1OCA1MzYuNTU5QzIxMy45OTEgNTM2LjYgMjA2Ljg1OCA1MzcuNzY5IDE5OC4xNzIgNTM1LjhDMTkyLjMwMyA1MzQuNDYzIDE4OC41MDcgNTMwLjQ0MSAxODcuNDkyIDUyNC40NDVDMTg2LjcwNiA1MTkuODg4IDE4Ny4zMjYgNTE1LjQ5IDE4Ny4wMDggNTExLjAxNEMxODUuNzYxIDQ5My4zNDkgMTg0LjUyMSA0NzUuNjcxIDE4My4yODYgNDU3Ljk5NEwxODAuODUzIDQzNi42MTFDMTgwLjA1NCA0MzcuOTM2IDE3MS4zNjkgNDUyLjkzOSAxNjcuNDkyIDQ1OS40QzE2My4xMDcgNDY2LjcwNCAxNTcuMTc5IDQ3Ni4yNzkgMTU1LjgzNCA0ODIuOTM1QzE1My40ODIgNDk0LjUzNSAxNTQuMTQ0IDUwMy42NTggMTU3LjkyNiA1MTIuODMzQzE1OC4xMyA1MTMuMzQyIDE1OC4zMDkgNTEzLjg1MSAxNTguNDg5IDUxNC4zNjFDMTU5LjY0MiA1MTcuNzM1IDE1OC44MDIgNTE5LjgxOCAxNTcuODgxIDUyMC45NTlDMTU2Ljk3NiA1MjIuMDc2IDE1NS4xNzQgNTIzLjM1NyAxNTEuNjk4IDUyMy4wODNDMTQ2LjMwOSA1MjIuNjQzIDEzOC45OCA1MjIuOTQ0IDEzMS44NjQgNTIxLjgyOEMxMzEuNDA3IDUyMS43NTggMTMwLjk1NSA1MjEuNjc3IDEzMC41MjcgNTIxLjU2N0MxMjcuNjQxIDUyMC44NjYgMTI1LjQyOCA1MTkuNDAzIDEyNC4wNDIgNTE3LjI5NUMxMjIuNDA0IDUxNC44MDEgMTIyLjA2MSA1MTEuNjE3IDEyMy4wNjQgNTA4LjA2M0MxMjYuNjI2IDQ5NS40NTYgMTMxLjM1NSA0ODQuNTE3IDEzNy41NTQgNDc0LjY1M0MxNDguOTYzIDQ1Ni40ODIgMTYwLjcwMiA0MzguMDk5IDE3Mi4wNDEgNDIwLjMxMUMxNzIuMDU1IDQyMC4yODkgMTcyLjYwNSA0MTkuMzg3IDE3Mi44MTEgNDE5LjEwMUMxNzUuOTA0IDQxNC44MDEgMTY5LjA5OCA0MTIuMzkyIDE2NS42NzggNDA4Ljc5MkMxNjQuOTMyIDQwOC4wMSAxNjQuNDUyIDQwNi4wMzcgMTY1LjM2MSA0MDQuNTM4Wk01MTkuNzI0IDQxOC41OTFDNTI0LjY3MiA0MTguMjQ5IDU0NC4xMzUgNDIwLjUzNSA1NDkuMTgxIDQyMS4xNTVDNTYxLjIwNSA0MjIuNjQzIDU3NS4yODQgNDI0Ljc5MSA1ODcuMzEyIDQyNi4yMzhDNTg4LjgzNiA0MjYuNDE3IDU5MC42MSA0MjYuNjk0IDU5Mi4zMDEgNDI3LjMyNkM1OTYuNzI4IDQyOC45OTMgNTk4Ljg4NCA0MzIuNjA0IDU5OC43MjEgNDM4LjA4NkM1OTguNjExIDQ0MS44ODkgNTk4LjQwMyA0NDUuNzQ5IDU5OC4yMTEgNDQ5LjQ2Nkw1OTguMDg0IDQ1MS43MjlDNTk3LjkyMSA0NTQuODk2IDU5Ni41MzIgNDU2LjkzNCA1OTMuOTY0IDQ1Ny43OUM1OTAuNjM4IDQ1OC44OSA1ODguNTYgNDU2LjYyIDU4Ny41NTcgNDU1LjUzMkw1ODcuNDQ3IDQ1NS40MDVDNTgwLjc1NCA0NDguMTA1IDU3MS40MzIgNDQyLjU5IDU2My4xMzMgNDQwLjUxMUM1NTkuMjI4IDQzOS41MzMgNTU1LjA1IDQzOC45OTUgNTUxLjAxOSA0MzguNDczQzU0OS42MzMgNDM4LjI5NCA1NDguMjQzIDQzOC4xMTUgNTQ2Ljg2OSA0MzcuOTIzQzU0NS40MjcgNDQ5LjI3NSA1NDUuMzU3IDQ1MC43NzUgNTQzLjgxNyA0NjIuMTE1QzU0My40MDUgNDY1LjE0NyA1NDUuMzA1IDQ3MC42MDUgNTU0LjI0IDQ3MS44NDRDNTY0LjQ2NiA0NzMuMjYzIDU3Ny40NTYgNDc1LjY0NyA1ODYuNTEzIDQ3Ni45ODRDNTg4LjAzNyA0NzcuMjE2IDU4OS42MDcgNDc3LjUxNyA1OTEuMTMxIDQ3Ny45ODZDNTk0LjkyNiA0NzkuMTcyIDU5Ny4zNTkgNDgxLjg5OSA1OTcuODI0IDQ4NS40ODJDNTk4LjE3IDQ4OC4xNTYgNTk4LjI5MiA0OTEuMDA5IDU5OC4xNyA0OTMuOTcyQzU5OC4wNiA0OTYuNDc5IDU5Ni45MzEgNDk3LjggNTk2LjAxIDQ5OC40NjRDNTk1LjA4OSA0OTkuMTM3IDU5My40NjcgNDk5Ljc5NiA1OTEuMDA5IDQ5OS4xMzZDNTg5LjA2OSA0OTguNjI3IDU4MS4wNjcgNDk0LjkyMiA1NzkuMjcgNDk0LjI0NkM1NzkuMTIyIDQ5NC4xODUgNTc4Ljk4OCA0OTQuMTM2IDU3OC44NTUgNDk0LjA4NkM1ODQuMzM5IDQ5OC41NzcgNTkzLjM3OSA1MDUuMDM4IDU5Ny40NDEgNTE1LjExOUM2MDcuMDA3IDUzOC44ODYgNTg2LjcyMSA1NTIuMzQ5IDU2NC43MSA1NDkuNTY1QzU2MC45ODMgNTQ5LjA5NiA1MDYuODk2IDU0My41NTcgNTAyLjE5NyA1NDIuOTk1TDUwMC44NjUgNTQyLjgyOEM0OTkuOTk2IDU0Mi43MTggNDk2Ljk4NyA1NDIuMjA3IDQ5NC4zODcgNTQxLjYyOEM0OTEuNTcxIDU0MS4wMDggNDkwLjI5MSA1MzYuMzM4IDQ5NS4xODYgNTM0LjMyNUM0OTcuMTM4IDUzMy41MTQgNDk5LjAzNCA1MzIuOTIzIDQ5OS4yNzEgNTMyLjgyNUM1MDMuMTE4IDUzMS4xMjkgNTA0LjY3MSA1MjcuODkzIDUwNS45MzUgNTIzLjIzNEM1MDcuMDg4IDUxOC45MzggNTA3Ljg3NCA1MTUuMTA2IDUwOC4zMzkgNTExLjUzNkM1MTEuNTMxIDQ4Ni44NDcgNTEzLjg2NyA0NjcuODQ5IDUxNi4wMTEgNDQ5LjkzNUM1MTguNTE0IDQyOC45ODEgNTE1LjQ2IDQyOC4yOTEgNTE0LjA5OSA0MjQuOTE3QzUxMy41NzcgNDIzLjY0OCA1MTMuMDE1IDQxOS4wNiA1MTkuNzI0IDQxOC41OTFaTTQ3OS4xNTUgNDA2LjkwOUM0ODIuNDUyIDQwNi4xNzkgNDg2LjQzOCA0MDYuNTA5IDQ4OC44MTkgNDA4LjE2NEM0OTEuNDE1IDQwOS45NjkgNDkzLjAyMSA0MTIuOTg2IDQ5My40NzggNDE2Ljg4NkM0OTUuMDcyIDQzMC43NzMgNDk0LjMxMyA0NDMuMjEzIDQ5My4xMzEgNDU1LjE0OEM0OTEuNzE3IDQ2OS4zMTIgNDg5Ljk3MiA0ODAuOTY2IDQ4Ny44ODEgNDkzLjYwMUM0ODcuMDQ2IDQ5OC42NTkgNDg2LjIwNiA1MDMuNzAxIDQ4NS4zNzggNTA4Ljc0M0w0ODQuODMyIDUxMi4wNzhDNDgzLjk1MiA1MTcuNTE5IDQ4My4wMzEgNTIzLjE0IDQ4Mi4wNTMgNTI4LjY2N0M0ODAuODE4IDUzNS42MjQgNDc2LjExNCA1MzguNTAyIDQ2OC44NzEgNTM5LjYwN0w0NjcuODU2IDUzOS43NTdDNDY3LjA5OCA1MzkuODY3IDQ2Ni4zNDMgNTM5Ljk5IDQ2NS41ODUgNTQwLjFDNDYzLjQ1NiA1NDAuNDE4IDQ1Mi4yNTMgNTQyLjE1NCA0NTAuMDk3IDU0Mi40NDRDNDQ5LjcyNiA1NDIuNDg1IDQ0MS45MDUgNTQzLjU0OCA0MzkuOTY0IDU0My42NThDNDM2LjgzIDU0My44MjEgNDM0LjkyMiA1MzkuODk2IDQzNi4xMjggNTM3LjcxOUM0MzguMDY4IDUzNC4yMTggNDQ0LjUwMSA1MzEuMzEyIDQ0MS43MjUgNTIzLjYyNUM0NDAuMzU1IDUxOS44MzMgNDMyLjA1NyA1MDQuNTQ5IDQzMi4wMDggNTA0LjQ1OUM0MjIuMTM2IDQ4Ni4wNTIgNDExLjkzNyA0NjcuMDA5IDQwMS44NDkgNDQ4LjMxMkM0MDAuNzQ4IDQ0Ni4yNDYgMzk5LjI0OSA0NDQuMDgyIDM5Ny4xNzQgNDQxLjQ5NEMzOTUuMDAyIDQzOC44MDggMzkyLjUyNyA0MzcuMzg5IDM4OS42MDEgNDM3LjE4MUMzODkuMDUgNDM3LjE1MyAzODYuODQ5IDQzNi44NjMgMzg0Ljc3NSA0MzYuMzk0QzM4My42OSA0MzYuMTQ1IDM4Mi4xMjEgNDM0LjczOSAzODIuMDI4IDQzMi45NUMzODEuOTE4IDQzMC45OTMgMzg1LjI5NyA0MjguMzA4IDM4Ny4wNTggNDI3LjQyN0MzODkuNzkzIDQyNi4wNjIgMzkyLjgyOSA0MjQuODQ3IDM5Ni4wNDUgNDIzLjgxNkM0MDAuNjUxIDQyMi4zNCA0MDMuNjM1IDQyMS4xMTQgNDA4Ljc1IDQxOS44NzVDNDEzLjUzMSA0MTguNTEzIDQxOS4xOCA0MjAuODkzIDQyMi44NzcgNDI2LjczOEM0MjUuMjY5IDQzMC41MjMgNDY2LjgyNyA1MDYuNzEgNDY2Ljg1MyA1MDYuNzU4QzQ2Ni44NTMgNTA2Ljc1OCA0NjguMTQ2IDQ5OS4wMDIgNDY4LjcwOCA0OTUuMTI5QzQ2OS4wNzkgNDkyLjU4MiA0NjkuNTAyIDQ5MC4wMTggNDY5LjkxOCA0ODcuNDdDNDcwLjk2MiA0ODEuMDM0IDQ3Mi4wNDYgNDc0LjM5NCA0NzIuMzQ4IDQ2Ny44ODlDNDczLjE4OCA0NDkuNTI3IDQ2Ny45MzcgNDM1LjA5OCA0NTYuMzA5IDQyMy43ODhDNDU0LjIzNCA0MjEuNzYyIDQ1My4zNjYgNDE5LjQ2MyA0NTMuODg4IDQxNy4yOThDNDU0LjE3NyA0MTYuMDcxIDQ1NS4yMDggNDEzLjg0MSA0NTguODI0IDQxMi42NjdDNDY0Ljc2MiA0MTAuNzQgNDcxLjgyNiA0MDguNTUxIDQ3OS4xMzggNDA2LjkyNEw0NzkuMTU1IDQwNi45MDlaTTM2OC44MTIgNDg0LjUzMkMzNTUuODc5IDQ2MS4zNzIgMzM0LjU0NSA0NTMuNDY1IDMyMC42ODcgNDYxLjYwNUMzMDYuODMzIDQ2OS43NDkgMzA3LjE2MiA0OTIuNTI1IDMxOC42MjggNTE0LjAxOEMzMzIuNDAxIDUzOS44MTEgMzUyLjg5NSA1NDUuMDg5IDM2Ni43NDkgNTM2Ljk0NkMzODAuNjA4IDUyOC44MDIgMzgwLjY4OSA1MDUuODA0IDM2OC44MTIgNDg0LjUzMlpNNTQ2LjM3NiA0OTAuMDU5QzU0Mi4yNjcgNDg5LjA2NSA1NDAuNDgxIDQ4OC45NDMgNTQwLjQ1IDQ4OS4xMjJDNTM5LjEzIDQ5OS41MDcgNTM4LjUxNCA1MDQuMzE4IDUzNy4zMzIgNTE0Ljg5OUM1MzYuOTE3IDUxOC41OTEgNTM2LjY3MiA1MTkuNTk4IDUzNy4xNjUgNTIzLjQ3QzUzNy41MDggNTI2LjIzOCA1MzguOTEgNTI3LjA5NCA1NDIuNjM1IDUyNy41NDZDNTQ2LjQ0MiA1MjguMDAzIDU1MC4yNTMgNTI4LjQ3MiA1NTQuMDYgNTI4LjkyNEw1NjAuMzI4IDUyOS42ODJDNTY1LjM1OCA1MzAuMjg5IDU3NC42NzcgNTMxLjAzMSA1NzcuNjg5IDUyOC4yNzZMNTc3LjcgNTI4LjI5MkM1ODAuODc2IDUyNS4zODYgNTgyLjIwOSA1MjIuNjU1IDU4MS43NjkgNTE4LjUzOUM1ODAuMDk0IDUwMi42MSA1NTUuOTQzIDQ5Mi4zNTggNTQ2LjM3NiA0OTAuMDU5WiIgZmlsbD0iI0ZERTdEQSI+PC9wYXRoPgo8cGF0aCBkPSJNMjk5LjMzMSAzMzguOTQ1QzMwOS4xOTkgMzA0LjQxNyAzNDIuMzQgMjgzLjE3MyAzNzMuNzUgMjkxLjYwMkM0MDUuMTU5IDMwMC4wMzUgNDIzLjAyOSAzMzEuNzM4IDQxMy4wNzUgMzY5LjQ2MUM0MDMuOTIgNDA0LjE2OCAzNzAuMDY2IDQyNS4yMzcgMzM4LjY1NiA0MTYuODA0QzMwNy4yNDcgNDA4LjM3MSAyODguMzc1IDM3Ny4yNDcgMjk5LjMzMSAzMzguOTQ1Wk01NjMuNDg3IDI3OC40MDJDNTY1LjA4MSAyNzguMDY4IDU2Ni43MTUgMjc4LjE5NCA1NjguMjU2IDI3OC4zNTdDNTcwLjIwOCAyNzguNTY1IDU3Mi4xNzIgMjc4Ljc1NyA1NzQuMTI1IDI3OC45NTNDNTc5LjY0OCAyNzkuNDkxIDU4NS4zNTUgMjgwLjA1MyA1OTAuOTUxIDI4MC45MzNDNTk0LjA5NyAyODEuNDMgNTk2LjU1NSAyODIuODQ5IDU5OC4wNjcgMjg1LjA0MkM1OTkuNjY1IDI4Ny4zNTcgNjAwLjEwNSAyOTAuMzQ1IDU5OS4zMzUgMjkzLjcwOEw1OTguOTY1IDI5NS4yNTJWMjk1LjMzM0M2MDUuMzE1IDI5MC43MTYgNjExLjIwOSAyODguMDQ2IDYxNy4zOTYgMjg2Ljk1OEM2MzEuNTI4IDI4NC40NjMgNjQ2LjYyIDI5MS40MzMgNjU0LjExMiAzMDMuODg5QzY1OS40NzIgMzEyLjgwMyA2NjEuODc3IDMyMy4wOTUgNjYxLjY4NSAzMzYuMjkzSDY2MS42OThDNjYxLjU1OSAzNDYuMDc2IDY2MC4zNzcgMzU0LjYzNiA2NTguMDk4IDM2Mi40NjFDNjUzLjU0NiAzNzguMDY4IDY0NS44MSAzODkuNzE0IDYzNC40NTQgMzk4LjA3OEM2MjIuMzMyIDQwNy4wMDQgNjA4LjY5NCA0MTAuNjI4IDU5My45MyA0MDguODYzQzU4NS44MDcgNDA3Ljg4NSA1NzcuNzQgNDA2LjMxNSA1NjkuODA4IDQwNC41NzlDNTY1Ljc0MSA0MDMuNjgyIDU2MS43MjYgNDAyLjc0OCA1NTcuNzQgNDAxLjgyM0M1NTEuNTI4IDQwMC4zNzYgNTQzLjUxIDM5OC41NTkgNTM4Ljc0MSAzOTcuNjA5QzUyOC4yMjUgMzk1LjUyNiA1MjUuNTMxIDM5OS4xOSA1MjEuNzEyIDM5Ny4zNDNDNTIwLjczMyAzOTYuODc4IDUxOC40OTYgMzk1LjM3NCA1MTkuNDg2IDM5Mi40NEM1MjEuMjcyIDM4Ny4xMDkgNTM1LjI2NCAzODguODA0IDUzNi45MjggMzg4LjQwNUM1NDMuODk3IDM4Ni43MDkgNTQ4LjM2NSAzODIuMTA4IDU1MC4zNDUgMzczLjk5M0M1NTUuNDU3IDM1My4wMjIgNTYwLjI1NSAzMzEuNTk4IDU2NC45MDEgMzEwLjg4OEw1NjYuMjc1IDMwNC43N0M1NjcuMDE3IDMwMS40NjUgNTY3LjAzMyAyOTguODc2IDU2Ny4wMzMgMjk1LjgzMkM1NjcuMDMzIDI5My4xMTcgNTYzLjg0MiAyOTAuMTk0IDU2MS40NDkgMjg4LjAxN0M1NjEuMzk2IDI4Ny45NzYgNTYxLjMzOSAyODcuOTM2IDU2MS4yODYgMjg3Ljg5NUM1NjAuOTAzIDI4Ny42MDYgNTYwLjI1NSAyODcuMDkyIDU1OS44OTYgMjg2LjI0MUM1NTkuODI3IDI4Ni4wNjEgNTU5Ljc0NSAyODUuODgyIDU1OS42NTEgMjg1LjY5QzU1OS4xMjUgMjg0LjU4NSA1NTguNDEyIDI4My4wNjkgNTU5LjA0NCAyODEuNTEyQzU1OS43NjEgMjc5LjczNSA1NjEuODg5IDI3OC43MzIgNTYzLjQ4NyAyNzguNDAyWk0yMjcuMDE0IDI3MS40OTlDMjM3LjU4MyAyNzAuMDIzIDI0OC42MzQgMjcwLjkyIDI2MC44NyAyNzQuMDkxQzI2NC44OTcgMjc1LjEzNSAyNjkuNzc2IDI3OC4zNzUgMjcxLjYxOCAyODQuNjU2QzI3MS45NDggMjg1Ljc3MyAyNzIuMTk3IDI4Ny43MjkgMjcyLjM4OCAyODkuMjc0QzI3Mi43MTkgMjkxLjkzMSAyNzMuMDQ5IDI5NC42NzUgMjczLjMwOSAyOTcuMzg5QzI3My4zMzggMjk3LjYzNCAyNzMuMzYyIDI5Ny44OTkgMjczLjQwMyAyOTguMTZDMjczLjY0IDI5OS45NDkgMjczLjEzIDMwNi4xNTMgMjY5LjEzMiAzMDcuODYxQzI2NS4zNjUgMzA5LjQ4NyAyNjIuMDY0IDMwNy4wMzMgMjYwLjk5MiAzMDUuNzVDMjYwLjc4OCAzMDUuNTA1IDI2MC41ODEgMzA1LjI1NiAyNjAuMzczIDMwNS4wNDhDMjUyLjg2OSAyOTcuNTQgMjQ4LjMwMyAyOTMuMzc5IDI0MC44NjkgMjkwLjkyNUMyMzQuNjE2IDI4OC44NTkgMjI5LjM1IDI5MC4xNTUgMjI0LjI5MiAyOTIuNjYyQzIxOS4yMjEgMjk1LjE4NSAyMTQuNDg5IDMwMC43NDggMjExLjY0NCAzMDYuNTkzQzIwOC4yNzggMzEzLjUzNSAyMDUuMjI0IDMyMC45NDkgMjA1LjgzMiAzMzEuNjI4QzIwNi41MDQgMzQzLjU5OSAyMDcuMDY3IDM0NS4yMjYgMjEzLjg5OCAzNTcuNTAyQzIxOC4wMTEgMzY0Ljg3MiAyMjIuNzkyIDM2OS44NzMgMjI4LjUzOSAzNzMuNjY0QzIzNS40NjggMzc4LjIzNyAyNDIuMjMgMzc5LjY4NCAyNTAuNTYxIDM3OS44MjNDMjUyLjIzNyAzNzkuODUxIDI1My45IDM3OS43NjYgMjU1LjY2MSAzNzkuNjg0QzI1Ni40NTYgMzc5LjY0MyAyNTcuMjY3IDM3OS42MDIgMjU4LjA3OCAzNzkuNTc0QzI1Ny45ODQgMzc1Ljk1IDI1Ny45NjggMzc1LjYwOCAyNTcuODk4IDM3MS45OEMyNTcuNzY0IDM2NC45MTIgMjU3LjYyNSAzNTcuNTg0IDI1Ny4yODMgMzUwLjQxOEMyNTcuMTE2IDM0Ni45NzQgMjU1Ljc1NCAzNDAuMTU1IDI1MS4zMDMgMzM2LjUzMkMyNDUuNzc2IDMzMi4wNTIgMjQwLjQgMzMzLjM0OCAyMzguNTg2IDMzMC42MzNDMjM4LjAzNiAzMjkuODIyIDIzOC4zMTMgMzI3Ljg5NCAyMzguNjQzIDMyNy4zOTdDMjM5LjY3NSAzMjUuODUyIDI0My45MjIgMzI1Ljg0IDI0OC4xNCAzMjYuMDMyQzI0OS45OTUgMzI2LjExNyAyNTguMjI5IDMyNS43NzEgMjU4LjczOCAzMjUuNzcxQzI2Mi44MjIgMzI1LjY4OSAyNjQuOTM3IDMyNS41NjMgMjY5LjAyMSAzMjUuMzE0QzI3Mi44MTIgMzI1LjA4MiAyNzMuMDQ5IDMyNSAyNzYuOTY2IDMyNC42NTRDMjgxLjA2MiAzMjQuMjk1IDI4NC42NjEgMzI1LjEzOSAyODYuOTg0IDMyOS43OTNDMjg5LjA3NSAzMzMuOTg0IDI4Ny43ODMgMzM2LjY5OCAyODYuNzIzIDM0MS43QzI4NS44NTkgMzQ1Ljg1NyAyODUuNTE0IDM0OS42MzUgMjg1LjQ4OSAzNTMuNDc5QzI4NS40MiAzNjMuNDQxIDI4NS42MzkgMzczLjI5MyAyODUuODg0IDM4My4zNDhDMjg1Ljk2OSAzODcuMDI5IDI4MS4zNjMgMzkyLjA5OSAyNzcuODg3IDM5My42MjdDMjYzLjk2MyAzOTkuNzE3IDI1Ny44NDUgMzk5Ljk3OSAyNDQuNTk1IDQwMC4xOTlIMjQzLjI3M0MyMjguNjc3IDQwMC4yMjcgMjE3LjI0IDM5Ny42NTEgMjA3LjMwMyAzOTIuMDcxTDIwNy4zMTUgMzkyLjExMkMxOTcuNTQxIDM4Ni42MTMgMTkwLjAzNyAzNzguODA0IDE4NS4wNDggMzY4Ljg5NUMxNzcuMjI2IDM1My4zNTMgMTc0LjgyMSAzMzYuMjk5IDE3Ny45MTUgMzE4LjE2NUMxODAuMzAzIDMwNC4wOTggMTg2Ljg5MSAyOTIuNTUyIDE5Ny40ODggMjgzLjgxN0MyMDUuNTU0IDI3Ny4xNjEgMjE1LjIxOSAyNzMuMTM3IDIyNy4wMTQgMjcxLjQ5OVpNMzYyLjQzOSAzMDkuMjFDMzQ2LjAyNSAzMDcuMjEzIDMzMS4xNCAzMjUuNjkgMzI3LjAwMyAzNTAuMTc0QzMyMi41MDcgMzc2LjgxOSAzMzQuNiAzOTYuMzcxIDM1MS4wMTQgMzk4LjM2OUMzNjcuNDI4IDQwMC4zNjYgMzgxLjg0NSAzODEuODA3IDM4Ni40NTEgMzU3LjQwOUMzOTEuOTc4IDMyOC4xMTUgMzc4Ljg0OSAzMTEuMjA4IDM2Mi40MzkgMzA5LjIxWk02MjMuODY5IDMxMS45MjNDNjIwLjI1NCAzMDQuOTI1IDYxMi43NSAzMDMuOTg3IDYwNy4xOTggMzA2LjcwMkM2MDMuMDA0IDMwOC43NTIgNTk5LjcwNiAzMDkuOTM5IDU5NS44NDIgMzE0LjU2OUM1OTQuODExIDMxNS43OTYgNTkzLjk4OCAzMTcuNDYzIDU5My41NzYgMzE5LjEyOUM1OTEuODg0IDMyNi4wMDIgNTkwLjI5IDMzMy4wNDUgNTg4Ljc1IDMzOS44NTJDNTg4LjM3OSAzNDEuNTE5IDU4OC4wMDggMzQzLjE4NiA1ODcuNjIxIDM0NC44NTNINTg3LjY3OEw1ODcuMTI4IDM0Ny4yNUM1ODYuNTA4IDM0OS45NDggNTg1Ljg3NiAzNTIuNjM0IDU4NS4yNDQgMzU1LjMzNkM1ODMuNjkxIDM2MS45NzYgNTgyLjA4MSAzNjguODI0IDU4MC43MDggMzc1LjU5QzU4MC4wNDcgMzc4LjgyNyA1NzguODM3IDM4Mi4yODcgNTc5LjAzMyAzODYuMDYxQzU3OS4xNDMgMzg4LjE5NyA1ODAuNzQ5IDM4OS40MzYgNTg0LjAyMSAzOTAuMTY2TDU4Ni42ODcgMzkwLjc3M0M1ODkuNDM5IDM5MS4zOTIgNTkyLjI2NyAzOTIuMDI4IDU5NS4wNTkgMzkyLjU3OUM2MDEuNjMgMzkzLjg1OCA2MDcuNDMgMzkyLjM1OSA2MTIuMzA5IDM4OC4wODdDNjE3LjI1OCAzODMuNzYzIDYyMC43MSAzNzcuNzY3IDYyMi44ODMgMzY5Ljc1QzYyNS42ODMgMzU5LjM4OCA2MjguODU4IDM0NS42NzYgNjI4LjYxMyAzMzEuNDg4QzYyOC40ODcgMzI0LjQyIDYyNy40NDMgMzE4Ljg0IDYyMy44NjkgMzExLjkyM1pNNDMzLjIxMyAzMDUuMTk4QzQ0OC41NjcgMjc0LjUxNCA0ODMuMzg0IDI2MC4yMTEgNTExLjM0MiAyNzMuNDI1QzUzOS4zMDMgMjg2LjY1MiA1NTAuNDUgMzE5LjQwMiA1MzQuNDQ4IDM1My4wNzRDNTE5LjcyNiAzODQuMDYzIDQ4NC4yNzcgMzk4LjA2IDQ1Ni4zMiAzODQuODQ2QzQyOC4zNTkgMzcxLjYyIDQxNi4xNjcgMzM5LjI0NCA0MzMuMjEzIDMwNS4xOThaTTQ5Ny42MjYgMjg4QzQ4Mi41ODUgMjgzLjM1OCA0NjUuMzY0IDI5OC4xNTggNDU3LjE1NSAzMjAuNDA5QzQ0OC4yMzcgMzQ0LjYyOCA0NTYuMTEyIDM2NC45OTIgNDcxLjE1MiAzNjkuNjUxQzQ4Ni4xODggMzc0LjI5MyA1MDIuOTg2IDM1OS4zNDcgNTExLjYxOSAzMzcuMjQ3QzUyMS45NjggMzEwLjcyIDUxMi42NjIgMjkyLjY1OSA0OTcuNjI2IDI4OFoiIGZpbGw9IiNGREU3REEiPjwvcGF0aD4KPC9zdmc+';
+  var BLOB_BEIGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzk4IiBoZWlnaHQ9Ijc4MiIgdmlld0JveD0iMjYxNCAxMDk1IDc5OCA3ODIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0zMDU3LjI3IDE4NTMuNDRDMjk3NS4zMyAxODU2Ljk0IDI5MDYuMDcgMTc5My4zNSAyOTAyLjU3IDE3MTEuNDFDMjkwMS43MSAxNjkxLjI3IDI4ODAuMjQgMTY3OC44MiAyODYyLjM0IDE2ODguMDhMMjg0Ni41OSAxNjk2LjIzQzI3OTguODIgMTcyMC45MyAyNzQwLjA3IDE3MDIuMjMgMjcxNS4zNiAxNjU0LjQ2QzI2OTAuNjYgMTYwNi42OSAyNzA5LjM1IDE1NDcuOTQgMjc1Ny4xMiAxNTIzLjI0QzI3OTMgMTUwNC42OCAyNzk4LjcgMTQ1NS43MSAyNzY4LjA1IDE0MjkuNDFMMjY5Ny41NSAxMzY4Ljk0QzI2NDAuODIgMTMyMC4yNyAyNjM0LjI4IDEyMzQuODMgMjY4Mi45NSAxMTc4LjFDMjczMS42MiAxMTIxLjM3IDI4MTcuMDUgMTExNC44NCAyODczLjc4IDExNjMuNUMyODkwLjAyIDExNzcuNDMgMjkxNC44NCAxMTczLjA1IDI5MzAuNCAxMTU4LjM4QzI5NTUuNDUgMTEzNC43NiAyOTg4Ljc5IDExMTkuNyAzMDI1Ljg4IDExMTguMTFDMzEwNy44MiAxMTE0LjYyIDMxNzcuMDggMTE3OC4yMSAzMTgwLjU4IDEyNjAuMTVDMzE4MS40NCAxMjgwLjI3IDMyMDIuODkgMTI5Mi43MSAzMjIwLjc4IDEyODMuNDVMMzIzNi4zOSAxMjc1LjM4QzMyODQuMTYgMTI1MC42OCAzMzQyLjkxIDEyNjkuMzggMzM2Ny42MiAxMzE3LjE0QzMzOTIuMzIgMTM2NC45MSAzMzczLjYyIDE0MjMuNjYgMzMyNS44NSAxNDQ4LjM3QzMyODguMDIgMTQ2Ny45NCAzMjgwLjY3IDE1MjAuODQgMzI4Ni4wOSAxNTYzLjA5QzMyOTAuOCAxNTk5Ljc2IDMyODAuNTUgMTYzOC4yMSAzMjU0LjU4IDE2NjguNDhDMzIyNy44NyAxNjk5LjYyIDMyMDEuOTIgMTczNi4wNSAzMTgzLjI0IDE3NzIuNThDMzE1OS42OCAxODE4LjY2IDMxMTIuNjcgMTg1MS4wOCAzMDU3LjI3IDE4NTMuNDRaIiBmaWxsPSIjRkRFN0RBIj48L3BhdGg+Cjwvc3ZnPg==';
+  var BLOB_BEIGE2 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODk5IiBoZWlnaHQ9Ijc4MyIgdmlld0JveD0iMzgwMyAxMTE2IDg5OSA3ODMiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0zODQ1LjIgMTM3Ny44NEMzODcyLjQzIDEyODcuMjUgMzk2Ny45NCAxMjM1Ljg4IDQwNTguNTMgMTI2My4xMUw0MDkzLjE5IDEyNzMuNTNDNDEwMi42OSAxMjc2LjM5IDQxMTIuMzkgMTI2OS43NiA0MTEzLjE5IDEyNTkuODdDNDExOC45IDExODkuMDcgNDE4MC45MiAxMTM2LjMxIDQyNTEuNzIgMTE0Mi4wMkM0MzIyLjUyIDExNDcuNzIgNDM3NS4yOSAxMjA5Ljc1IDQzNjkuNTggMTI4MC41NUM0MzY5LjIxIDEyODUuMTcgNDM3NC4xNyAxMjg4LjQzIDQzNzguNDggMTI4Ni43QzQ0MTkuOTYgMTI3MC4wMyA0NDY4LjQ4IDEyODUuODYgNDQ5MS42MyAxMzI1LjY0QzQ0OTcuMTIgMTMzNS4wNyA0NTAwLjczIDEzNDUuMDcgNDUwMi41OSAxMzU1LjIxQzQ1MDYuNzEgMTM3Ny43NSA0NTE4LjI4IDE0MDEuMyA0NTQwLjIyIDE0MDcuOUM0NjMwLjgxIDE0MzUuMTMgNDY4Mi4xNyAxNTMwLjY0IDQ2NTQuOTUgMTYyMS4yM0M0NjI3LjcyIDE3MTEuODIgNDUzMi4yIDE3NjMuMTggNDQ0MS42MiAxNzM1Ljk1TDQzODUuNDYgMTcxOS4wN0M0MzU5LjcyIDE3MTEuMzQgNDMzMy40IDE3MjkuMzEgNDMzMS4yNCAxNzU2LjFDNDMyNS41MyAxODI2LjkgNDI2My41MSAxODc5LjY3IDQxOTIuNzEgMTg3My45NkM0MTIxLjkxIDE4NjguMjUgNDA2OS4xNCAxODA2LjIzIDQwNzQuODUgMTczNS40M0M0MDc3LjA0IDE3MDguMjggNDA0Ny44MSAxNjg5Ljg3IDQwMjQuMjcgMTcwMy41N0wzOTc0LjA4IDE3MzIuNzlDMzkzMC4zOSAxNzU4LjIyIDM4NzQuMzUgMTc0My40MSAzODQ4LjkyIDE2OTkuNzJDMzgyMy40OSAxNjU2LjAzIDM4MzguMyAxNTk5Ljk5IDM4ODEuOTkgMTU3NC41NkMzODkyLjMzIDE1NjguNTQgMzg5My4zNiAxNTUzLjg5IDM4ODUuMTEgMTU0NS4yMUMzODQ0LjE3IDE1MDIuMSAzODI2Ljg2IDE0MzguODUgMzg0NS4yIDEzNzcuODRaIiBmaWxsPSIjRkRFN0RBIj48L3BhdGg+Cjwvc3ZnPg==';
+  var BLOB_TERRA = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTkzIiBoZWlnaHQ9Ijc1OCIgdmlld0JveD0iMTIyMiA0MCA5OTMgNzU4IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMTc0OC4zOCA1OS41Mjg5QzE4MDMuNDEgNTkuNTI4OSAxODUxLjQ1IDg5LjQ2MDQgMTg3Ny4xIDEzMy45MzFDMTg5NC4yOCAxNjMuNyAxOTMxLjM0IDE4Ni44NzYgMTk2Mi41MSAxNzIuNDA1QzIwMzYuOSAxMzcuODcxIDIxMjUuMiAxNzAuMTgxIDIxNTkuNzMgMjQ0LjU3QzIxOTQuMjcgMzE4Ljk1OSAyMTYxLjk2IDQwNy4yNTkgMjA4Ny41NyA0NDEuNzkzQzIwMjMuOTkgNDcxLjMwNiAyMDEwLjQ5IDU1NS43ODIgMjA2MS42OSA2MDMuNjQ4TDIwNjguMjQgNjA5Ljc2NUMyMTA1LjAxIDY0NC4xMzcgMjEwNi45NSA3MDEuODA5IDIwNzIuNTggNzM4LjU3OUMyMDM4LjIxIDc3NS4zNDggMTk4MC41NCA3NzcuMjkyIDE5NDMuNzcgNzQyLjkyMUwxODg0LjI0IDY4Ny4yODFDMTgxNS45NyA2MjMuNDU5IDE2ODMuOTQgNjI5LjE2OSAxNjAzLjczIDY2Ni40MDVMMTQ3My40NiA3MjYuODc5QzEzOTkuMDcgNzYxLjQxMiAxMzEwLjc3IDcyOS4xMDMgMTI3Ni4yNCA2NTQuNzE0QzEyNDEuNyA1ODAuMzI0IDEyNzQuMDEgNDkyLjAyNCAxMzQ4LjQgNDU3LjQ5MUwxNDQ2LjUgNDExLjk1QzE0OTIuMjQgMzkwLjcxNSAxNTAxLjk2IDMyOS45MzUgMTQ2NS4xMiAyOTUuNDk3QzE0MjguMzUgMjYxLjEyNSAxNDI2LjQxIDIwMy40NTMgMTQ2MC43OCAxNjYuNjgzQzE0OTUuMTUgMTI5LjkxMyAxNTUyLjgyIDEyNy45NjkgMTU4OS41OSAxNjIuMzRDMTU5NS43NSAxNjguMDk0IDE2MDUuOTYgMTY1IDE2MDguODUgMTU3LjA4NkMxNjI5LjY0IDEwMC4xNjQgMTY4NC4yNyA1OS41Mjg5IDE3NDguMzggNTkuNTI4OVoiIGZpbGw9IiNCMDQ4MkQiPjwvcGF0aD4KPC9zdmc+';
 
+  /* ---------- i18n ---------- */
   function lang(){
     try{ var l = localStorage.getItem('gms_lang'); if(l==='de'||l==='en') return l; }catch(e){}
     return /^de/i.test(document.documentElement.lang||navigator.language||'en') ? 'de' : 'en';
   }
-  function t(en, de){ return lang()==='de' ? de : en; }
+  function setLang(l){ try{ localStorage.setItem('gms_lang', l); }catch(e){} }
+  var COPY = {
+    en:{ free:"First class free", noCard:"No card, no commitment", close:"Close",
+      schedTitle:"Pick your first class",
+      schedSub:"Free for first-timers. Choose the day and time that suit you.",
+      daysLabel:"Next 14 days", today:"Today", fullMini:"full", withWord:"with",
+      fullLabel:"Fully booked", loadingLabel:"Finding open classes…",
+      emptyTitle:"This day is fully booked",
+      emptyPre:"Every mat is taken on ", emptyPost:". Your next open day is one tap away.",
+      backToClasses:"Back to classes", yourClass:"Your class",
+      reassure:"We set up your Good Moves account with these details and reserve your mat.",
+      lblName:"Name", lblEmail:"Email", lblPhone:"Phone",
+      phName:"Your name", phEmail:"you@email.com", phPhone:"+49 …",
+      submit:"Book my free class",
+      errName:"Please add your name", errEmailEmpty:"Please add your email",
+      errEmailBad:"That email doesn’t look right", errPhone:"Please add a phone number",
+      errSummary:"Please check the highlighted fields.",
+      genericErr:"Something went wrong. Please try again.",
+      rateErr:"Too many attempts — please try again in a few minutes.", tryAgain:"Try again",
+      returnEyebrow:"Welcome back",
+      returnMsg:"Lovely to see you again! The free first class is for brand-new faces, but your mat is waiting: book in the Mindbody app, or send us a message and we’ll sort it for you personally.",
+      returnMindbody:"Open the Mindbody app", returnMessage:"Send us a message",
+      doneTitle:"You’re in!", doneTitlePre:"You’re in, ", doneTitlePost:"!",
+      pendingTitle:"Almost done!",
+      pendingBody:"We got your details and will confirm your class by email shortly.",
+      doneConfirm:"Your Good Moves account is set up, and a confirmation email is on its way.",
+      addCal:"Add to calendar", studioLabel:"Studio", address:"Immanuelkirchstraße 24, 10405 Berlin",
+      comeEarly:"Come 10 minutes early — we’ll show you around and get your mat ready.",
+      directions:"Get directions", signoff:"See you on the mat.", bookAnother:"Book another class" },
+    de:{ free:"Erste Stunde gratis", noCard:"Keine Karte, keine Verpflichtung", close:"Schließen",
+      schedTitle:"Wähl deine erste Stunde",
+      schedSub:"Gratis für alle, die neu sind. Wähl Tag und Zeit, die dir passen.",
+      daysLabel:"Nächste 14 Tage", today:"Heute", fullMini:"voll", withWord:"mit",
+      fullLabel:"Ausgebucht", loadingLabel:"Freie Kurse werden geladen…",
+      emptyTitle:"Dieser Tag ist ausgebucht",
+      emptyPre:"Am ", emptyPost:" ist jede Matte belegt. Dein nächster freier Tag ist nur einen Tipp entfernt.",
+      backToClasses:"Zurück zu den Kursen", yourClass:"Dein Kurs",
+      reassure:"Wir richten mit diesen Angaben dein Good-Moves-Konto ein und reservieren deine Matte.",
+      lblName:"Name", lblEmail:"E-Mail", lblPhone:"Telefon",
+      phName:"Dein Name", phEmail:"du@email.com", phPhone:"+49 …",
+      submit:"Meine Gratis-Stunde buchen",
+      errName:"Bitte gib deinen Namen an", errEmailEmpty:"Bitte gib deine E-Mail an",
+      errEmailBad:"Diese E-Mail sieht nicht richtig aus", errPhone:"Bitte gib eine Telefonnummer an",
+      errSummary:"Bitte prüf die markierten Felder.",
+      genericErr:"Etwas ist schiefgelaufen. Bitte versuch es erneut.",
+      rateErr:"Zu viele Versuche — bitte probier es in ein paar Minuten nochmal.", tryAgain:"Erneut versuchen",
+      returnEyebrow:"Willkommen zurück",
+      returnMsg:"Schön, dich wiederzusehen! Die gratis erste Stunde ist für ganz neue Gesichter, aber deine Matte wartet: Buch in der Mindbody-App, oder schreib uns und wir regeln das persönlich für dich.",
+      returnMindbody:"Mindbody-App öffnen", returnMessage:"Schreib uns",
+      doneTitle:"Du bist dabei!", doneTitlePre:"Du bist dabei, ", doneTitlePost:"!",
+      pendingTitle:"Fast geschafft!",
+      pendingBody:"Wir haben deine Daten und bestätigen dir deine Stunde gleich per E-Mail.",
+      doneConfirm:"Dein Good-Moves-Konto ist eingerichtet und eine Bestätigungs-E-Mail ist unterwegs.",
+      addCal:"Zum Kalender hinzufügen", studioLabel:"Studio", address:"Immanuelkirchstraße 24, 10405 Berlin",
+      comeEarly:"Komm 10 Minuten früher — wir zeigen dir alles und richten deine Matte ein.",
+      directions:"Route anzeigen", signoff:"Wir sehen uns auf der Matte.", bookAnother:"Weitere Stunde buchen" }
+  };
+  function T(){ return COPY[lang()]; }
+  var WD = { en:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], de:["So","Mo","Di","Mi","Do","Fr","Sa"] };
+  var MO = { en:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+             de:["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"] };
+
+  /* ---------- helpers ---------- */
   function consented(){
     try{ return localStorage.getItem('gms_consent') === 'granted'; }catch(e){ return false; }
   }
@@ -86,59 +150,210 @@
     var d = new Date(); d.setDate(d.getDate()+days);
     return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
   }
-  function niceDate(iso){
-    var p = iso.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
-    return d.toLocaleDateString(lang()==='de'?'de-DE':'en-GB', {weekday:'long', day:'numeric', month:'long'});
+  function parseISO(iso){ var p = iso.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function longDate(iso){
+    var d = parseISO(iso), l = lang();
+    return l==='de' ? (WD.de[d.getDay()]+', '+d.getDate()+'. '+MO.de[d.getMonth()])
+                    : (WD.en[d.getDay()]+', '+d.getDate()+' '+MO.en[d.getMonth()]);
   }
-  function chipDate(iso){
-    var p = iso.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
-    var loc = lang()==='de'?'de-DE':'en-GB';
-    return { top: d.toLocaleDateString(loc,{weekday:'short'}), sub: d.toLocaleDateString(loc,{day:'numeric',month:'short'}) };
+  function scarcityLabel(n){
+    return lang()==='de' ? (n===1?'nur noch 1 Platz':'nur noch '+n+' Plätze')
+                         : (n===1?'only 1 spot left':'only '+n+' spots left');
+  }
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  /* class names like "Pilates Slider Burn (EN)" → { nm, tag } */
+  function splitTag(name){
+    var m = /^(.*)\s\((EN|DE)\)\s*$/.exec(name || '');
+    return m ? { nm:m[1], tag:m[2] } : { nm:(name||''), tag:'' };
+  }
+  function icsHref(slot){
+    var d = parseISO(slot.date), p = slot.time.split(':');
+    var s = new Date(d.getFullYear(), d.getMonth(), d.getDate(), +p[0], +p[1]);
+    var e = new Date(s.getTime() + 55*60000);
+    function z(x){ return x.getFullYear()+pad(x.getMonth()+1)+pad(x.getDate())+'T'+pad(x.getHours())+pad(x.getMinutes())+'00'; }
+    var ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Good Moves//Booking//EN','BEGIN:VEVENT',
+      'DTSTART:'+z(s),'DTEND:'+z(e),'SUMMARY:Good Moves — '+splitTag(slot.className).nm,
+      'DESCRIPTION:Your free first class'+(slot.teacher?(' with '+slot.teacher):'')+'. Come 10 minutes early.',
+      'LOCATION:Immanuelkirchstraße 24\\, 10405 Berlin','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    return 'data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
   }
 
-  /* Styles — inherits the page's CSS variables; full-screen sheet on phones. */
+  /* ---------- styles (design tokens from the Claude Design handoff) ---------- */
   var css = ''
-    + '.gmsbk-overlay{position:fixed;inset:0;background:rgba(2,15,82,.55);display:none;align-items:center;justify-content:center;z-index:999;padding:18px}'
-    + '.gmsbk-overlay.open{display:flex}'
-    + '.gmsbk{background:var(--cream,#F7F0E9);color:var(--ink,#020F52);border-radius:22px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:26px 22px;position:relative;font-family:inherit}'
-    + '@media(max-width:560px){.gmsbk-overlay{padding:0}.gmsbk{border-radius:0;max-height:100vh;height:100vh}}'
-    + '.gmsbk h3{margin:0 0 6px;font-size:1.3rem}'
-    + '.gmsbk p{margin:0 0 14px;font-size:.95rem}'
-    + '.gmsbk label{display:block;font-weight:700;font-size:.8rem;margin:12px 0 4px}'
-    + '.gmsbk input{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid rgba(2,15,82,.25);background:#fff;font:inherit;font-size:.95rem}'
-    + '.gmsbk .gmsbk-err{color:#B0482D;font-size:.82rem;margin:6px 0 0;display:none}'
-    + '.gmsbk .gmsbk-x{position:absolute;top:12px;right:14px;border:0;background:none;font-size:1.5rem;cursor:pointer;color:inherit}'
-    + '.gmsbk button[type=submit]{margin-top:18px;width:100%;padding:13px;border:0;border-radius:999px;font-weight:800;font-size:1rem;cursor:pointer;background:var(--coral,#F26D5B);color:#fff}'
-    + '.gmsbk button[disabled]{opacity:.6;cursor:wait}'
-    + '.gmsbk .gmsbk-done{text-align:center;padding:18px 4px}'
-    + '.gmsbk .gmsbk-done .mark{font-size:2rem}'
-    + '.gmsbk .gmsbk-done b{display:block;margin:8px 0 4px;font-size:1.1rem}'
-    /* step 1: day chips + slot cards */
-    + '.gmsbk-days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch}'
-    + '.gmsbk-day{flex:0 0 auto;border:1.5px solid rgba(2,15,82,.25);background:#fff;border-radius:999px;'
-    +   'padding:8px 13px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;color:inherit;text-align:center;line-height:1.15}'
-    + '.gmsbk-day small{display:block;font-size:.68rem;font-weight:600;opacity:.75}'
-    + '.gmsbk-day[aria-pressed=true]{background:var(--ink,#020F52);color:var(--cream,#F7F0E9);border-color:var(--ink,#020F52)}'
-    + '.gmsbk-day[disabled]{opacity:.4;cursor:default}'
-    + '.gmsbk-slots{display:flex;flex-direction:column;gap:8px;margin-top:8px;overflow:auto;padding:2px;flex:1}'
-    + '.gmsbk-slot{display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid rgba(2,15,82,.2);'
-    +   'background:#fff;border-radius:14px;padding:12px 14px;font:inherit;cursor:pointer;color:inherit;width:100%}'
-    + '.gmsbk-slot:hover{border-color:var(--coral,#F26D5B)}'
-    + '.gmsbk-slot .tm{font-weight:800;font-size:1.05rem;min-width:52px}'
-    + '.gmsbk-slot .nm{font-weight:700;font-size:.92rem}'
-    + '.gmsbk-slot .sub{display:block;font-weight:500;font-size:.78rem;color:#54547E}'
-    + '.gmsbk-slot .go{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px}'
-    + '.gmsbk-slot .pick{background:var(--coral,#F26D5B);color:#fff;border-radius:999px;font-weight:800;font-size:.74rem;padding:6px 12px;white-space:nowrap}'
-    + '.gmsbk-slot .left{font-size:.7rem;font-weight:800;color:var(--coral,#F26D5B);white-space:nowrap}'
-    + '.gmsbk-empty{color:#54547E;font-weight:500;padding:18px 2px}'
-    /* step 2: registration */
-    + '.gmsbk-back{border:0;background:none;color:#54547E;font:inherit;font-size:.85rem;font-weight:700;cursor:pointer;padding:0;margin-bottom:10px}'
-    + '.gmsbk-chosen{background:#fff;border:1.5px solid var(--coral,#F26D5B);border-radius:14px;padding:10px 14px;margin:2px 0 10px;font-weight:700;font-size:.92rem}'
-    + '.gmsbk-chosen small{display:block;font-weight:500;color:#54547E}';
+  + '.gmsbk-overlay{position:fixed;inset:0;background:rgba(0,0,68,.62);display:none;z-index:999;}'
+  + '.gmsbk-overlay.open{display:block;animation:gmbkFade .3s ease both;}'
+  + '.gmsbk{position:absolute;left:0;right:0;bottom:0;top:12px;margin:0 auto;border-radius:26px 26px 0 0;'
+  +   'display:flex;flex-direction:column;overflow:hidden;background:#FBF6F1;color:#000044;'
+  +   'box-shadow:0 -10px 40px rgba(0,0,68,.18);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;'
+  +   'animation:gmbkSheetM .44s cubic-bezier(.22,1,.36,1) both;}'
+  + '@media(min-width:640px){.gmsbk{top:50%;bottom:auto;left:50%;right:auto;transform:translate(-50%,-50%);'
+  +   'width:min(564px,94vw);max-height:92vh;border-radius:32px;box-shadow:0 30px 80px rgba(0,0,68,.3);'
+  +   'animation:gmbkSheetD .42s cubic-bezier(.22,1,.36,1) both;}'
+  +   '@keyframes gmbkSheetD{from{opacity:0;transform:translate(-50%,-48%) scale(.98)}to{opacity:1;transform:translate(-50%,-50%)}}}'
+  + '.gmsbk-handle{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;border-radius:999px;background:rgba(0,0,68,.18);z-index:2;}'
+  + '@media(min-width:640px){.gmsbk-handle{display:none}}'
+  + '.gmsbk *{box-sizing:border-box;font-family:inherit;}'
+  + '.gmsbk-display{font-family:"Nersans Three","Nunito",system-ui,sans-serif;text-transform:uppercase;}'
+  + '.gmsbk-head{flex-shrink:0;padding:15px 18px 12px;border-bottom:1px solid rgba(0,0,68,.08);}'
+  + '.gmsbk-headrow{display:flex;align-items:center;gap:10px;}'
+  + '.gmsbk-logo{width:34px;height:34px;flex-shrink:0;}'
+  + '.gmsbk-brand{display:flex;flex-direction:column;line-height:1.15;min-width:0;}'
+  + '.gmsbk-brand b{font-family:"Nersans Three","Nunito",system-ui,sans-serif;font-weight:400;font-size:15px;text-transform:uppercase;color:#000044;white-space:nowrap;}'
+  + '.gmsbk-brand small{font-size:11.5px;color:#B0482D;font-weight:700;white-space:nowrap;}'
+  + '.gmsbk-langs{margin-left:auto;display:flex;align-items:center;gap:2px;}'
+  + '.gmsbk-langs button{background:none;border:0;cursor:pointer;font-size:13px;letter-spacing:.05em;padding:8px 5px;}'
+  + '.gmsbk-langs .on{color:#B0482D;font-weight:800;}'
+  + '.gmsbk-langs .off{color:rgba(0,0,68,.42);font-weight:600;}'
+  + '.gmsbk-langs span{opacity:.3;font-size:12px;}'
+  + '.gmsbk-x{margin-left:4px;width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;'
+  +   'background:#EEDBC3;border:0;border-radius:999px;color:#000044;cursor:pointer;transition:background .15s;}'
+  + '.gmsbk-x:hover{background:#E6CFB2;}'
+  + '.gmsbk-trust{display:flex;align-items:center;gap:5px;margin-top:10px;font-size:12.5px;color:rgba(0,0,68,.66);font-weight:600;}'
+  + '.gmsbk-trust b{color:#B0482D;font-weight:800;}'
+  + '.gmsbk-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}'
+  + '.gmsbk-body::-webkit-scrollbar{width:0;height:0;}'
+  + '.gmsbk-view{padding:18px 20px 26px;animation:gmbkFade .3s ease both;}'
+  + '.gmsbk-h1{font-size:clamp(26px,6.4vw,34px);line-height:1;color:#B0482D;margin:0 0 6px;}'
+  + '.gmsbk-sub{font-size:14.5px;line-height:1.5;color:rgba(0,0,68,.72);margin:0 0 16px;max-width:40ch;}'
+  + '.gmsbk-eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#B0482D;font-weight:700;margin-bottom:8px;}'
+  + '.gmsbk-days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;'
+  +   '-webkit-overflow-scrolling:touch;scrollbar-width:none;}'
+  + '.gmsbk-days::-webkit-scrollbar{width:0;height:0;}'
+  + '.gmsbk-day{flex:0 0 auto;width:58px;min-height:66px;scroll-snap-align:start;display:flex;flex-direction:column;'
+  +   'align-items:center;justify-content:center;gap:1px;border:0;border-radius:16px;cursor:pointer;padding:8px 4px;'
+  +   'transition:background .16s,color .16s,transform .1s;background:#EEDBC3;color:#000044;}'
+  + '.gmsbk-day:active{transform:scale(.96);}'
+  + '.gmsbk-day .wd{font-size:11px;font-weight:700;letter-spacing:.02em;opacity:.85;}'
+  + '.gmsbk-day .dn{font-family:"Nersans Three","Nunito",system-ui,sans-serif;font-size:22px;line-height:1;}'
+  + '.gmsbk-day .mini{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;height:11px;line-height:1;}'
+  + '.gmsbk-day[aria-selected=true]{background:#B0482D;color:#FDE7DA;}'
+  + '.gmsbk-day[disabled]{background:transparent;color:rgba(0,0,68,.34);border:1px dashed rgba(0,0,68,.22);cursor:default;}'
+  + '.gmsbk-slots{display:flex;flex-direction:column;gap:10px;margin-top:14px;animation:gmbkUp .42s cubic-bezier(.22,1,.36,1) both;}'
+  + '.gmsbk-slot{display:block;position:relative;width:100%;text-align:left;border:0;border-radius:20px;'
+  +   'padding:14px 52px 14px 66px;min-height:66px;transition:background .15s,transform .12s;'
+  +   'background:#EEDBC3;color:#000044;cursor:pointer;}'
+  + '.gmsbk-slot:hover{background:#E6CFB2;transform:translateY(-2px);}'
+  + '.gmsbk-slot:active{transform:scale(.99);}'
+  + '.gmsbk-slot[disabled]{background:#ECE3D5;color:rgba(0,0,68,.5);cursor:not-allowed;transform:none;}'
+  + '.gmsbk-slot .tm{position:absolute;left:15px;top:15px;width:46px;font-family:"Nersans Three","Nunito",system-ui,sans-serif;font-size:20px;line-height:1;white-space:nowrap;}'
+  + '.gmsbk-slot .nm{display:block;font-size:14.5px;font-weight:700;line-height:1.3;}'
+  + '.gmsbk-slot .sub{display:block;font-size:12.5px;color:rgba(0,0,68,.6);line-height:1.3;margin-top:3px;}'
+  + '.gmsbk-slot .tag{display:inline-block;vertical-align:middle;margin-left:6px;font-size:9.5px;font-weight:800;'
+  +   'letter-spacing:.04em;padding:2px 6px;border-radius:999px;border:1px solid rgba(0,0,68,.22);color:rgba(0,0,68,.7);}'
+  + '.gmsbk-slot .left{display:inline-block;background:#B0482D;color:#FDE7DA;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;}'
+  + '.gmsbk-slot .fullpill{display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;'
+  +   'color:rgba(0,0,68,.45);background:rgba(0,0,68,.06);padding:3px 10px;border-radius:999px;}'
+  + '.gmsbk-slot .pick{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:34px;height:34px;'
+  +   'border-radius:999px;background:#B0482D;color:#FDE7DA;display:flex;align-items:center;justify-content:center;font-size:17px;}'
+  + '.gmsbk-skelrow{display:flex;gap:8px;overflow:hidden;padding-bottom:4px;}'
+  + '.gmsbk-skelchip{flex:0 0 auto;width:58px;height:66px;border-radius:16px;background:#EEDBC3;animation:gmbkShim 1.25s ease-in-out infinite;}'
+  + '.gmsbk-skelcard{height:74px;border-radius:20px;background:#EEDBC3;animation:gmbkShim 1.25s ease-in-out infinite;}'
+  + '.gmsbk-loadrow{display:flex;align-items:center;gap:9px;margin:16px 2px 12px;color:rgba(0,0,68,.6);font-size:13px;}'
+  + '.gmsbk-spin{width:16px;height:16px;border-radius:50%;border:2.5px solid #EEDBC3;border-top-color:#B0482D;display:inline-block;animation:gmbkSpin .9s linear infinite;}'
+  + '.gmsbk-emptywrap{margin-top:20px;text-align:center;padding:12px 8px 18px;animation:gmbkUp .42s cubic-bezier(.22,1,.36,1) both;}'
+  + '.gmsbk-emptyico{position:relative;width:88px;height:88px;margin:0 auto 16px;}'
+  + '.gmsbk-emptyico .blob{position:absolute;inset:-16px;width:120px;height:120px;opacity:.95;animation:gmbkFloatB 13s cubic-bezier(.22,1,.36,1) infinite;}'
+  + '.gmsbk-emptyico .disc{position:relative;width:88px;height:88px;border-radius:999px;background:#EEDBC3;display:flex;align-items:center;justify-content:center;color:#B0482D;}'
+  + '.gmsbk-btn{background:#B0482D;color:#FDE7DA;border:0;padding:14px 26px;border-radius:999px;'
+  +   'font-family:"Nersans Three","Nunito",system-ui,sans-serif;font-size:15px;text-transform:uppercase;'
+  +   'letter-spacing:.02em;cursor:pointer;min-height:48px;transition:background .15s;}'
+  + '.gmsbk-btn:hover{background:#9B3E26;}'
+  + '.gmsbk-btn:active{transform:scale(.98);}'
+  + '.gmsbk-back{background:none;border:0;cursor:pointer;color:#B0482D;font-size:13.5px;font-weight:700;'
+  +   'padding:2px 2px 12px;display:inline-flex;align-items:center;gap:6px;}'
+  + '.gmsbk-chosen{background:#EEDBC3;border-radius:22px;padding:16px 18px;margin-bottom:16px;}'
+  + '.gmsbk-chosen .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#B0482D;font-weight:800;margin-bottom:8px;}'
+  + '.gmsbk-chosen .tmn{line-height:1.25;}'
+  + '.gmsbk-chosen .tmn .tm{font-family:"Nersans Three","Nunito",system-ui,sans-serif;font-size:25px;color:#000044;}'
+  + '.gmsbk-chosen .tmn .nm{font-size:15.5px;font-weight:700;color:#000044;margin-left:9px;}'
+  + '.gmsbk-chosen .dt{font-size:13.5px;color:rgba(0,0,68,.72);margin-top:8px;}'
+  + '.gmsbk-reassure{display:flex;gap:9px;font-size:13.5px;line-height:1.5;color:rgba(0,0,68,.72);margin:0 0 16px;}'
+  + '.gmsbk-reassure svg{color:#B0482D;flex-shrink:0;margin-top:1px;}'
+  + '.gmsbk-banner{display:flex;align-items:flex-start;gap:10px;background:#FBEDE8;border:1.5px solid #B0482D;'
+  +   'border-radius:16px;padding:13px 15px;margin-bottom:14px;animation:gmbkUp .42s cubic-bezier(.22,1,.36,1) both;}'
+  + '.gmsbk-banner svg{color:#B0482D;flex-shrink:0;margin-top:1px;}'
+  + '.gmsbk-banner .bt{font-size:14px;font-weight:700;color:#000044;}'
+  + '.gmsbk-banner .retry{margin-top:8px;background:#B0482D;color:#FDE7DA;border:0;padding:9px 18px;border-radius:999px;'
+  +   'font-size:13px;font-weight:700;cursor:pointer;min-height:40px;}'
+  + '.gmsbk-banner .retry:hover{background:#9B3E26;}'
+  + '.gmsbk-errsum{display:flex;align-items:center;gap:9px;background:#FBEDE8;border:1.5px solid #B0482D;border-radius:14px;'
+  +   'padding:11px 14px;margin-bottom:14px;font-size:13.5px;font-weight:600;color:#B0482D;animation:gmbkUp .42s cubic-bezier(.22,1,.36,1) both;}'
+  + '.gmsbk-fields{display:flex;flex-direction:column;gap:13px;}'
+  + '.gmsbk-fields label{display:block;font-size:12.5px;font-weight:700;color:#000044;margin-bottom:6px;}'
+  + '.gmsbk-fields input{width:100%;border-radius:12px;padding:13px 15px;font-size:16px;color:#000044;min-height:50px;'
+  +   'outline:none;transition:border-color .15s,box-shadow .15s;background:#FFFDFA;border:1.5px solid rgba(0,0,68,.16);}'
+  + '.gmsbk-fields input:focus{border-color:#B0482D;box-shadow:0 0 0 4px rgba(176,72,45,.16);}'
+  + '.gmsbk-fields input[aria-invalid=true]{background:#FBEDE8;border-color:#B0482D;}'
+  + '.gmsbk-ferr{font-size:12.5px;color:#B0482D;font-weight:600;margin-top:5px;display:flex;align-items:center;gap:5px;}'
+  + '.gmsbk-submit{width:100%;margin-top:18px;background:#B0482D;color:#FDE7DA;border:0;padding:16px;border-radius:999px;'
+  +   'font-family:"Nersans Three","Nunito",system-ui,sans-serif;font-size:17px;text-transform:uppercase;'
+  +   'letter-spacing:.02em;cursor:pointer;min-height:54px;transition:background .15s;}'
+  + '.gmsbk-submit:hover{background:#9B3E26;}'
+  + '.gmsbk-submit:active{transform:scale(.99);}'
+  + '.gmsbk-submit[disabled]{opacity:.6;cursor:wait;}'
+  + '.gmsbk-nocard{text-align:center;font-size:12.5px;color:rgba(0,0,68,.55);margin-top:11px;}'
+  + '.gmsbk-return{background:#001DA2;color:#FDE7DA;border-radius:22px;padding:20px;position:relative;overflow:hidden;'
+  +   'animation:gmbkUp .42s cubic-bezier(.22,1,.36,1) both;}'
+  + '.gmsbk-return .blob{position:absolute;top:-40px;right:-30px;width:120px;opacity:.16;animation:gmbkFloatA 11s cubic-bezier(.22,1,.36,1) infinite;}'
+  + '.gmsbk-return .in{position:relative;}'
+  + '.gmsbk-return .eyebrow{font-family:"Nersans Three","Nunito",system-ui,sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.06em;opacity:.82;margin-bottom:8px;}'
+  + '.gmsbk-return p{font-size:15px;line-height:1.55;margin:0 0 16px;}'
+  + '.gmsbk-return .btns{display:flex;flex-direction:column;gap:9px;}'
+  + '.gmsbk-return a{text-decoration:none;text-align:center;min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:999px;padding:13px 18px;}'
+  + '.gmsbk-return .prim{background:#FDE7DA;color:#001DA2;font-family:"Nersans Three","Nunito",system-ui,sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.02em;}'
+  + '.gmsbk-return .prim:hover{background:#F4D7C4;}'
+  + '.gmsbk-return .sec{background:rgba(253,231,218,.14);color:#FDE7DA;font-size:14px;font-weight:700;border:1px solid rgba(253,231,218,.3);}'
+  + '.gmsbk-return .sec:hover{background:rgba(253,231,218,.22);}'
+  + '.gmsbk-celebrate{position:relative;overflow:hidden;border-radius:26px;padding:32px 22px 28px;text-align:center;background:#B0482D;color:#FDE7DA;}'
+  + '.gmsbk-celebrate .blob{position:absolute;bottom:-70px;left:-50px;width:150px;opacity:.18;animation:gmbkFloatB 13s cubic-bezier(.22,1,.36,1) infinite;}'
+  + '.gmsbk-celebrate .in{position:relative;}'
+  + '.gmsbk-celebrate .ringwrap{position:relative;width:78px;height:78px;margin:0 auto 14px;}'
+  + '.gmsbk-celebrate .ring{position:absolute;inset:0;border-radius:999px;border:2px solid #FDE7DA;animation:gmbkRing 1.1s cubic-bezier(.22,1,.36,1) .1s both;}'
+  + '.gmsbk-celebrate .disc{width:78px;height:78px;border-radius:999px;background:#FDE7DA;color:#B0482D;display:flex;align-items:center;justify-content:center;animation:gmbkPop .6s cubic-bezier(.34,1.56,.64,1) both;}'
+  + '.gmsbk-celebrate h1{font-size:clamp(30px,7.5vw,40px);line-height:.98;margin:0;}'
+  + '.gmsbk-calline{display:inline-flex;align-items:center;gap:8px;margin-top:13px;font-size:13.5px;font-weight:700;color:#B0482D;text-decoration:none;}'
+  + '.gmsbk-confline{display:flex;gap:9px;font-size:13.5px;line-height:1.5;color:rgba(0,0,68,.72);margin:16px 2px;}'
+  + '.gmsbk-confline svg{color:#B0482D;flex-shrink:0;margin-top:1px;}'
+  + '.gmsbk-addr{display:flex;gap:11px;background:#FBF6F1;border:1px solid rgba(0,0,68,.1);border-radius:18px;padding:15px 16px;}'
+  + '.gmsbk-addr svg{color:#B0482D;flex-shrink:0;margin-top:1px;}'
+  + '.gmsbk-addr .lb{font-size:14.5px;font-weight:700;color:#000044;}'
+  + '.gmsbk-addr .ad{font-size:14px;color:rgba(0,0,68,.8);line-height:1.4;margin-top:2px;}'
+  + '.gmsbk-addr .ce{font-size:13px;color:rgba(0,0,68,.7);line-height:1.45;margin-top:6px;}'
+  + '.gmsbk-addr a{display:inline-block;margin-top:9px;font-size:13px;font-weight:700;color:#B0482D;text-decoration:none;}'
+  + '.gmsbk-signoff{text-align:center;font-size:clamp(22px,6vw,28px);color:#B0482D;margin:22px 0 4px;}'
+  + '.gmsbk-again{background:none;border:0;cursor:pointer;color:rgba(0,0,68,.55);font-size:13.5px;font-weight:600;'
+  +   'text-decoration:underline;text-underline-offset:3px;padding:8px;display:block;margin:0 auto;}'
+  + '.gmsbk-hp{position:absolute;left:-9999px;}'
+  + '@keyframes gmbkFade{from{opacity:0}to{opacity:1}}'
+  + '@keyframes gmbkUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}'
+  + '@keyframes gmbkSheetM{from{opacity:0;transform:translateY(48px)}to{opacity:1;transform:none}}'
+  + '@keyframes gmbkPop{0%{opacity:0;transform:scale(.5)}62%{opacity:1;transform:scale(1.08)}100%{transform:scale(1)}}'
+  + '@keyframes gmbkRing{0%{opacity:.5;transform:scale(.55)}100%{opacity:0;transform:scale(1.9)}}'
+  + '@keyframes gmbkFloatA{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(10px,-8px) rotate(2deg)}}'
+  + '@keyframes gmbkFloatB{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(-9px,7px) rotate(-2deg)}}'
+  + '@keyframes gmbkShim{0%,100%{opacity:.5}50%{opacity:1}}'
+  + '@keyframes gmbkSpin{to{transform:rotate(360deg)}}'
+  + '@media (prefers-reduced-motion: reduce){.gmsbk,.gmsbk *,.gmsbk-overlay{animation:none !important;}}'
+  + '.gmsbk :focus-visible{outline:2px solid #B0482D;outline-offset:3px;}'
+  + '.gmsbk input:focus-visible{outline:none;}';
   var style = document.createElement('style');
   style.textContent = css;
   document.head.appendChild(style);
 
+  /* ---------- svg bits ---------- */
+  var SVG = {
+    x:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>',
+    check:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>',
+    bigcheck:'<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>',
+    warn:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.3v.2"></path></svg>',
+    warn18:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.3v.2"></path></svg>',
+    cal:'<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path></svg>',
+    caldl:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="3"></rect><path d="M3 9.5h18M8 2.5v4M16 2.5v4M12 13v4M10 15h4"></path></svg>',
+    mail:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M4 7l8 6 8-6"></path></svg>',
+    pin:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>'
+  };
+
+  /* ---------- shell ---------- */
   var overlay = document.createElement('div');
   overlay.className = 'gmsbk-overlay';
   overlay.setAttribute('role','dialog');
@@ -146,46 +361,48 @@
   document.body.appendChild(overlay);
   overlay.addEventListener('mousedown', function(e){ if(e.target===overlay) close(); });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
-
   function close(){ overlay.classList.remove('open'); document.body.style.overflow=''; }
-  function bindClose(){
-    var x = overlay.querySelector('.gmsbk-x');
-    if(x) x.addEventListener('click', close);
+
+  /* state */
+  var S = { slots:[], byDay:{}, dayKeys:[], currentDay:null, chosen:null, loaded:false };
+
+  function headHTML(){
+    var t = T(), l = lang();
+    return '<div class="gmsbk-handle" aria-hidden="true"></div>'
+      + '<div class="gmsbk-head">'
+      + '<div class="gmsbk-headrow">'
+      + '<img class="gmsbk-logo" src="'+LOGO+'" alt="Good Moves"/>'
+      + '<div class="gmsbk-brand"><b>Good Moves</b><small>'+t.free+'</small></div>'
+      + '<div class="gmsbk-langs">'
+      +   '<button type="button" data-setlang="en" class="'+(l==='en'?'on':'off')+'" aria-label="English">EN</button>'
+      +   '<span>/</span>'
+      +   '<button type="button" data-setlang="de" class="'+(l==='de'?'on':'off')+'" aria-label="Deutsch">DE</button>'
+      + '</div>'
+      + '<button type="button" class="gmsbk-x" data-close="1" aria-label="'+t.close+'">'+SVG.x+'</button>'
+      + '</div>'
+      + '<div class="gmsbk-trust"><b>&#10003;</b> '+t.noCard+'</div>'
+      + '</div>';
+  }
+  function shell(bodyHTML){
+    overlay.innerHTML = '<div class="gmsbk">'+headHTML()
+      + '<div class="gmsbk-body"><div class="gmsbk-view">'+bodyHTML+'</div></div></div>';
+    overlay.querySelector('[data-close]').addEventListener('click', close);
+    overlay.querySelectorAll('[data-setlang]').forEach(function(b){
+      b.addEventListener('click', function(){
+        setLang(b.dataset.setlang);
+        rerender();
+      });
+    });
+  }
+  var currentView = 'loading';
+  function rerender(){
+    if(currentView==='loading') renderLoading();
+    else if(currentView==='schedule') renderSchedule();
+    else if(currentView==='register') renderRegister(S.chosen, null);
+    else if(currentView==='done') { /* keep as-is; language switch mid-done re-renders */ renderDone(S.lastDone||{booked:null}); }
   }
 
-  function scarcity(s){
-    if(s.spotsLeft > 3) return '';
-    return lang()==='de'
-      ? (s.spotsLeft===1 ? 'nur noch 1 Platz' : 'nur noch '+s.spotsLeft+' Plätze')
-      : (s.spotsLeft===1 ? 'only 1 spot left' : 'only '+s.spotsLeft+' spots left');
-  }
-
-  function doneHTML(res){
-    var b = res.booked;
-    var head = b ? t('You\'re in!','Du bist dabei!') : t('Almost done!','Fast geschafft!');
-    var body = b
-      ? (b.className+'<br>'+niceDate(b.date)+' · '+b.time+(b.teacher?('<br>'+t('with ','mit ')+b.teacher):''))
-      : t('We got your details and will confirm your class by email shortly.',
-          'Wir haben deine Daten und bestätigen dir deine Stunde gleich per E-Mail.');
-    var cal = (b && b.calendarUrl)
-      ? '<p><a href="'+b.calendarUrl+'" target="_blank" rel="noopener" style="font-weight:700">'
-        + t('Add to calendar','Zum Kalender hinzufügen')+'</a></p>'
-      : '';
-    var addr = b
-      ? '<p style="font-size:.85rem">Immanuelkirchstraße 24, 10405 Berlin<br>'
-        + t('Come 10 minutes early — mats and props are at the studio.',
-            'Komm 10 Minuten früher — Matten und Props sind im Studio.')+'</p>'
-      : '';
-    var acct = b
-      ? '<p style="font-size:.85rem">'+t('Your Good Moves account is set up — your confirmation is on its way by email.',
-          'Dein Good-Moves-Konto ist eingerichtet — deine Bestätigung kommt per E-Mail.')+'</p>'
-      : '';
-    return '<div class="gmsbk"><button type="button" class="gmsbk-x" aria-label="Close">×</button>'
-      + '<div class="gmsbk-done"><span class="mark">🎉</span><b>'+head+'</b><p>'+body+'</p>'
-      + cal + acct + addr
-      + '<p>'+t('See you on the mat.','Wir sehen uns auf der Matte.')+'</p></div></div>';
-  }
-
+  /* ---------- data ---------- */
   function loadSlots(){
     var dates = [];
     for(var i=0;i<DAYS_AHEAD;i++) dates.push(isoPlus(i));
@@ -193,157 +410,302 @@
       return apiFetch('/api/classes?date='+d).then(function(r){ return r.json(); }).catch(function(){ return {slots:[]}; });
     })).then(function(days){
       var slots = [];
+      var today = isoPlus(0), now = new Date();
+      var nowMin = now.getHours()*60 + now.getMinutes() + 30; // 30-min cutoff before start
       days.forEach(function(day){ (day.slots||[]).forEach(function(s){
-        if(!s.soldOut && s.spotsLeft>0 && String(s.classId).indexOf('mb-')===0) slots.push(s);
+        if(String(s.classId).indexOf('mb-')!==0) return;
+        if(s.date === today){ // Mindbody keeps started classes "available" — hide past times
+          var hm = String(s.time).split(':');
+          if((+hm[0])*60 + (+hm[1]) <= nowMin) return;
+        }
+        slots.push(s); // sold-out ones stay: shown as "fully booked"
       });});
-      return { dates: dates, slots: slots };
+      S.slots = slots;
+      S.byDay = {};
+      slots.forEach(function(s, i){ (S.byDay[s.date] = S.byDay[s.date] || []).push(i); });
+      S.dayKeys = dates;
+      S.currentDay = null;
+      for(var i=0;i<dates.length;i++){
+        var list = S.byDay[dates[i]]||[];
+        var open = list.some(function(ix){ return !S.slots[ix].soldOut && S.slots[ix].spotsLeft>0; });
+        if(open){ S.currentDay = dates[i]; break; }
+      }
+      if(!S.currentDay) S.currentDay = dates[0];
+      S.loaded = true;
+    });
+  }
+  function dayOpen(d){
+    return (S.byDay[d]||[]).some(function(ix){ return !S.slots[ix].soldOut && S.slots[ix].spotsLeft>0; });
+  }
+  function nextOpenDay(from){
+    var idx = S.dayKeys.indexOf(from);
+    for(var k=1;k<=S.dayKeys.length;k++){
+      var d = S.dayKeys[(idx+k)%S.dayKeys.length];
+      if(dayOpen(d)) return d;
+    }
+    return null;
+  }
+
+  /* ---------- screens ---------- */
+  function renderLoading(){
+    currentView='loading';
+    var t = T();
+    var chips=''; for(var i=0;i<7;i++) chips+='<div class="gmsbk-skelchip"></div>';
+    var cards=''; for(var j=0;j<5;j++) cards+='<div class="gmsbk-skelcard"></div>';
+    shell('<h1 class="gmsbk-h1 gmsbk-display">'+t.schedTitle+'</h1>'
+      + '<p class="gmsbk-sub">'+t.schedSub+'</p>'
+      + '<div class="gmsbk-eyebrow">'+t.daysLabel+'</div>'
+      + '<div class="gmsbk-skelrow">'+chips+'</div>'
+      + '<div class="gmsbk-loadrow"><span class="gmsbk-spin"></span>'+t.loadingLabel+'</div>'
+      + '<div style="display:flex;flex-direction:column;gap:10px;">'+cards+'</div>');
+  }
+
+  function dayChipsHTML(){
+    var t = T(), l = lang();
+    return S.dayKeys.map(function(d, i){
+      var dt = parseISO(d), open = dayOpen(d), sel = d===S.currentDay;
+      return '<button type="button" class="gmsbk-day" role="tab" data-day="'+d+'"'
+        + ' aria-selected="'+sel+'"' + (open?'':' disabled')
+        + ' aria-label="'+(i===0?t.today:WD[l][dt.getDay()])+' '+dt.getDate()+(open?'':' — '+t.fullLabel)+'">'
+        + '<span class="wd">'+(i===0?t.today:WD[l][dt.getDay()])+'</span>'
+        + '<span class="dn">'+dt.getDate()+'</span>'
+        + '<span class="mini">'+(open?'':t.fullMini)+'</span>'
+        + '</button>';
+    }).join('');
+  }
+
+  function renderSchedule(){
+    currentView='schedule';
+    var t = T();
+    var list = S.byDay[S.currentDay]||[];
+    var anyOpen = dayOpen(S.currentDay);
+    var body = '<h1 class="gmsbk-h1 gmsbk-display">'+t.schedTitle+'</h1>'
+      + '<p class="gmsbk-sub">'+t.schedSub+'</p>'
+      + '<div class="gmsbk-eyebrow">'+t.daysLabel+'</div>'
+      + '<div class="gmsbk-days" role="tablist">'+dayChipsHTML()+'</div>';
+
+    if(!anyOpen){
+      var nd = nextOpenDay(S.currentDay);
+      var ndt = nd ? parseISO(nd) : null;
+      var ndLabel = nd ? ((S.dayKeys.indexOf(nd)===0?t.today:WD[lang()][ndt.getDay()])+' '+ndt.getDate()) : '';
+      var cta = lang()==='de' ? (ndLabel+' ansehen') : ('See '+ndLabel);
+      body += '<div class="gmsbk-emptywrap">'
+        + '<div class="gmsbk-emptyico"><img class="blob" src="'+BLOB_BEIGE2+'" alt=""/><div class="disc">'+SVG.cal+'</div></div>'
+        + '<div class="gmsbk-display" style="font-size:22px;color:#000044;margin-bottom:8px;">'+t.emptyTitle+'</div>'
+        + '<p class="gmsbk-sub" style="margin:0 auto 18px;max-width:34ch;text-align:center;">'+t.emptyPre+longDate(S.currentDay)+t.emptyPost+'</p>'
+        + (nd ? '<button type="button" class="gmsbk-btn" data-jump="'+nd+'">'+cta+' &#8594;</button>' : '')
+        + '</div>';
+    } else {
+      body += '<div class="gmsbk-slots">'
+        + list.map(function(ix){
+            var s = S.slots[ix], st = splitTag(s.className);
+            var full = s.soldOut || s.spotsLeft<=0;
+            var scarce = !full && s.spotsLeft<=3;
+            return '<button type="button" class="gmsbk-slot" data-ix="'+ix+'"'+(full?' disabled':'')
+              + ' aria-label="'+esc(s.time+' '+st.nm+(s.teacher?(' '+t.withWord+' '+s.teacher):''))+(full?' — '+t.fullLabel:(scarce?' — '+scarcityLabel(s.spotsLeft):''))+'">'
+              + '<span class="tm">'+s.time+'</span>'
+              + '<span class="nm">'+esc(st.nm)+'</span>'
+              + '<span class="sub">'+(s.teacher?(t.withWord+' '+esc(s.teacher)):'')
+              +   (st.tag?('<span class="tag">'+st.tag+'</span>'):'')+'</span>'
+              + (scarce?('<div style="margin-top:7px;"><span class="left">'+scarcityLabel(s.spotsLeft)+'</span></div>'):'')
+              + (full?('<div style="margin-top:7px;"><span class="fullpill">'+t.fullLabel+'</span></div>'):'')
+              + (!full?('<span class="pick">&#8594;</span>'):'')
+              + '</button>';
+          }).join('')
+        + '</div>';
+    }
+    shell(body);
+    overlay.querySelectorAll('[data-day]').forEach(function(b){
+      b.addEventListener('click', function(){
+        if(b.disabled) return;
+        S.currentDay = b.dataset.day;
+        renderSchedule();
+      });
+    });
+    var jump = overlay.querySelector('[data-jump]');
+    if(jump) jump.addEventListener('click', function(){ S.currentDay = jump.dataset.jump; renderSchedule(); });
+    overlay.querySelectorAll('[data-ix]').forEach(function(b){
+      b.addEventListener('click', function(){
+        if(b.disabled) return;
+        S.chosen = S.slots[Number(b.dataset.ix)];
+        renderRegister(S.chosen, null);
+      });
     });
   }
 
-  window.gmsOpenBooking = function(){
-    overlay.innerHTML = '<div class="gmsbk"><p style="margin:0">'+t('Loading classes…','Lade Stunden…')+'</p></div>';
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
+  function chosenHTML(slot, withEyebrow){
+    var t = T(), st = splitTag(slot.className);
+    return '<div class="gmsbk-chosen">'
+      + (withEyebrow?('<div class="eyebrow">'+t.yourClass+'</div>'):'')
+      + '<div class="tmn"><span class="tm gmsbk-display">'+slot.time+'</span><span class="nm">'+esc(st.nm)+'</span></div>'
+      + '<div class="dt">'+longDate(slot.date)+(slot.teacher?(' · '+t.withWord+' '+esc(slot.teacher)):'')+'</div>'
+      + '</div>';
+  }
 
-    loadSlots().then(function(loaded){
-      var slots = loaded.slots;
-      if(!slots.length){
-        overlay.innerHTML = doneHTML({booked:null});
-        bindClose();
+  /* sub: null | {kind:'returning'} | {kind:'error', msg} | {kind:'validation', errs, vals} */
+  function renderRegister(slot, sub){
+    currentView='register';
+    var t = T();
+    var vals = (sub && sub.vals) || { name:'', email:'', phone:'' };
+    var errs = (sub && sub.kind==='validation') ? sub.errs : {};
+    var body = '<button type="button" class="gmsbk-back" data-back="1">&#8592; '+t.backToClasses+'</button>'
+      + chosenHTML(slot, true);
+
+    if(sub && sub.kind==='returning'){
+      body += '<div class="gmsbk-return">'
+        + '<img class="blob" src="'+BLOB_BEIGE+'" alt=""/>'
+        + '<div class="in">'
+        + '<div class="eyebrow">'+t.returnEyebrow+'</div>'
+        + '<p>'+t.returnMsg+'</p>'
+        + '<div class="btns">'
+        + '<a class="prim" href="'+MINDBODY_URL+'" target="_blank" rel="noopener">'+t.returnMindbody+'</a>'
+        + '<a class="sec" href="mailto:hello@goodmovesstudio.com">'+t.returnMessage+'</a>'
+        + '</div></div></div>';
+      shell(body);
+      overlay.querySelector('[data-back]').addEventListener('click', function(){ renderSchedule(); });
+      return;
+    }
+
+    body += '<p class="gmsbk-reassure">'+SVG.check+'<span>'+t.reassure+'</span></p>';
+    if(sub && sub.kind==='error'){
+      body += '<div class="gmsbk-banner">'+SVG.warn18
+        + '<div style="flex:1;"><div class="bt">'+esc(sub.msg||t.genericErr)+'</div>'
+        + '<button type="button" class="retry" data-retry="1">'+t.tryAgain+'</button></div></div>';
+    }
+    if(Object.keys(errs).length){
+      body += '<div class="gmsbk-errsum">'+SVG.warn+' '+t.errSummary+'</div>';
+    }
+    function field(id, key, type, ac){
+      return '<div><label for="gmbk-'+key+'">'+t['lbl'+id]+'</label>'
+        + '<input id="gmbk-'+key+'" name="'+key+'" type="'+type+'" autocomplete="'+ac+'" maxlength="'+(key==='email'?254:(key==='name'?100:20))+'"'
+        + ' placeholder="'+t['ph'+id]+'" value="'+esc(vals[key]||'')+'" aria-invalid="'+(errs[key]?'true':'false')+'">'
+        + (errs[key]?('<div class="gmsbk-ferr">&#9888; '+errs[key]+'</div>'):'')
+        + '</div>';
+    }
+    body += '<form novalidate>'
+      + '<div class="gmsbk-fields">'
+      + field('Name','name','text','name')
+      + field('Email','email','email','email')
+      + field('Phone','phone','tel','tel')
+      + '</div>'
+      + '<div class="gmsbk-hp" aria-hidden="true"><label>Website</label><input name="website" tabindex="-1" autocomplete="off"></div>'
+      + '<button type="submit" class="gmsbk-submit">'+t.submit+'</button>'
+      + '<div class="gmsbk-nocard">'+t.noCard+'</div>'
+      + '</form>';
+    shell(body);
+    overlay.querySelector('[data-back]').addEventListener('click', function(){ renderSchedule(); });
+    var retry = overlay.querySelector('[data-retry]');
+    var form = overlay.querySelector('form');
+    function currentVals(){
+      return { name:form.name.value, email:form.email.value, phone:form.phone.value, website:form.website?form.website.value:'' };
+    }
+    if(retry) retry.addEventListener('click', function(){ submitBooking(slot, currentVals()); });
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      submitBooking(slot, currentVals());
+    });
+  }
+
+  function validate(v){
+    var t = T(), e = {};
+    if(!v.name || !v.name.trim()) e.name = t.errName;
+    if(!v.email || !v.email.trim()) e.email = t.errEmailEmpty;
+    else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email.trim())) e.email = t.errEmailBad;
+    if(!v.phone || v.phone.replace(/\D/g,'').length < 6) e.phone = t.errPhone;
+    return e;
+  }
+
+  function submitBooking(slot, v){
+    var t = T();
+    var errs = validate(v);
+    if(Object.keys(errs).length){
+      renderRegister(slot, {kind:'validation', errs:errs, vals:v});
+      return;
+    }
+    var btn = overlay.querySelector('.gmsbk-submit');
+    if(btn) btn.disabled = true;
+    var leadId = eventId('lead');
+    apiFetch('/api/book-first-class', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name:v.name.trim(), email:v.email.trim(), phone:v.phone.trim(),
+        classId:slot.classId, date:slot.date, time:slot.time,
+        className:slot.className, teacher:slot.teacher,
+        website:v.website||'', locale:lang(),
+        leadEventId:leadId, metaConsent:consented()
+      })
+    }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); })
+    .then(function(res){
+      if(res.data && res.data.code === 'not_eligible'){
+        renderRegister(slot, {kind:'returning', vals:v});
         return;
       }
-      var byDay = {};
-      slots.forEach(function(s, i){ (byDay[s.date] = byDay[s.date] || []).push(i); });
-      // Chips for ALL requested days — empty ones stay visible but disabled,
-      // so the two-week window reads honestly.
-      var dayKeys = loaded.dates;
-      var currentDay = null;
-      for(var i=0;i<dayKeys.length;i++){ if((byDay[dayKeys[i]]||[]).length){ currentDay = dayKeys[i]; break; } }
-
-      /* ---- STEP 1: the schedule ---- */
-      function renderStep1(){
-        overlay.innerHTML = ''
-          + '<div class="gmsbk" style="display:flex;flex-direction:column">'
-          + '<button type="button" class="gmsbk-x" aria-label="Close">×</button>'
-          + '<h3>'+t('Pick your free first class','Wähl deine gratis erste Stunde')+'</h3>'
-          + '<p>'+t('The next two weeks at the studio. No card, no commitment.',
-                   'Die nächsten zwei Wochen im Studio. Keine Karte, keine Verpflichtung.')+'</p>'
-          + '<div class="gmsbk-days" role="tablist"></div>'
-          + '<div class="gmsbk-slots" role="list"></div>'
-          + '</div>';
-        bindClose();
-        var daysBox  = overlay.querySelector('.gmsbk-days');
-        var slotsBox = overlay.querySelector('.gmsbk-slots');
-        daysBox.innerHTML = dayKeys.map(function(d){
-          var c = chipDate(d), n = (byDay[d]||[]).length;
-          return '<button type="button" class="gmsbk-day" data-day="'+d+'" aria-pressed="'+(d===currentDay)+'"'+(n?'':' disabled')+'>'
-            + c.top + '<small>' + c.sub + '</small></button>';
-        }).join('');
-        slotsBox.innerHTML = (byDay[currentDay]||[]).map(function(i){
-          var s = slots[i], left = scarcity(s);
-          return '<button type="button" class="gmsbk-slot" data-slot="'+i+'" role="listitem">'
-            + '<span class="tm">'+s.time+'</span>'
-            + '<span><span class="nm">'+s.className+'</span>'
-            + (s.teacher ? '<span class="sub">'+t('with ','mit ')+s.teacher+'</span>' : '')
-            + '</span>'
-            + '<span class="go"><span class="pick">'+t('Book free','Gratis buchen')+'</span>'
-            + (left ? '<span class="left">'+left+'</span>' : '')
-            + '</span>'
-            + '</button>';
-        }).join('') || '<p class="gmsbk-empty">'+t('No open spots on this day.','Keine freien Plätze an diesem Tag.')+'</p>';
-        daysBox.addEventListener('click', function(e){
-          var b = e.target.closest('[data-day]');
-          if(!b || b.disabled) return;
-          currentDay = b.dataset.day;
-          renderStep1();
-        });
-        slotsBox.addEventListener('click', function(e){
-          var b = e.target.closest('[data-slot]');
-          if(!b) return;
-          renderStep2(slots[Number(b.dataset.slot)]);
-        });
+      if(res.status === 429){
+        renderRegister(slot, {kind:'error', msg:t.rateErr, vals:v});
+        return;
       }
-
-      /* ---- STEP 2: verification & registration ---- */
-      function renderStep2(slot){
-        overlay.innerHTML = ''
-          + '<div class="gmsbk">'
-          + '<button type="button" class="gmsbk-x" aria-label="Close">×</button>'
-          + '<button type="button" class="gmsbk-back">‹ '+t('All classes','Alle Stunden')+'</button>'
-          + '<h3>'+t('Lock in your spot','Sicher dir deinen Platz')+'</h3>'
-          + '<div class="gmsbk-chosen">'+slot.time+' · '+slot.className
-          +   '<small>'+niceDate(slot.date)+(slot.teacher?(' · '+t('with ','mit ')+slot.teacher):'')+'</small></div>'
-          + '<p>'+t('We set up your Good Moves account with these details and reserve your mat.',
-                   'Mit diesen Angaben richten wir dein Good-Moves-Konto ein und reservieren deine Matte.')+'</p>'
-          + '<form novalidate>'
-          + '<label>'+t('Name','Name')+'</label><input name="name" autocomplete="name" required maxlength="100">'
-          + '<label>'+t('Email','E-Mail')+'</label><input name="email" type="email" autocomplete="email" required maxlength="254">'
-          + '<label>'+t('Phone','Telefon')+'</label><input name="phone" type="tel" autocomplete="tel" required maxlength="20">'
-          + '<div style="position:absolute;left:-9999px" aria-hidden="true"><label>Website</label><input name="website" tabindex="-1" autocomplete="off"></div>'
-          + '<p class="gmsbk-err"></p>'
-          + '<button type="submit">'+t('Book my free class','Meine Gratis-Stunde buchen')+'</button>'
-          + '</form></div>';
-        bindClose();
-        overlay.querySelector('.gmsbk-back').addEventListener('click', renderStep1);
-
-        var form = overlay.querySelector('form');
-        form.addEventListener('submit', function(e){
-          e.preventDefault();
-          var err = overlay.querySelector('.gmsbk-err');
-          err.style.display = 'none';
-          var name = form.name.value.trim(), email = form.email.value.trim(), phone = form.phone.value.trim();
-          if(!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.replace(/\D/g,'').length < 6){
-            err.textContent = t('Please check your name, email and phone.','Bitte prüfe Name, E-Mail und Telefon.');
-            err.style.display = 'block';
-            return;
-          }
-          var btn = form.querySelector('button[type=submit]');
-          btn.disabled = true;
-          var leadId = eventId('lead');
-
-          apiFetch('/api/book-first-class', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({
-              name:name, email:email, phone:phone,
-              classId:slot.classId, date:slot.date, time:slot.time,
-              className:slot.className, teacher:slot.teacher,
-              website: form.website ? form.website.value : '',
-              locale: lang(),
-              leadEventId:leadId, metaConsent: consented()
-            })
-          }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); })
-          .then(function(res){
-            if(res.data && res.data.code === 'not_eligible'){
-              btn.disabled = false;
-              err.textContent = t(
-                'Lovely to see you again! The free first class is for brand-new faces, but your mat is waiting: book in the Mindbody app, or send us a message and we\'ll sort it for you personally.',
-                'Schön, dich wiederzusehen! Die Gratis-Stunde ist für ganz neue Gesichter, aber deine Matte wartet: buch einfach in der Mindbody-App oder schreib uns und wir kümmern uns persönlich darum.');
-              err.style.display = 'block';
-              return;
-            }
-            if(res.status === 429){
-              btn.disabled = false;
-              err.textContent = t('Too many attempts — please try again in a few minutes.','Zu viele Versuche — bitte probier es in ein paar Minuten nochmal.');
-              err.style.display = 'block';
-              return;
-            }
-            if(!res.ok || !res.data.ok) throw new Error('booking failed');
-            // No tracking on the honeypot path — humans never fill it.
-            if(window.gmsTrack && !(form.website && form.website.value)) gmsTrack('Lead', {value:0, currency:'EUR'}, leadId);
-            overlay.innerHTML = doneHTML(res.data);
-            bindClose();
-          })
-          .catch(function(){
-            btn.disabled = false;
-            err.textContent = t('Something went wrong. Please try again.','Etwas ist schiefgelaufen. Bitte versuch es nochmal.');
-            err.style.display = 'block';
-          });
-        });
-      }
-
-      renderStep1();
+      if(!res.ok || !res.data.ok) throw new Error('booking failed');
+      if(window.gmsTrack && !(v.website)) gmsTrack('Lead', {value:0, currency:'EUR'}, leadId);
+      S.lastDone = res.data;
+      S.lastName = v.name;
+      renderDone(res.data);
+    })
+    .catch(function(){
+      renderRegister(slot, {kind:'error', msg:t.genericErr, vals:v});
     });
+  }
+
+  function renderDone(data){
+    currentView='done';
+    var t = T();
+    var b = data.booked;
+    var firstName = (S.lastName||'').trim().split(/\s+/)[0]||'';
+    var title = b ? (firstName ? (t.doneTitlePre+esc(firstName)+t.doneTitlePost) : t.doneTitle) : t.pendingTitle;
+    var slotForCal = b ? { className:b.className, date:b.date, time:b.time, teacher:b.teacher } : null;
+    var body = '<div class="gmsbk-celebrate">'
+      + '<img class="blob" src="'+BLOB_TERRA+'" alt=""/>'
+      + '<div class="in">'
+      + '<div class="ringwrap"><span class="ring" aria-hidden="true"></span><div class="disc">'+SVG.bigcheck+'</div></div>'
+      + '<h1 class="gmsbk-display">'+title+'</h1>'
+      + '</div></div>';
+    if(b){
+      var st = splitTag(b.className);
+      body += '<div class="gmsbk-chosen" style="margin-top:16px;margin-bottom:0;">'
+        + '<div class="tmn"><span class="tm gmsbk-display">'+b.time+'</span><span class="nm">'+esc(st.nm)+'</span></div>'
+        + '<div class="dt">'+longDate(b.date)+(b.teacher?(' · '+t.withWord+' '+esc(b.teacher)):'')+'</div>'
+        + '<a class="gmsbk-calline" href="'+icsHref(slotForCal)+'" download="good-moves-class.ics">'+SVG.caldl+' '+t.addCal+'</a>'
+        + '</div>'
+        + '<p class="gmsbk-confline">'+SVG.mail+'<span>'+t.doneConfirm+'</span></p>';
+    } else {
+      body += '<p class="gmsbk-confline">'+SVG.mail+'<span>'+t.pendingBody+'</span></p>';
+    }
+    body += '<div class="gmsbk-addr">'+SVG.pin
+      + '<div style="flex:1;"><div class="lb">'+t.studioLabel+'</div>'
+      + '<div class="ad">'+t.address+'</div>'
+      + '<div class="ce">'+t.comeEarly+'</div>'
+      + '<a href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('Good Moves Studio, Immanuelkirchstraße 24, 10405 Berlin')+'" target="_blank" rel="noopener">'+t.directions+' &#8594;</a>'
+      + '</div></div>'
+      + '<div class="gmsbk-signoff gmsbk-display">'+t.signoff+'</div>'
+      + '<button type="button" class="gmsbk-again" data-again="1">'+t.bookAnother+'</button>';
+    shell(body);
+    overlay.querySelector('[data-again]').addEventListener('click', function(){
+      renderLoading();
+      loadSlots().then(renderSchedule);
+    });
+  }
+
+  /* ---------- entry ---------- */
+  window.gmsOpenBooking = function(){
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if(S.loaded){
+      renderSchedule();
+      loadSlots().then(function(){ if(currentView==='schedule') renderSchedule(); }); // refresh spots quietly
+    } else {
+      renderLoading();
+      loadSlots().then(renderSchedule);
+    }
   };
 })();
 </script>
