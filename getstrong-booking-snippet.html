@@ -100,7 +100,20 @@
     + '.gmsbk button[disabled]{opacity:.6;cursor:wait}'
     + '.gmsbk .gmsbk-done{text-align:center;padding:18px 4px}'
     + '.gmsbk .gmsbk-done .mark{font-size:2rem}'
-    + '.gmsbk .gmsbk-done b{display:block;margin:8px 0 4px;font-size:1.1rem}';
+    + '.gmsbk .gmsbk-done b{display:block;margin:8px 0 4px;font-size:1.1rem}'
+    /* day chips + slot cards (replaces the native select) */
+    + '.gmsbk-days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;-webkit-overflow-scrolling:touch}'
+    + '.gmsbk-day{flex:0 0 auto;border:1.5px solid rgba(2,15,82,.25);background:#fff;border-radius:999px;'
+    +   'padding:8px 14px;font:inherit;font-size:.84rem;font-weight:700;cursor:pointer;color:inherit}'
+    + '.gmsbk-day[aria-pressed=true]{background:var(--ink,#020F52);color:var(--cream,#F7F0E9);border-color:var(--ink,#020F52)}'
+    + '.gmsbk-slots{display:flex;flex-direction:column;gap:8px;margin-top:8px;max-height:238px;overflow:auto;padding:2px}'
+    + '.gmsbk-slot{display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid rgba(2,15,82,.2);'
+    +   'background:#fff;border-radius:14px;padding:10px 14px;font:inherit;cursor:pointer;color:inherit;width:100%}'
+    + '.gmsbk-slot[aria-checked=true]{border-color:var(--coral,#B0482D);box-shadow:0 0 0 1.5px var(--coral,#B0482D) inset;background:rgba(176,72,45,.06)}'
+    + '.gmsbk-slot .tm{font-weight:800;font-size:1.02rem;min-width:50px}'
+    + '.gmsbk-slot .nm{font-weight:700;font-size:.92rem}'
+    + '.gmsbk-slot .sub{display:block;font-weight:500;font-size:.78rem;color:#54547E}'
+    + '.gmsbk-slot .left{margin-left:auto;font-size:.72rem;font-weight:800;color:var(--coral,#B0482D);white-space:nowrap;padding-left:8px}';
   var style = document.createElement('style');
   style.textContent = css;
   document.head.appendChild(style);
@@ -115,7 +128,7 @@
 
   function close(){ overlay.classList.remove('open'); document.body.style.overflow=''; }
 
-  function formHTML(slotOptions){
+  function formHTML(){
     return ''
       + '<div class="gmsbk">'
       + '<button type="button" class="gmsbk-x" aria-label="Close">×</button>'
@@ -123,7 +136,8 @@
       + '<p>'+t('Pick a class, tell us who you are, done. No card, no commitment.',
                'Such dir eine Stunde aus, sag uns kurz wer du bist, fertig. Keine Karte, keine Verpflichtung.')+'</p>'
       + '<form novalidate>'
-      + '<label>'+t('Class','Stunde')+'</label><select name="slot" required>'+slotOptions+'</select>'
+      + '<label>'+t('Day','Tag')+'</label><div class="gmsbk-days" role="tablist"></div>'
+      + '<div class="gmsbk-slots" role="radiogroup" aria-label="'+t('Available classes','Verfügbare Stunden')+'"></div>'
       + '<label>'+t('Name','Name')+'</label><input name="name" autocomplete="name" required maxlength="100">'
       + '<label>'+t('Email','E-Mail')+'</label><input name="email" type="email" autocomplete="email" required maxlength="254">'
       + '<label>'+t('Phone','Telefon')+'</label><input name="phone" type="tel" autocomplete="tel" required maxlength="20">'
@@ -184,24 +198,54 @@
         bindClose();
         return;
       }
-      // Group by day; surface teacher and (when scarce) remaining spots.
+      // Group by day → tappable day chips + slot cards (no native select:
+      // the whole schedule stays visible and on-brand, also on mobile).
       var byDay = {};
-      slots.forEach(function(s, i){ (byDay[s.date] = byDay[s.date] || []).push([s, i]); });
-      var opts = Object.keys(byDay).sort().map(function(day){
-        var inner = byDay[day].map(function(pair){
-          var s = pair[0];
-          var label = s.time+' · '+s.className+(s.teacher?' · '+s.teacher:'');
-          if(s.spotsLeft <= 3){
-            label += ' · '+(lang()==='de'
-              ? (s.spotsLeft===1 ? 'nur noch 1 Platz' : 'nur noch '+s.spotsLeft+' Plätze')
-              : (s.spotsLeft===1 ? 'only 1 spot left' : 'only '+s.spotsLeft+' spots left'));
-          }
-          return '<option value="'+pair[1]+'">'+label+'</option>';
-        }).join('');
-        return '<optgroup label="'+niceDate(day)+'">'+inner+'</optgroup>';
-      }).join('');
-      overlay.innerHTML = formHTML(opts);
+      slots.forEach(function(s, i){ (byDay[s.date] = byDay[s.date] || []).push(i); });
+      var dayKeys = Object.keys(byDay).sort();
+      var currentDay = dayKeys[0];
+      var selected = -1; // deliberate choice — no accidental 07:15 bookings
+
+      overlay.innerHTML = formHTML();
       bindClose();
+      var daysBox  = overlay.querySelector('.gmsbk-days');
+      var slotsBox = overlay.querySelector('.gmsbk-slots');
+
+      function scarcity(s){
+        if(s.spotsLeft > 3) return '';
+        return lang()==='de'
+          ? (s.spotsLeft===1 ? 'nur noch 1 Platz' : 'nur noch '+s.spotsLeft+' Plätze')
+          : (s.spotsLeft===1 ? 'only 1 spot left' : 'only '+s.spotsLeft+' spots left');
+      }
+      function renderPicker(){
+        daysBox.innerHTML = dayKeys.map(function(d){
+          return '<button type="button" class="gmsbk-day" data-day="'+d+'" aria-pressed="'+(d===currentDay)+'">'
+            + niceDate(d) + '</button>';
+        }).join('');
+        slotsBox.innerHTML = byDay[currentDay].map(function(i){
+          var s = slots[i], left = scarcity(s);
+          return '<button type="button" class="gmsbk-slot" data-slot="'+i+'" role="radio" aria-checked="'+(i===selected)+'">'
+            + '<span class="tm">'+s.time+'</span>'
+            + '<span><span class="nm">'+s.className+'</span>'
+            + (s.teacher ? '<span class="sub">'+t('with ','mit ')+s.teacher+'</span>' : '')
+            + '</span>'
+            + (left ? '<span class="left">'+left+'</span>' : '')
+            + '</button>';
+        }).join('');
+      }
+      renderPicker();
+      daysBox.addEventListener('click', function(e){
+        var b = e.target.closest('[data-day]');
+        if(!b) return;
+        currentDay = b.dataset.day;
+        renderPicker();
+      });
+      slotsBox.addEventListener('click', function(e){
+        var b = e.target.closest('[data-slot]');
+        if(!b) return;
+        selected = Number(b.dataset.slot);
+        renderPicker();
+      });
 
       var form = overlay.querySelector('form');
       form.addEventListener('submit', function(e){
@@ -209,12 +253,17 @@
         var err = overlay.querySelector('.gmsbk-err');
         err.style.display = 'none';
         var name = form.name.value.trim(), email = form.email.value.trim(), phone = form.phone.value.trim();
+        if(selected < 0){
+          err.textContent = t('Please pick a class above.','Bitte wähl oben eine Stunde aus.');
+          err.style.display = 'block';
+          return;
+        }
         if(!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || phone.replace(/\D/g,'').length < 6){
           err.textContent = t('Please check your name, email and phone.','Bitte prüfe Name, E-Mail und Telefon.');
           err.style.display = 'block';
           return;
         }
-        var slot = slots[Number(form.slot.value)] || slots[0];
+        var slot = slots[selected];
         var btn = form.querySelector('button[type=submit]');
         btn.disabled = true;
         var leadId = eventId('lead');
